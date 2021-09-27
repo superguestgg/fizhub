@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function savetask(){
+			text=document.getElementById("textarea").value;
+			theme1=document.getElementById("theme1").value;
+			theme2=document.getElementById("theme2").value;
+			creatorname=document.getElementById("creatorname").value;
+			document.getElementById("sendtaskbutton").innerHTML='<a id="a" href="/physic-in-sesc/sendtask/'+text+'/'+creatorname+'/'+theme1+'/'+theme2+'">отправить задачу</a>'
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
+		<div class="taskname">создание задачи</div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="">категории(no)</a><br>
+		<a href="">мое(no)</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br>
+	</div>
+	
+    <div class="bod">
+    
+        <div class="task">
+        	
+        	
+{% csrf_token %}
+
+    <div class="taskheader"><center>новая задача</center></div>
+    <div class="tasksubpart">
+    	id создателя:
+    	<input type="text" id="creatorname" value="1">
+    </div><div class="tasksubpart">
+    	тема1:
+    	<select type="text" id="theme1">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+
+    	</select>
+    </div><div class="tasksubpart">	
+    	тема2:
+    	<select type="text" id="theme2">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+
+    	</select>
+    </div>
+    	
+        <textarea id="textarea" value="условие" cols='90' rows='10'>условие</textarea>
+<div class="solutionbutton" onclick="savetask()">сохранить задачу</div>
+<div class="solutionbutton" id="sendtaskbutton"><a id="a" href="">отправить задачу</a></div>
+        
+    
+    
+
+    
+
+</div>
+</div>
+</body>
+</html>

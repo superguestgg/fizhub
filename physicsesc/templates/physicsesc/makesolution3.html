@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function savesolution(){
+			text=document.getElementById("textarea").value;
+			document.getElementById("sendsolutionbutton").innerHTML='<a id="a" href="/physic-in-sesc/{{task.id}}/makesolution3/'+text+'">отправить решение</a>'
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
+		<div class="taskname">задача {{task.id }}</div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="">категории(no)</a><br>
+		<a href="">мое(no)</a><br>
+	</div>
+	{% if task %}
+    <div class="bod">
+    
+        <div class="task"><a href="/physic-in-sesc/{{ task.id }}/">{{ task.solution_set.all }}</a>
+        	
+        	
+{% csrf_token %}
+
+    <h1>{{ task.task_text }}</h1>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        <textarea type="text" id="textarea" value="{{ task.id }}">{ task.id }</textarea>
+<div class="solutionbutton" onclick="savesolution()">сохранить решение</div>
+<div class="solutionbutton" id="sendsolutionbutton"><a id="a" href="">отправить решение</a></div>
+        
+    
+    
+{% else %}
+    <p>No tasks are available.</p>
+{% endif %}
+</div>
+</div>
+</body>
+</html>

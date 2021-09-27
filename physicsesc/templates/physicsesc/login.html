@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function savetask(){
+			creatorname=document.getElementById("creatorname").value;
+			document.getElementById("sendaccountbutton").innerHTML='<a id="a" href="/physic-in-sesc/sendaccount/'+creatorname+'">создать аккаунт</a>'
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
+		<div class="taskname">регистрация</div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="">категории(no)</a><br>
+		<a href="">мое(no)</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br>
+	</div>
+	
+    <div class="bod">
+    
+        <div class="task">
+        	
+        	
+{% csrf_token %}
+
+    <div class="taskheader" name="createaccount">новый аккаунт</div>
+    <div class="tasksubpart">
+    	имя создателя:
+    	<input type="text" id="creatorname" value="1">
+    </div>
+    	
+       
+<div class="solutionbutton" onclick="savetask()">сохранить аккаунт</div>
+<div class="solutionbutton" id="sendaccountbutton"><a id="a" href="">создать аккаунт</a></div>
+        
+    
+    
+
+    
+
+</div>
+</div>
+</body>
+</html>
