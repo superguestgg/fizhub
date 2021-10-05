@@ -1,0 +1,253 @@
+body{
+	background-image: linear-gradient(to left, #345, #567);
+	font-size: 15px;
+	margin-top: 50px;
+}
+textarea{
+	color: #fff;
+	background-color: #234;
+	margin-top: 20px;
+	margin-left: 40px;
+}
+input{
+	color: #fff;
+	background-color: #345;
+	padding: 5px;
+	border-radius: 5px;
+}
+select{
+	color: #fff;
+	background-color: #345;
+	padding: 5px;
+	border-radius: 5px;
+}
+option:hover{
+	color: #1ff;
+	background-color: #fff;
+}
+i{
+background-image: linear-gradient(to right,#234, #456);
+border-radius: 5px;
+margin-left: 20px;
+padding: 5px;
+border-bottom: 2px solid #ccc;
+}
+b{
+background-color: #345;
+border-radius: 5px;
+margin-left: 20px;
+padding: 5px;
+border: 1px solid #999;
+margin-bottom: 10px;
+}
+.menubutton{
+	transform: rotate(90deg);
+	width: 18px;
+	height: 35px;
+
+	padding: 10px;
+	font-size: 30px;
+	transition: 0.5s linear;
+	color: #fff;
+	margin-top: 0px;
+	margin-left: 10px;
+}
+.menubutton2{
+	transform: rotate(-270deg);
+	width: 18px;
+	height: 35px;
+
+	padding: 10px;
+	font-size: 30px;
+	transition: 0.5s linear;
+	color: #fff;
+	margin-top: 0px;
+	margin-left: 10px;
+}
+.header{
+	position: fixed;
+	width: 100%;
+	top: 0px;
+	left: 0px;
+	height: 50px;
+	border-bottom: 3px solid black;
+	background-image: linear-gradient(to top left, #234, #456);
+	z-index: 1500;
+
+}
+.menuopened{
+	position: fixed;
+	width: 300px;
+	max-width: 90%;
+	top: 50px;
+	left: 0px;
+	height: 100%;
+	border-right: 3px solid black;
+	background-image: linear-gradient(to top left, #123, #345);
+	transition: 0.5s ease-out;
+	z-index: 1000;
+	padding: 20px;
+	font-size: 25px;
+	color: #eee;
+	overflow-y: visible; 
+}
+.menuclosed{
+	position: fixed;
+	width: 300px;
+	max-width: 90%;
+	transition: 0.5s ease-out;
+	top: 50px;
+	left: -350px;
+	height: 100%;
+	border-right: 3px solid black;
+	background-image: linear-gradient(to top left, #123, #345);
+	z-index: 1000;
+	padding: 20px;
+	font-size: 25px;
+	color: #eee;
+	overflow-y: visible; 
+
+
+}
+.taskname{
+	position: fixed;
+	width: 200px;
+	max-width: 50%;
+	transition: 0.5s ease-out;
+	top: 10px;
+	left: calc(50% - 75px);
+	background-image: linear-gradient(to top, #123, #678);
+	border-radius: 5px;
+	padding: 5px;
+	text-align: center
+	z-index: 1500;
+	font-size: 25px;
+	color: #fff;
+}
+.loginbutton{
+	position: fixed;
+	width: 150px;
+	max-width: 50%;
+	transition: 0.5s ease-out;
+	top: 5px;
+	right: 5px;
+	background-color: #345;
+	border: 2px solid #123;
+	border-radius: 5px;
+	padding: 5px;
+	text-align: center
+	z-index: 1500;
+	font-size: 25px;
+	color: #fff;
+}
+.bod{
+	margin-top: 70px;
+}
+.task{
+	margin-top: 20px;
+	border: 4px solid #234;
+	border-radius: 10px;
+	padding: 15px;
+	font-size: 20px;
+	background-color: #567;
+	margin-left: 10%;
+	width: 80%;
+	transition: 0.5s ease-in-out;
+	color: #def;
+	overflow: hidden;
+}
+.task:hover{
+	margin-top: 20px;
+	border: 4px solid #123;
+	border-radius: 10px;
+	padding: 15px;
+	font-size: 20px;
+	background-color: #345;
+	margin-left: 8%;
+	width: 84%;
+	transition: 0.5s ease-in-out;
+
+}
+.taskheader{
+	margin-bottom: 20px;
+	border-bottom: 4px solid #123;	
+	padding: 10px;
+	padding-bottom: 20px;
+	font-size: 25px;
+	margin-left: 3%;
+	width: 94%;
+	transition: 0.5s ease-in-out;	
+}
+.tasksubpart{
+	border-bottom: 3px solid #012;
+	border-radius: 15px 0 15px 0;
+	padding: 10px;
+	font-size: 20px;
+	background-image: linear-gradient(to right, #345, #456);
+	margin: auto;
+	width: 90%;
+	
+	
+	margin-top:15px;
+}
+.solutionbutton{
+	border: 2px solid #123;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 20px;
+	background-color: #567;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 8px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+	text-align: center;
+}
+.solutionbutton:hover{
+	border: 2px solid #123;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 20px;
+	background-color: #234;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 8px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+
+}
+.like{
+	border: 2px solid #123;
+	margin-top: 5px;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 20px;
+	background-color: #0a8;
+	width: 150px;
+	max-width: 40%;
+	transition: 0.3s ease-in-out;
+}
+.report{
+	border: 2px solid #123;
+	margin-top: 5px;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 20px;
+	background-color: #a78;
+	width: 150px;
+	max-width: 40%;
+	transition: 0.3s ease-in-out;
+}
+a{
+	text-decoration: none;
+	font-size: 25px;
+	color: #eee;
+	margin-bottom: 50px;
+}
+a:hover{
+	text-decoration: underline;
+	font-size: 25px;
+	color: #eee;
+	margin-bottom: 50px;
+
+}
