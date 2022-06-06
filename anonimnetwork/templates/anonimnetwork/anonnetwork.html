@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/anonnetwork.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1">
+	<title>AnonNetwork</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'anonimnetwork/anonnetwork.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;
+		</div></div>
+		<div class="taskname"><center>комнаты</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		
+	</div>
+	<div class="menuclosed" id="menu">
+		<div class="menusubpart"><a href="/anonnetwork/main">главная</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/newrooms">новые комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/toprooms">популярные комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/channels">новые каналы &#10064;</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/theme">поиск по теме</a></div>		
+		<div class="menusubpart"><a href="/anonnetwork/createroom">создать новую комнату</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/findroom">найти комнату</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/useful">полезные файлы(no)</a></div><br>
+		<div class="menusubpart"><a href="/physic-in-sesc/">physic-in-sesc</a></div>
+		<div class="menusubpart"><a href="https://superguestgg.github.io/me/">about me</a></div><br>
+		<p>&#946; version</p>
+	</div>
+	{% if publicrooms_list %}
+    <div class="bodanon">
+    {% for room in publicrooms_list %}
+        <div class="room">
+        	<img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+
+        	<a href="/anonnetwork/{{ room.room_name }}/">{{ room.room_name }}</a>
+
+        	
+        	
+        	<b><a href="/anonnetwork/theme/{{room.room_theme}}">{{room.room_theme}}</a></b>
+        	{% if room.room_type_password %}<b>пароль &#128274;</b>{% endif %}
+        	{% if room.room_type_token %}<b>шифруется &#10004;</b>{% endif %}
+        	{% if room.room_type_channel %}<k>&#922;&#257;н&#257;л &#10064;</k>{% endif %}
+        	&nbsp; {{room.room_messages_count}} &#9993;
+        	&nbsp; <a href="/anonnetwork/{{ room.room_name }}/description" style="font-size: 20px"> о комнате </a>
+        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
+        
+        
+        </div>
+    {% endfor %}
+    <div class="message">
+        	{% if pages|add:'-1' %}
+     <a href="/anonnetwork/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
+     
+     {% endif %}
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
+
+     {% if next_page %}
+     <a href="/anonnetwork/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
+     {% else %}
+
+     {% endif %}
+
+
+
+        	<br>
+        		
+     
+        </div>
+    </div>
+{% else %}
+		<div class="room">
+        	<div class="taskheader">
+        	No rooms are available.
+        </div>
+        {% if page_name %}
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/newrooms">new rooms</a></center></div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/main">main page</a></center></div>
+        </div>
+    
+{% endif %}
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

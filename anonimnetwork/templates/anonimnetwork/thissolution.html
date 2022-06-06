@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">|||</div></div>
+		<div class="taskname"><center>решения</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/physic-in-sesc/login">login|войти</a></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="/physic-in-sesc/best">лучшее</a><br>
+		<a href="/physic-in-sesc/user">создатели</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="/physic-in-sesc/theme">темы</a><br>
+		<a href="">мое(no)</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br><br>
+
+		<a href="/physic-in-sesc/useful">полезные файлы</a><br>
+		<a href="/physic-in-sesc/login">войти</a><br>
+	</div>
+	{% if task %}
+    <div class="bod">
+    
+        <div class="task">
+        	<a href="/physic-in-sesc/{{ task.id }}/">условие задачи:</a><br>{{ task.task_text }}<br>решения:
+       		{%for Solution in task.solution_set.all %}
+       		<div class="tasksubpart"> {{Solution}} </div>
+
+			{% endfor %}
+        	<div class="solutionbutton"><a href="/physic-in-sesc/{{ task.id }}/">
+        		back</a></div>
+        	<div class="solutionbutton" ><a href="/physic-in-sesc/{{ task.id }}/makesolution">i know solution!</a></div>
+        </div>
+    
+    </div>
+{% else %}
+    <p>No solutions are available.<br>  нет решений, но вы можете оставить свое<a href="/physic-in-sesc/{{ task.id }}/makesolution">здесь</a></p>
+{% endif %}
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

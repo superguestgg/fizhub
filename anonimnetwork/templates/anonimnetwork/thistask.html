@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">|||</div></div>
+		<div class="taskname"><center>{{task.id}}</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/physic-in-sesc/login">login|войти</a></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="/physic-in-sesc/best">лучшее</a><br>
+		<a href="/physic-in-sesc/user">создатели</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="/physic-in-sesc/theme">темы</a><br>
+		<a href="">мое(no)</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br><br>
+
+		<a href="/physic-in-sesc/useful">полезные файлы</a><br>
+		<a href="/physic-in-sesc/login">войти</a><br>
+	</div>
+	{% if task %}
+    <div class="bod">
+    	
+        <div class="task">
+        	<div class="taskheader"><center><a href="/physic-in-sesc/{{task.id}}">{{task.task_name}}</a></center>
+        	<i><a href="/physic-in-sesc/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
+        	<i><a href="/physic-in-sesc/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
+        	<b>task by <a href="/physic-in-sesc/user/{{task.creator_name.guest_name}}">{{task.creator_name.guest_name}}</a></b>
+        	<br>
+        	условие задачи:<br>{{ task.task_text }}
+        	
+        	{% if task.picture_href %}
+        	<br><img class="medium" src="{{task.picture_href}}" alt="no image"></div>{% endif %}
+        	<div class="solutionbutton" >
+        		<a href="/physic-in-sesc/{{ task.id }}/solution" name="open solution">открыть решение</a></div>
+        	<div class="solutionbutton" >
+        		<a href="/physic-in-sesc/{{ task.id }}/makesolution" name="i know solution!">я знаю решение!</a></div>
+        	<div class="like" ><a href="/physic-in-sesc/{{ task.id }}/like" name="like">like | {{task.like}}</a></div>
+        	<div class="report" ><a href="/physic-in-sesc/{{ task.id }}/report" name="report">жалоба | {{task.report}}</a></div>
+
+        </div>
+    
+    </div>
+{% else %}
+    <p>No tasks are available.<br>упс, такого задания нет, но вы можете создать новое<a href="/physic-in-sesc/createtask">здесь</a></p>
+{% endif %}
+<script type="text/javascript">
+	//<a href="/physic-in-sesc/picture/{{task.picture_href}}">////.replace('/','^')
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

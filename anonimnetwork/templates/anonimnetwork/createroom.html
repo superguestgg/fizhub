@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/anonnetwork.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1">
+	<title>AnonNetwork</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'anonimnetwork/anonnetwork.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>создание комнаты</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/anonnetwork/main">главная</a><br>
+		<a href="/anonnetwork/newrooms">новые комнаты</a><br>
+		<a href="/anonnetwork/toprooms">популярные комнаты</a><br>
+		<a href="/anonnetwork/channels">новые каналы</a><br>
+		<a href="/anonnetwork/theme">комнаты по темам</a><br>		
+		<a href="/anonnetwork/createroom">создать новую комнату</a><br>
+		<a href="/anonnetwork/findroom">войти в комнату</a><br><br>
+		<a href="/anonnetwork/useful">полезные файлы(no)</a><br><br>
+		<a href="/physic-in-sesc/">physic-in-sesc</a><br>
+		<a href="https://superguestgg.github.io/me/">about me</a><br><br><br><br>
+		<p>&#946; version</p>
+		
+	</div>
+	
+    <div class="bod">
+    	<div class="task">
+        	<div class="taskheader">
+        	<center>создать новую комнату</center>
+        	</div>
+        	<form action="/anonnetwork/sendroom/" method="post" enctype="multipart/form-data">	
+
+    	{% csrf_token %}
+        		<div class="tasksubpart">название комнаты: <input name="room_name" placeholder="например, AnonNetwork"></input></div>
+        		<div class="tasksubpart">тема комнаты: <input name="room_theme" placeholder="например, бред"></input></div>
+        		<div class="tasksubpart">описание комнаты: <textarea cols="50" rows="4" name="room_description" placeholder="например, 'комната для общения', так людям будет легче понять, о чем здесь говорят"></textarea></div>
+        		<div class="tasksubpart">иконка комнаты: <br>
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon"> 
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        		</div>
+        		<div class="tasksubpart">комната - канал (смотреть могут все, а писать только те, у кого есть пароль администратора) <input name="room_type_channel" type="checkbox"></input></div>
+        		<div class="tasksubpart">пароль администратора: <input name="room_channel_admin_password" type="password" placeholder="например, 12345"></input></div>
+        		<div class="tasksubpart">комната приватная (ее не видно из списка всех комнат) <input name="room_type_private" type="checkbox"></input></div>
+        		<div class="tasksubpart">у комнаты есть пароль(входить в комнату только по паролю) <input name="room_type_password" type="checkbox"></input></div>
+        		<div class="tasksubpart">пароль: <input name="room_password" type="password" placeholder="например, 12345"></input></div>
+        		<div class="tasksubpart">в комнате будет возможность использовать шифрование вашим личным токеном <input name="room_type_token" type="checkbox" placeholder="token?"></input></div>
+        		
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+        	</form>
+        	
+        	
+        	
+        	
+        	
+        
+        
+        </div>
+
+    </div>
+
+
+
+        </div>
+    
+
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/anonnetwork.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1">
+	<title>AnonNetwork</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'anonimnetwork/anonnetwork.css' %}">
+	<script type="text/javascript">
+		room_password="{{room.room_password}}";
+		function createcookie(password){
+			
+			maxage=60;
+			maxage=(60*60)/1;
+			document.cookie="password="+password+"; samesite=strict; path=/; max-age="+maxage;
+		}
+		ss="1234567890abcdefghijklmnopqrstuvwxyz[]:;'.,/ABCDEFGHIJKLMNOPQRSTUVWXYZ{}<>абвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ|-=+_)(*^%$#@!?`~ "+'"'
+		lens=(ss).length
+		function sumbolnumber(s){
+			
+			if (1>0){
+				//console.log(ss.indexOf(s)+s)
+				return ss.indexOf(s)
+			} else {
+				return 1
+			}
+		}
+		function numbertosumbol(n){
+			
+			//console.log(ss[n%((ss).length)])
+			return ss[n%((ss).length)]
+		}
+		function closepinnedmessage(id){
+			//console.log(id)
+			id=id.replace("close","")
+			message=document.getElementById(id).innerHTML
+			message=``
+        	document.getElementById(id).innerHTML=message
+        	document.getElementById(id).remove()
+		}
+		function createanswertextarea(id){
+			//console.log(id)
+			id=id.replace("answer","");
+			id2=id.replace("p","");
+			message=document.getElementById(id).innerHTML
+			message+=`<form action="/anonnetwork/{{room.room_name}}/${id2}/answer/" method="post" enctype="multipart/form-data">
+        		{% csrf_token %}
+        		<textarea name="textarea" placeholder="ваш ответ на сообщение {{message.id}}" cols="50" rows="5"></textarea><br>
+				{% if room.room_type_password %}<div class="tasksubpart">
+					пароль: <input type="text" name="roompassword" placeholder="сохраняется в cookies">
+				</div><br>{% endif %}
+        		<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
+        		</form>`
+        	document.getElementById(id).innerHTML=message
+		}
+		function encrypt(id){
+			token=document.getElementById("roomtoken").value;
+			string=document.getElementById("textarea"+id).value;
+			stringend=""
+			//console.log(token)
+			console.log(string)
+			lt=(token).length;
+			ls=(string).length;
+			for (let i=0; i < ls; i++){
+				stringend=stringend+numbertosumbol((sumbolnumber(string[i])/1+sumbolnumber(token[i%lt])/1)%lens)
+				//console.log(stringend)
+			}
+			document.getElementById("textarea"+id).value=stringend;
+
+		}
+		function encrypt2(id){
+			token=document.getElementById("roomtoken").value;
+			string=document.getElementById("textarea"+id).innerHTML;
+			stringend=""
+			//console.log(token)
+			console.log(string)
+			lt=(token).length;
+			ls=(string).length;
+			for (let i=0; i < ls; i++){
+				stringend=stringend+numbertosumbol((sumbolnumber(string[i])/1+sumbolnumber(token[i%lt])/1)%lens)
+				//console.log(stringend)
+			}
+			document.getElementById("textarea"+id).innerHTML=stringend;
+
+		}
+		function deencrypt(id){
+			token=document.getElementById("roomtoken").value;
+			string=document.getElementById("textarea"+id).value;
+			stringend=""
+			//console.log(token)
+			console.log(string)
+			lt=(token).length;
+			ls=(string).length;
+			for (let i=0; i < ls; i++){
+				stringend=stringend+numbertosumbol((sumbolnumber(string[i])/1+lens-sumbolnumber(token[i%lt])/1)%lens)
+				//console.log(stringend)
+			}
+			document.getElementById("textarea"+id).value=stringend;
+
+		}
+		function deencrypt2(id){
+			token=document.getElementById("roomtoken").value;
+			string=document.getElementById("textarea"+id).innerHTML;
+			stringend=""
+			//console.log(token)
+			console.log(string)
+			lt=(token).length;
+			ls=(string).length;
+			for (let i=0; i < ls; i++){
+				stringend=stringend+numbertosumbol((sumbolnumber(string[i])/1+lens-sumbolnumber(token[i%lt])/1)%lens)
+				//console.log(stringend)
+			}
+			document.getElementById("textarea"+id).innerHTML=stringend;
+
+		}
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
+	</script>
+</head>
+<body>
+	<base href="/anonnetwork/{{room.room_name}}/">
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname" ><center>{% if is_pined_page %}pinned{% endif %}<a href="/anonnetwork/{{room.room_name}}/description" title="описание">
+		{{room.room_name}}</a> {{pages}}/{{pagescount}}</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+
+		{% if room.room_type_token %} <div class="loginbutton"><center>токен:</center> <input type="text" id="roomtoken" name="roomtoken" placeholder="мой токен"></div><br> {% else %}
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		{% endif %}
+	</div>
+	<div class="menuclosed" id="menu">
+		<div class="menusubpart"><a href="/anonnetwork/main">главная</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/newrooms">новые комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/toprooms">популярные комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/channels">новые каналы &#10064;</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/theme">комнаты по темам</a></div>		
+		<div class="menusubpart"><a href="/anonnetwork/createroom">создать новую комнату</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/findroom">войти в комнату</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/useful">полезные файлы(no)</a></div><br>
+		<div class="menusubpart"><a href="/physic-in-sesc/">physic-in-sesc</a></div>
+		<div class="menusubpart"><a href="https://superguestgg.github.io/me/">about me</a></div><br>
+		<p>&#946; version</p>
+
+	</div>
+
+
+		{% if pinned_message %}
+	<div class="pinnedmessage" id=p{{pinned_message.id}}>
+	
+	
+		
+		 <a href="/anonnetwork/{{room.room_name}}/pinned">pinned</a>: &nbsp;&nbsp;&nbsp; <a href="/anonnetwork/{{room.room_name}}/{{ pinned_message.id }}/" id="textarea{{pinned_message.id}}">{{ pinned_message.message_text}}</a>
+     {% if pinned_message.answer_for %}<b>
+ответ на <a href="/anonnetwork/{{room.room_name}}/{{pinned_message.answer_for}}/" style="font-size: 20px"> сообщение {{pinned_message.answer_for}}</a></b>{% endif %}
+
+<button  id="answerp{{pinned_message.id}}" onclick="createanswertextarea(id)">ответить</button>&nbsp;&nbsp;&nbsp;  
+<button id="closep{{pinned_message.id}}" onclick="closepinnedmessage(id)">&#10005; close</button>&nbsp;&nbsp;&nbsp;
+<button id="unpinp{{pinned_message.id}}" onclick="unpinpinnedmessage(id)"><a href="/anonnetwork/{{room.room_name}}/{{pinned_message.id}}/unpin" style="font-size: 15px"> &#128465; unpin</a></button>
+</div>
+	{% endif %}
+
+    <div class="bod">
+    	{% if pinned_message %}<br><br>
+    	{% endif %}
+    	<div class="task">
+
+        	<div class="taskheader">
+        	<center>{% if room.room_type_channel %}{% if isadmin %}для администратора{% else %}<a href="/anonnetwork/{{room.room_name}}/admin/">войти как автор</a>{% endif %}{% else %}отправить сообщение{% endif %}</center>
+        	</div>
+        	<form action="/anonnetwork/{{room.room_name}}/sendmessage/" method="post" enctype="multipart/form-data">	
+
+    	{% csrf_token %}
+    	{% if room.room_type_channel %}{% if isadmin %}
+        		<textarea name="textarea" placeholder="текст сообщения" cols="50" rows="4" id="textarea0"></textarea><br>
+        		{% if room.room_type_password %}
+        		<div class="tasksubpart">пароль: <input type="password" id="roompassword" name="roompassword" placeholder="для комнат с паролем"></div><br>
+        		{% endif %}
+        		{% if room.room_type_channel %}
+        		<div class="tasksubpart">пароль: <input type="password" id="passwordadmin" name="passwordadmin" placeholder="для администратора канала"></div><br>
+        		{% endif %}
+        		{% if room.room_type_token %} <div class="tasksubpart">зашифровать с помощью токена: <input type="button" id="0" onclick="encrypt(id)" value="зашифровать"> <input type="button" id="0" onclick="deencrypt(id)" value="расшифровать"></div><br> {% endif %}
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+    	 {% else %}
+    	 вы не владелец канала
+
+    	 {% endif %}
+
+
+    	 {% else %}
+    	 	    <textarea name="textarea" placeholder="текст сообщения" cols="50" rows="4" id="textarea0"></textarea><br>
+        		{% if room.room_type_password %}
+        		<div class="tasksubpart">пароль: <input type="password" id="roompassword" name="roompassword" placeholder="для комнат с паролем"></div><br>
+        		{% endif %}
+        		{% if room.room_type_channel %}
+        		<div class="tasksubpart">пароль: <input type="password" id="passwordadmin" name="passwordadmin" placeholder="для администратора канала"></div><br>
+        		{% endif %}
+        		{% if room.room_type_token %} <div class="tasksubpart">зашифровать с помощью токена: <input type="button" id="0" onclick="encrypt(id)" value="зашифровать"> <input type="button" id="0" onclick="deencrypt(id)" value="расшифровать"></div><br> {% endif %}
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+
+
+    	 {% endif %}
+        	</form>       	
+    </div>
+    {% if is_pined_page %}
+<div class="message">
+        <center>	
+     закрепленные сообщения
+</center>
+        </div>
+{% endif %}
+
+        {% if message_list %}
+    {% for message in message_list %}
+
+
+        <div class="message" id="{{message.id}}">
+        	
+     <a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="textarea{{message.id}}">{{ message.message_text }}</a>
+     {% if message.answer_for %}<b>
+ответ на <a href="/anonnetwork/{{room.room_name}}/{{message.answer_for}}/" style="font-size: 20px"> сообщение {{message.answer_for}}</a></b>{% endif %}
+
+<button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
+	{% if message.is_pinned %}
+	
+		&#9885; pinned
+	
+	{% endif %}
+        	<br>
+        		
+{% if room.room_type_token %} 
+<div class="messagemenu">
+
+        		действия с помощью токена: 
+        	<input type="button" id="{{message.id}}" onclick="encrypt2(id)" value="зашифровать"> 
+        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать"></div>{% endif %}
+     
+        </div>
+
+    {% endfor %}
+    <div class="message">
+        	{% if pages|add:'-1' %}
+     <a href="/anonnetwork/{{room.room_name}}/page/{{pages|add:'-1'}}" id="textarea{{message.id}}"> предыдущая страница </a>
+     
+     {% endif %}
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
+
+     
+     <a href="/anonnetwork/{{room.room_name}}/page/{{pages|add:'1'}}" id="textarea{{message.id}}"> следующая страница </a>
+
+
+
+
+        	<br>
+        		
+     
+        </div>
+    </div>
+
+
+{% else %}
+		<div class="task">
+        	<div class="taskheader">
+        	No messages are available.<br>здесь пока пусто, заговорите первым и пустота возможно ответит
+        </div>
+        {% if pages|add:'-1' %}
+        	<div class="solutionbutton" ><a href="/anonnetwork/{{room.room_name}}/page/{{pages|add:'-1'}}">предыдущая страница </a></div>{% else %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	{% endif %}
+        	<div class="solutionbutton" ><a href="/anonnetwork/new">new rooms</a></div>
+        	<div class="solutionbutton" ><a href="/anonnetwork/main">main</a></div>
+        </div>
+    
+{% endif %}
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+		if ("{{room.room_type_password}}"=="True"){
+
+			document.getElementById("roompassword").value=room_password;
+			createcookie(room_password);
+		}
+</script>
+</body>
+</html>
