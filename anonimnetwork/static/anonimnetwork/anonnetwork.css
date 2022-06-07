@@ -194,6 +194,12 @@ margin-bottom: 10px;
 	color: #eee;
 	overflow-y: visible;
 }
+symbol{
+	
+	
+	margin-right: 5px;
+
+}
 .taskname{
 	max-height: 25px;
 	position: fixed;

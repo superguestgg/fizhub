@@ -91,6 +91,12 @@
         		</form>`
         	document.getElementById(id).innerHTML=message
 		}
+
+
+		
+		function copylink(){
+			navigator.clipboard.writeText("phs3.na4u.ru/anonnetwork/{{room.room_name}}/{{this_message.id}}");
+		}
 	</script>
 </head>
 <body>
@@ -102,17 +108,18 @@
 		
 	</div>
 	<div class="menuclosed" id="menu">
-		<div class="menusubpart"><a href="/anonnetwork/main">главная</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/newrooms">новые комнаты</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/toprooms">популярные комнаты</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/channels">новые каналы &#10064;</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/theme">комнаты по темам</a></div>		
-		<div class="menusubpart"><a href="/anonnetwork/createroom">создать новую комнату</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/findroom">войти в комнату</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/useful">полезные файлы(no)</a></div><br>
+		<div class="menusubpart"><a href="/anonnetwork/main"><symbol>&#9872;</symbol> главная</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/newrooms"><symbol>&#8679;</symbol> новые комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/toprooms"><symbol>&#9734;</symbol> популярные комнаты</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/channels"><symbol>&#10064;</symbol> новые каналы </a></div>
+		<div class="menusubpart"><a href="/anonnetwork/theme"><symbol>&#8376;</symbol> комнаты по темам</a></div>		
+		<div class="menusubpart"><a href="/anonnetwork/createroom"><symbol>&#10010;</symbol> создать новую комнату</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/findroom"><symbol>&#128270;</symbol> поиск комнат</a></div>
+		<br><br>
 		<div class="menusubpart"><a href="/physic-in-sesc/">physic-in-sesc</a></div>
 		<div class="menusubpart"><a href="https://superguestgg.github.io/me/">about me</a></div><br>
 		<p>&#946; version</p>
+
 	</div>
 	{% if message_list %}
     <div class="bod">
@@ -132,8 +139,11 @@
         	{% if message.is_pinned %}
         	 &nbsp;&nbsp;&nbsp;<a href="/anonnetwork/{{room.room_name}}/{{message.id}}/unpin"> &#128465; unpin</a>
         	{% else %} &nbsp;&nbsp;&nbsp; <a href="/anonnetwork/{{room.room_name}}/{{message.id}}/pin"> &#9885; pin</a>
-        	{% endif %} &nbsp;&nbsp;&nbsp;
+        	{% endif %} 
+        	&nbsp;&nbsp;&nbsp;
         	 {{ message.answers_count }} ответов
+        	 &nbsp;&nbsp;&nbsp;
+        	 	<click onclick="copylink()"> 🖉 скопировать ссылку</click>
         	</div>
         	
         	<form action="/anonnetwork/{{room.room_name}}/{{message.id}}/answer/" method="post" enctype="multipart/form-data">
