@@ -264,6 +264,7 @@ symbol{
 .bod{
 	margin-top: 70px;
 	width:100%;
+	background-image: linear-gradient(to left, #081018, #081018);
 }
 .room{
 	margin-top: 0px;
