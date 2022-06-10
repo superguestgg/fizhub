@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
 	{% load static %}
@@ -19,51 +20,110 @@
 				document.getElementById("menu").className="menuclosed";
 			}
 		}
-		function savetask(){
+		function createaccount(){
 			creatorname=document.getElementById("creatorname").value;
-			document.getElementById("sendaccountbutton").innerHTML='<a id="a" href="/physic-in-sesc/sendaccount/'+creatorname+'">создать аккаунт</a>'
+			creatorpassword=document.getElementById("creatorpassword").value;
+			document.getElementById("sendaccountbutton").innerHTML='<a id="a" href="/fizhub/sendaccount/'+creatorname+'/'+creatorpassword+'">создать аккаунт</a>'
+			createcookie()
+		}
+		function openaccount(){
+			creatorname=document.getElementById("creatorname2").value;
+			creatorpassword=document.getElementById("creatorpassword2").value;
+			document.getElementById("sendaccountbutton2").innerHTML='<a id="a" href="/fizhub/sendaccount/'+creatorname+'/'+creatorpassword+'">открыть аккаунт</a>'
+			createcookie2()
+		}
+		function createcookie(t){
+			//let date = new Date(Date.now() + 864000);
+			//alert(date);
+			//date = date.toUTCString();
+			maxage=3600
+			maxage=(t*60)/1
+			document.cookie="username="+document.getElementById("creatorname").value+";samesite=strict; path=/; max-age="+maxage
+			document.cookie="userpassword="+document.getElementById("creatorpassword").value+"; samesite=strict; path=/; max-age="+maxage;
+		}
+		function createcookie2(t){
+			//let date = new Date(Date.now() + 864000);
+			//alert(date);
+			//date = date.toUTCString();
+			maxage=3600
+			maxage=(t*60)/1
+			document.cookie="username="+document.getElementById("creatorname2").value+";samesite=strict; path=/; max-age="+maxage;
+			document.cookie="userpassword="+document.getElementById("creatorpassword2").value+"; samesite=strict; path=/; max-age="+maxage;
 		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
-		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
-		<div class="taskname">регистрация</div>
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>вход</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		
 	</div>
-	<div class="menuclosed" id="menu">
-		<a href="/physic-in-sesc/main">главная</a><br>
-		<a href="/physic-in-sesc/new">новое</a><br>
-		<a href="">популярное(no)</a><br>
-		<a href="">подписки(no)</a><br>
-		<a href="">категории(no)</a><br>
-		<a href="">мое(no)</a><br>
-		<a href="/physic-in-sesc/createtask">новая задача</a><br>
+<div class="menuclosed" id="menu">
+		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
+		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
+		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
+		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
+		<div class="menusubpart"><a href="">олимпиады</a></div>
+		<div class="menusubpart"><a href="">подписки(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
+		<div class="menusubpart"><a href="">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
+		<br>
+
+		<div class="menusubpart"><a href="/fizhub/useful">полезные файлы</a></div>
+		<div class="menusubpart"><a href="/fizhub/login">войти</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
+		<p>&#946; version</p>
 	</div>
 	
     <div class="bod">
-    
+    <div class="task">
+        	
+    	<form action="{% url 'physicsesc:sendaccountpost' %}" method="post">	
+    		<input type="hidden" name="registration_type" value="open">
+    	{% csrf_token %}
+    <div class="taskheader" name="createaccount">войти</div>
+    <div class="tasksubpart">
+    	ваше имя:
+    	<input type="text" id="creatorname" placeholder="мое имя" name="username">
+    </div>
+
+    <div class="tasksubpart">
+    	пароль
+    	<input type="password" id="creatorpassword" placeholder="1234" name="userpassword">
+    </div>
+
+
+        <center><input type="submit" value="открыть аккаунт" class="solutionbutton"></center>
+    </form>
+</div>
+
         <div class="task">
         	
         	
-{% csrf_token %}
+<form action="{% url 'physicsesc:sendaccountpost' %}" method="post">	
+	<input type="hidden" name="registration_type" value="new">
+    	{% csrf_token %}
 
     <div class="taskheader" name="createaccount">новый аккаунт</div>
     <div class="tasksubpart">
-    	имя создателя:
-    	<input type="text" id="creatorname" value="1">
+    	ваше имя:
+
+    	<input type="text" id="creatorname2" placeholder="мое имя" name="username">
+    </div><div class="tasksubpart">
+    	пароль
+    	<input type="password" id="creatorpassword2" placeholder="1234" name="userpassword">
     </div>
-    	
+     
+    	<textarea placeholder="напишите здесь о себе" name="guest_information" cols="90" row="10" style="height: 100px"></textarea>
+    
        
-<div class="solutionbutton" onclick="savetask()">сохранить аккаунт</div>
-<div class="solutionbutton" id="sendaccountbutton"><a id="a" href="">создать аккаунт</a></div>
-        
-    
-    
 
-    
-
+<center><input type="submit" value="создать аккаунт" class="solutionbutton"></center>
+    </form>
 </div>
+
 </div>
 </body>
 </html>

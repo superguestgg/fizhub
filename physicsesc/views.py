@@ -1,37 +1,105 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
+from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Task, Solution, Guest
+from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote
 from django.template import loader
 from django.urls import reverse
+import random
+def su_cut(string, l):
+    if len(string) > l:
+        string = string[0:l]
+    return string
 def index(request):
-    return HttpResponse('<a href="main">main</a>')
+    try:
+
+        latest_tasks_list = Task.objects.all()[:1]
+
+        #task.task_text="hi for all. you in my project fizhub, where you can post your physic tasks"
+        template = loader.get_template('physicsesc/fizhub.html')
+        context = {
+            'latest_tasks_list': latest_tasks_list,
+        }
+        # antiddos(request=request)
+        return HttpResponse((template.render(context, request)))
+    except:
+        return HttpResponse('<a href="/physic-in-sesc/main">main page</a>')
 def main(request):
-    latest_tasks_list = Task.objects.all()
+    return main_page(request,1)
+def main_page(request,page_number):
+    page_number = max(1,page_number)
+    latest_tasks_list = Task.objects.all()[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.all())//50+1
+    next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
+        'page_name': 'main',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
     }
+    #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
 def new(request):
-    latest_tasks_list = Task.objects.order_by('-pub_date')[:10]
+
+    return new_page(request, 1)
+def new_page(request, page_number):
+    page_number = max(1, page_number)
+    latest_tasks_list = Task.objects.order_by('-pub_date')[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.all())//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/fizhub.html')
+    context = {
+        'latest_tasks_list': latest_tasks_list,
+        'page_name': 'new',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    return HttpResponse(template.render(context, request))
+def best(request):
+
+    return best_page(request, 1)
+def best_page(request, page_number):
+    page_number = max(1, page_number)
+    latest_tasks_list = (Task.objects.order_by('like')[::-1])[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.all())//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/fizhub.html')
+    context = {
+        'latest_tasks_list': latest_tasks_list,
+        'page_name': 'best',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    return HttpResponse(template.render(context, request))
+def theme(request):
+    return render(request, 'physicsesc/theme.html')
+def themepost(request):
+    theme1_name = request.POST['theme1']
+    theme2_name = request.POST['theme2']
+    latest_tasks_list = Task.objects.filter(theme1_name=theme1_name)
+    if theme2_name!="No theme":
+        latest_tasks_list = latest_tasks_list.filter(theme2_name=theme2_name)
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
     }
     return HttpResponse(template.render(context, request))
-def theme(request):
-    return render(request, 'physicsesc/theme.html')
 def themefind(request,theme_name1):
-    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1)
+    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
     }
     return HttpResponse(template.render(context, request))
 def themefind2(request,theme_name1,theme_name2):
-    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1, theme2_name=theme_name2)
+    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1, theme2_name=theme_name2)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
@@ -43,28 +111,111 @@ def user(request):
 def userfind(request,user_name):
     try:
         latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.all()
+
+        page_number = 1
+        page_count = len(latest_tasks_list) // 50 + 1
+        next_page = page_number < page_count
         template = loader.get_template('physicsesc/fizhub.html')
         context = {
             'latest_tasks_list': latest_tasks_list,
+            'page_name': 'user/'+user_name,
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('Server error')
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+def userfind_page(request,user_name):
+    try:
+        latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.all()
+
+        page_number = 1
+        page_count = len(latest_tasks_list) // 50 + 1
+        next_page = page_number < page_count
+        template = loader.get_template('physicsesc/fizhub.html')
+        context = {
+            'latest_tasks_list': latest_tasks_list,
+            'page_name': 'best',
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+
 def login(request):
     return render(request, 'physicsesc/login.html')
-def sendaccount(request, guest_name):
+def sendaccount(request, guest_name,guest_password):
     #try:
-    g=0
-    #for guest in (len(Guest.objects.filter(guest_name=guest_name))):
-    #    g+=1
     if (len(Guest.objects.filter(guest_name=guest_name)))==0:
-        new_user=Guest(guest_name=guest_name)
+        new_user = Guest(guest_name=guest_name,guest_password=guest_password)
         new_user.save()
         return HttpResponse('you user_id is '+str(new_user.id))
-    return HttpResponse('name reserved|имя занято')
+    else:
+        this_user = Guest.objects.get(guest_name=guest_name)
+        if this_user.guest_password==guest_password:
+            return HttpResponse('you user_id is ' + str(this_user.id))
+    return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
     #except:
         #raise Http404("Error")
-def detail(request, task_id):
+
+def sendaccountpost(request):
+    if True:
+        type = su_cut(request.POST['registration_type'], 40)
+        guest_name = su_cut(request.POST['username'], 40)
+        guest_password = su_cut(request.POST['userpassword'], 40)
+        if type == "new":
+            if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+                try:
+                    guest_information = su_cut(request.POST['guest_information'], 2000)
+                except:
+                    return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
+                new_user = Guest(guest_name=guest_name, guest_password=guest_password, guest_information=guest_information)
+                new_user.save()
+                s = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+
+
+                session_key = ""
+                for j in range(50):
+                    session_key += s[random.randint(0, 125)]
+                new_session_for_user = Guest_session(guest_id=new_user, session_key=session_key)
+                new_session_for_user.save()
+                template = loader.get_template('physicsesc/succesfullogin.html')
+                context = {
+                    'user_id': new_user.id,
+                    'session_key': session_key,
+                    'user_name': guest_name,
+                }
+                return HttpResponse(template.render(context, request))
+            else:
+                return HttpResponse('имя занято | name reserved')
+
+        else:
+            if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+                return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
+            else:
+                this_user = Guest.objects.get(guest_name=guest_name)
+                if this_user.guest_password==guest_password:
+                    s = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+                    session_key = ""
+                    for j in range(50):
+                        session_key += s[random.randint(0, 125)]
+                    new_session_for_user = Guest_session(guest_id=this_user, session_key=session_key)
+                    new_session_for_user.save()
+                    template = loader.get_template('physicsesc/succesfullogin.html')
+                    context = {
+                        'user_id': this_user.id,
+                        'session_key': session_key,
+                        'user_name': guest_name,
+                    }
+                    return HttpResponse(template.render(context, request))
+                else:
+                    return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
+    else:
+        return HttpResponse("server error")
+def task(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
@@ -73,16 +224,123 @@ def detail(request, task_id):
 def like(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
+        try:
+            user_name = su_cut(request.COOKIES['user_name'], 40)
+            session_key = su_cut(request.COOKIES['session_key'], 100)
+            user = Guest.objects.get(guest_name=user_name)
+            if len(Guest_session.objects.filter(session_key=session_key, guest_id=user))==0:
+                return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        except:
+            return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        user = Guest.objects.get(guest_name=user_name)
+        if len(task.like_set.filter(guest=user))<=0:
+            if len(task.report_set.filter(guest=user)) >0:
+                task.report_count=task.report_count-1
+                report=Report.objects.get(task=task, guest=user)
+                report.delete()
+            task.like_count=task.like_count+1
+            task.save()
+            like = Like(task=task, guest=user)
+            like.save()
+
+        else:
+            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу'})
+
+
+    except Task.DoesNotExist:
+        raise Http404("Task does not exist")
+    return render(request, 'physicsesc/thistask.html', {'task': task})
+def report(request, task_id):
+    try:
+        task = Task.objects.get(pk=task_id)
+        try:
+            user_name = su_cut(request.COOKIES['user_name'], 40)
+            session_key = su_cut(request.COOKIES['session_key'], 100)
+            user = Guest.objects.get(guest_name=user_name)
+            if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
+                return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        except:
+
+            return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        user = Guest.objects.get(guest_name=user_name)
+        if len(task.report_set.filter(guest=user))<=0:
+            if len(task.like_set.filter(guest=user)) >0:
+                task.like_count=task.like_count-1
+                like=Like.objects.get(task=task, guest=user)
+                like.delete()
+            task.report_count=task.report_count+1
+            task.save()
+            report = Report(task=task, guest=user)
+            report.save()
+        else:
+            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу'})
+
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
     return render(request, 'physicsesc/thistask.html', {'task': task})
 def solution(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
+        solution_set = Solution.objects.filter(task=task.id).order_by('-votes_count', 'votes_against_count')[:100]
+
         #solution = Solution.objects.get(pk=task_id)
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thissolution.html', {'task': task})
+    return render(request, 'physicsesc/thissolution.html', {'task': task,'solution_set':solution_set})
+def solution_vote(request, task_id, solution_id, vote_type):
+    try:
+        task = Task.objects.get(pk=task_id)
+        solution_set = Solution.objects.filter(task=task.id)[:100]
+        solution = Solution.objects.get(task=task.id, id=solution_id)
+        try:
+            user_name = su_cut(request.COOKIES['user_name'], 40)
+
+            session_key = su_cut(request.COOKIES['session_key'], 100)
+            user = Guest.objects.get(guest_name=user_name)
+            if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
+                return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        except:
+            return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        user = Guest.objects.get(guest_name=user_name)
+        if vote_type == "vote_for":
+            vote_type = True
+        elif vote_type == "vote_against":
+            vote_type = False
+        else:
+            return HttpResponse("нет такого варианта голоса")
+        if len(solution.vote_set.filter(guest=user)) <= 0:
+            if vote_type==True:
+                solution.votes_count = solution.votes_count + 1
+                solution.save()
+            elif vote_type == False:
+                solution.votes_against_count = solution.votes_against_count + 1
+                solution.save()
+            vote = Vote(task=task, solution=solution, vote_type=vote_type, guest=user)
+            vote.save()
+            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
+        else:
+            if solution.vote_set.get(guest=user).vote_type == vote_type:
+                return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set, 'alert': 'вы уже так оценили эту задачу'})
+            else:
+                if vote_type == True:
+                    solution.votes_against_count = solution.votes_against_count - 1
+                    solution.votes_count = solution.votes_count + 1
+                    solution.save()
+                elif vote_type == False:
+                    solution.votes_count = solution.votes_count - 1
+                    solution.votes_against_count = solution.votes_against_count + 1
+                    solution.save()
+
+            vote = solution.vote_set.get(guest=user)
+            vote.vote_type = vote_type
+            vote.save()
+            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
+
+
+        #solution = Solution.objects.get(pk=task_id)
+    except Task.DoesNotExist:
+        raise Http404("Task does not exist")
+    return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
 
 def makesolution(request, task_id):
     try:
@@ -101,7 +359,29 @@ def makesolution3(request, task_id, solution_text):
 
     #print(task.solution_set.solution_text)
 
-    return HttpResponse('<a href="physic-in-sesc/main>back</a>')
+    return HttpResponse('<a href="/physic-in-sesc/main">main page</a>')
+def sendsolutionpost(request):
+    try:
+        try:
+            user_name = su_cut(request.COOKIES['user_name'], 40)
+
+            session_key = su_cut(request.COOKIES['session_key'], 100)
+            user = Guest.objects.get(guest_name=user_name)
+            if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
+                return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        except:
+            return HttpResponse('session inactive | user not found <br> сессия неактивна | пользователь не найден')
+
+        task_id = su_cut(request.POST['taskid'], 100)
+        solution_text = su_cut(request.POST['solutiontext'], 500)
+        task = Task.objects.get(pk=task_id)
+        if len(task.solution_set.filter(solution_text=solution_text))==0 and len(solution_text)>=5:
+            task.solution_set.create(solution_text=solution_text, creator_id=user)
+            return HttpResponse('успешно<br><a href="/physic-in-sesc/main">main page|главная страница</a><br><a href="/physic-in-sesc/'+task_id+'">back to task|обратно к задаче</a>')
+        else:
+            return HttpResponse('ddos attack identified and reflected <a href="/physic-in-sesc/main">main page|главная страница(go fuck)</a>')
+    except:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main>main page</a>')
 """def makesolution2(request, task_id):
     task = get_object_or_404(Task, pk=task_id)
     try:
@@ -122,10 +402,139 @@ def makesolution3(request, task_id, solution_text):
 """
 def createtask(request):
         return render(request, 'physicsesc/createtask.html')
-def sendtask(request, task_text,theme1_name, theme2_name, creator_name):
-    user = Guest.objects.get(id=creator_name)
-    #task = Task(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name, creator_name=creator_name)
-    user.task_set.create(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name)
-    #print(task.solution_set.solution_text)
-    
-    return HttpResponse('<a href="physic-in-sesc/main>back</a>')
+def sendtaskpost(request):
+    try:
+        t=1
+        try:
+            user_name = su_cut(request.COOKIES['user_name'], 40)
+            session_key = su_cut(request.COOKIES['session_key'], 100)
+            user = Guest.objects.get(guest_name=user_name)
+            if len(Guest_session.objects.filter(session_key=session_key, guest_id=user))==0:
+                return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+        except:
+            user_name = 'undefined guest'
+            user = Guest.objects.get(guest_name=user_name)
+
+        task_name=su_cut(request.POST['taskheader'], 50)
+        task_text=su_cut(request.POST['textarea'], 1500)
+        theme1_name = su_cut(request.POST['theme1'], 30)
+        theme2_name = su_cut(request.POST['theme2'], 30)
+        picture_url=su_cut(request.POST['pictureurl'], 100)
+        if len(task_text)>=10 and len(task_name)>2 and task_name.count(" ")<len(task_name):
+            if user.guest_rights==0:
+                user.task_set.create(task_name=task_name,task_text=task_text, pub_date=timezone.now(),picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                #taskid= user.task_set.all()[-1:-2]
+                return HttpResponse('succesful <br> <a href="/physic-in-sesc/new">last tasks</a>')
+            elif user.guest_rights>=1:
+                try:
+                    userfile = request.FILES['file']
+                    filesize= userfile.size
+                    if filesize>100 and filesize<3000000:
+                        fs = FileSystemStorage()
+                        filename = fs.save(user_name+"_"+userfile.name, userfile)
+                        uploaded_file_url = fs.url(filename)
+                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(),picture_href=uploaded_file_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                        user.guest_rights=user.guest_rights-1
+                        user.save()
+                        return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+                    elif  filesize>=3000000:
+                        return HttpResponse('picture size too big<a href="/physic-in-sesc/main">main page</a>')
+                    elif filesize>0:
+                        return HttpResponse('picture size not enough big<a href="/physic-in-sesc/main">main page</a>')
+                    else:
+                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                        return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+                except:
+                    user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                    return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+
+        return HttpResponse("password incorrect or недостаточная длина условия или названия задачи")
+    except:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+"""
+def sendtask(request, task_text,theme1_name, theme2_name, creator_name,creator_password):
+    try:
+        user = Guest.objects.get(guest_name=creator_name)
+        if user.guest_password==creator_password:
+            #task = Task(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name, creator_name=creator_name)
+            user.task_set.create(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name)
+            #print(task.solution_set.solution_text)
+            return HttpResponse('succesful <br> <a href="physic-in-sesc/main>main page</a>')
+    except:
+        HttpResponse('server error<br><a href="physic-in-sesc/main>main page</a>')
+def sendtaskwithpicture(request, task_text,picture_url,theme1_name, theme2_name, creator_name,creator_password):
+    try:
+        user = Guest.objects.get(guest_name=creator_name)
+        if user.guest_password==creator_password:
+            picture_url=picture_url.replace("^","/")
+            #task = Task(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name, creator_name=creator_name)
+            user.task_set.create(task_text=task_text, pub_date=timezone.now(), theme1_name=theme1_name, theme2_name=theme2_name,picture_href=picture_url)
+            #print(task.solution_set.solution_text)
+            return HttpResponse('succesful <br> <a href="physic-in-sesc/main>main page</a>')
+    except:
+        return HttpResponse('server error<br><a href="physic-in-sesc/main>main page</a>')
+"""
+def useful(request):
+    useful_files = Usefulfiles.objects.all()[:50]
+    template=loader.get_template('physicsesc/useful.html')
+    context = {
+        'useful_files': useful_files,
+    }
+    return HttpResponse(template.render(context,request))
+def sendusefulfile(request):
+    try:
+        filename = su_cut(request.POST['filename'], 50)
+        username = su_cut(request.POST['username'], 40)
+        userpassword = su_cut(request.POST['userpassword'], 40)
+        filehref = su_cut(request.POST['filehref'], 200)
+        user = (Guest.objects.get(guest_name=username))
+        if user.guest_password==userpassword and filename!="" and filehref!="":
+            file = user.usefulfiles_set.create(file_name=filename,file_href=filehref)
+            file.save()
+
+            return HttpResponse('succesful')
+        else:
+            return HttpResponse('not succesful')
+    except:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+
+def account(request,user_name):
+    user_name_request = user_name
+    user = openaccount(request)
+    user_request = Guest.objects.get(guest_name=user_name_request)
+    template = loader.get_template('physicsesc/user.html')
+    tasks_count = len(user_request.task_set.all())
+    context = {
+        'tasks_count': tasks_count,
+        'user': user_request,
+
+    }
+    return HttpResponse(template.render(context,request))
+def myaccount(request):
+    user = openaccount(request)
+    template = loader.get_template('physicsesc/user.html')
+    tasks_count = len(user.task_set.all())
+    context = {
+        'tasks_count': tasks_count,
+        'user': user,
+        'its_me': True
+
+    }
+    return HttpResponse(template.render(context,request))
+
+
+def settings(request):
+    user = openaccount(request)
+def openaccount(request):
+    try:
+        user_name = su_cut(request.COOKIES['user_name'], 40)
+        session_key = su_cut(request.COOKIES['session_key'], 100)
+        user = Guest.objects.get(guest_name=user_name)
+        if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
+            return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+    except:
+        user_name = 'undefined guest'
+        user = Guest.objects.get(guest_name=user_name)
+    return user
+def antiddos(request):
+    print(request.META.HTTP_COOKIE)

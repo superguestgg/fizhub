@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
 	{% load static %}
@@ -25,54 +26,97 @@
 			theme2=document.getElementById("theme2").value;
 			document.getElementById("sendtaskbutton").innerHTML='<a id="a" href="/physic-in-sesc/theme/'+theme1+'">найти по теме</a>'
 		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
-		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
-		<div class="taskname">главная</div>
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">|||</div></div>
+		<div class="taskname"><center>главная</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
-		<div class="loginbutton" id="loginbutton" ><a href="login">login|войти</a></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/physic-in-sesc/login">login|войти</a></div>
 	</div>
 	<div class="menuclosed" id="menu">
 		<a href="/physic-in-sesc/main">главная</a><br>
 		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="/physic-in-sesc/best">лучшее</a><br>
+		<a href="/physic-in-sesc/user">создатели</a><br>
 		<a href="">популярное(no)</a><br>
 		<a href="">подписки(no)</a><br>
-		<a href="">категории(no)</a><br>
+		<a href="/physic-in-sesc/theme">темы</a><br>
 		<a href="">мое(no)</a><br>
-		<a href="/physic-in-sesc/createtask">новая задача</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br><br>
+
+		<a href="/physic-in-sesc/useful">полезные файлы</a><br>
+		<a href="/physic-in-sesc/login">войти</a><br>
 	</div>
 
 	<div class="bod">
 		<div class="task">
 			<div class="taskheader"><center>поиск по теме</center></div>
+			<form action="{% url 'physicsesc:themepost' %}" method="post">	
+    	{% csrf_token %}
 	 <div class="tasksubpart">
     	тема1:
-    	<select type="text" id="theme1">
+    	<select type="text" id="theme1" name="theme1">
     		<option value="No theme">No theme</option>
     		<option value="электричество">электричество</option>
     		<option value="динамика">динамика</option>
     		<option value="механика">механика</option>
     		<option value="конденсаторы">конденсаторы</option>
     		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
     		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
 
     	</select>
     </div><div class="tasksubpart">	
     	тема2:
-    	<select type="text" id="theme2">
+    	<select type="text" id="theme2" name="theme2">
     		<option value="No theme">No theme</option>
     		<option value="электричество">электричество</option>
     		<option value="динамика">динамика</option>
     		<option value="механика">механика</option>
     		<option value="конденсаторы">конденсаторы</option>
     		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
     		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
 
     	</select>
     </div>
-    <div class="solutionbutton" onclick="savetask()">сохранить поиск по теме</div>
-<div class="solutionbutton" id="sendtaskbutton"><a id="a" href="">найти по теме</a></div>
+
+<center><input type="submit" name="submit" class="solutionbutton" value="найти по теме"></center>
+</form>
 </div>
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
 </body>

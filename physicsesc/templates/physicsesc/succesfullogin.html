@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function saveaccount(){
+			
+			document.cookie="user_name={{user_name}}; samesite=strict; path=/; max-age=3600000000000000"
+			document.cookie="user_id={{user_id}}; samesite=strict; path=/; max-age=3600000000000000"
+			document.cookie="session_key={{session_key}}; samesite=strict; path=/; max-age=3600000000000000"
+		
+		}
+		saveaccount()
+
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>успешно</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		
+	</div>
+<div class="menuclosed" id="menu">
+		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
+		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
+		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
+		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
+		<div class="menusubpart"><a href="">олимпиады</a></div>
+		<div class="menusubpart"><a href="">подписки(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
+		<div class="menusubpart"><a href="">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
+		<br>
+
+		<div class="menusubpart"><a href="/fizhub/useful">полезные файлы</a></div>
+		<div class="menusubpart"><a href="/fizhub/login">войти</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
+		<p>&#946; version</p>
+	</div>
+	
+    <div class="bod">
+    <div class="task">
+    	<div class="tasksubpart">
+        	вы успешно вошли, сессия действительна неограниченное время, закрыть ее можно в настройках аккаунта
+        	</div>
+        	<div class="tasksubpart">
+        	изменить пароль и информацию о себе вы можете в настройках аккаунта 
+    	</div>
+    	<div class="tasksubpart">
+    		ваш id пользователя {{user_id}}
+    	</div>
+</div>
+
+        
+
+</div>
+</body>
+</html>

@@ -51,15 +51,40 @@
 				return userpassword
 			}
 		}
-		if ('{{alert}}'){
-			alert('{{alert}}')
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
 		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>{{task.id}}</center></div>
+		<div class="taskname"><center>Fizhub</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
@@ -71,7 +96,7 @@
 		<div class="menusubpart"><a href="">олимпиады</a></div>
 		<div class="menusubpart"><a href="">подписки(no)</a></div>
 		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
-		<div class="menusubpart"><a href="">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/my">мое(no)</a></div>
 		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
 		<br>
 
@@ -80,35 +105,36 @@
 		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
-	{% if task %}
+	
     <div class="bod">
-    	
-        <div class="task">
-        	<div class="taskheader"><center><a href="/fizhub/{{task.id}}">{{task.task_name}}</a></center>
-        	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
-        	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
-        	<b>task by <a href="/fizhub/user/{{task.creator_name.guest_name}}">{{task.creator_name.guest_name}}</a></b>
+
+    <div class="task">
+    	<div class="taskheader">
+        	<center>{{user.guest_name}}</center>
+        </div>
+        	<br>&nbsp;&nbsp;&nbsp;&nbsp;о себе: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	{{user.guest_information}}
         	<br>
-        	условие задачи:<br>{{ task.task_text }}
-        	
-        	{% if task.picture_href %}
-        	<br><img class="medium" src="{{task.picture_href}}" alt="no image"></div>{% endif %}
-        	
-        	<div class="solutionbutton" >
-        		<a href="/fizhub/{{ task.id }}/solution" name="open solution">открыть решение</a></div>
-        	<div class="solutionbutton" >
-        		<a href="/fizhub/{{ task.id }}/makesolution" name="i know solution!">я знаю решение!</a></div>
-        	<div class="like" ><a href="/fizhub/{{ task.id }}/like" name="like">like &#128077;| {{task.like_count}}</a></div>
-        	<div class="report" ><a href="/fizhub/{{ task.id }}/report" name="report">жалоба &#128078;| {{task.report_count}}</a></div>
+        	&nbsp;&nbsp;&nbsp;&nbsp;этот пользователь опубликовал <a href="/fizhub/user/{{user.guest_name}}">{{tasks_count}} задач</a>
+        	{% if its_me %}
+        		<br><br>
+        		&nbsp;&nbsp;&nbsp;&nbsp;информацию выше видят о вас все пользователи
+        	{% endif %}
+
 
         </div>
-    
+        {% if its_me %}
+        <div class="task">
+        	<div class="taskheader"> это видите только вы
+        	</div>
+        	<a href="/fizhub/settings/">настройки</a>
+        </div>
+        {% endif %}
     </div>
-{% else %}
-    <p>No tasks are available.<br>упс, такого задания нет, но вы можете создать новое<a href="/fizhub/createtask">здесь</a></p>
-{% endif %}
+
+    
+
 <script type="text/javascript">
-	//<a href="/fizhub/picture/{{task.picture_href}}">////.replace('/','^')
 	openaccountfromcookie("i");
 </script>
 </body>

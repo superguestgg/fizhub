@@ -3,6 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
 	{% load static %}
@@ -19,50 +20,143 @@
 				document.getElementById("menu").className="menuclosed";
 			}
 		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" user_name")){
+					username=valuethiscookie;
+				}
+			}
+			console.log(username);
+			//if (username == "undefined guest"){
+			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
+			//} else {
+			//	document.getElementById("creatorname2").remove()
+			//}
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
 
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
-		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
-		<div class="taskname">главная</div>
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>{{page_name}}</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
-		<div class="loginbutton" id="loginbutton" ><a href="login">login|войти</a></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
 	<div class="menuclosed" id="menu">
-		<a href="/physic-in-sesc/main">главная</a><br>
-		<a href="/physic-in-sesc/new">новое</a><br>
-		<a href="/physic-in-sesc/user">создатели</a><br>
-		<a href="">популярное(no)</a><br>
-		<a href="">подписки(no)</a><br>
-		<a href="/physic-in-sesc/theme">темы</a><br>
-		<a href="">мое(no)</a><br>
-		<a href="/physic-in-sesc/createtask">новая задача</a><br>
+		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
+		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
+		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
+		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
+		<div class="menusubpart"><a href="">олимпиады</a></div>
+		<div class="menusubpart"><a href="">подписки(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
+		<div class="menusubpart"><a href="/fizhub/my">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
+		<br>
+
+		<div class="menusubpart"><a href="/fizhub/useful">полезные файлы</a></div>
+		<div class="menusubpart"><a href="/fizhub/login">войти</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
+		<p>&#946; version</p>
 	</div>
 	{% if latest_tasks_list %}
     <div class="bod">
     {% for task in latest_tasks_list %}
         <div class="task">
         	<div class="taskheader">
-        	<a href="/physic-in-sesc/{{ task.id }}/">{{ task.task_text }}</a>
-        	<i><a href="/physic-in-sesc/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
-        	<i><a href="/physic-in-sesc/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
-        	<b><a href="/physic-in-sesc/user/{{task.creator_name.guest_name}}">task by {{task.creator_name.guest_name}}</a></b>
-        </div>
-        	<div class="solutionbutton" ><a href="/physic-in-sesc/{{ task.id }}/solution">open solution</a></div>
-        	<div class="solutionbutton" ><a href="/physic-in-sesc/{{ task.id }}/solution">i know solution!</a></div>
+        	<a href="/fizhub/{{ task.id }}/">{{ task.task_name }}</a>
+        	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
+        	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
+        	<b><a href="/fizhub/user/{{task.creator_name.guest_name}}">task by {{task.creator_name.guest_name}}</a></b>
+        	<br><img class="small" src="{{task.picture_href}}"></div>
+        	
+        	<div id="{{task.id}}_text" class="textplace" onclick='showtext(id)'>{{task.task_text}}</div>
+        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
+        
+        
         </div>
     {% endfor %}
+
+    <div class="message">
+        	{% if pages|add:'-1' %}
+     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
+     
+     {% endif %}
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
+
+     {% if next_page %}
+     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
+     {% else %}
+
+     {% endif %}
+
+
+
+        	<br>
+        		
+     
+        </div>
     </div>
 {% else %}
 		<div class="task">
         	<div class="taskheader">
         	No tasks are available.
         </div>
-        	<div class="solutionbutton" ><a href="/physic-in-sesc/new">last tasks</a></div>
-        	<div class="solutionbutton" ><a href="/physic-in-sesc/main">main</a></div>
+        {% if page_name %}
+        	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
+        	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
+        	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
         </div>
     
 {% endif %}
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
 </body>
 </html>

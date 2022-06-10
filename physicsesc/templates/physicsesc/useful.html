@@ -37,11 +37,11 @@
 				}
 			}
 			console.log(username);
-			//if (username == "undefined guest"){
-			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
-			//} else {
-			//	document.getElementById("creatorname2").remove()
-			//}
+			if (username == "undefined guest"){
+				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
+			} else {
+				document.getElementById("creatorname2").remove()
+			}
 			if (cakes>1) {
 				document.getElementById("loginbutton").innerHTML=username;
 			}
@@ -51,15 +51,28 @@
 				return userpassword
 			}
 		}
-		if ('{{alert}}'){
-			alert('{{alert}}')
+		function writenameandpassword(){
+			let name=openaccountfromcookie("name");
+			let password=openaccountfromcookie("password");
+			if (name!=""){
+				document.getElementById("creatorname").value=name;
+
+			}
+			if (password!=""){
+				document.getElementById("creatorpassword").value=password;
+			}
+		}
+		function conditionregister(){
+			if (document.getElementById("creatorname").value=="undefined guest"){
+				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться на сайте <a href='/fizhub/login'>здесь</a>"
+			}
 		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>{{task.id}}</center></div>
+		<div class="taskname"><center>полезные файлы</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
@@ -80,36 +93,62 @@
 		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
-	{% if task %}
+	
     <div class="bod">
-    	
-        <div class="task">
-        	<div class="taskheader"><center><a href="/fizhub/{{task.id}}">{{task.task_name}}</a></center>
-        	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
-        	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
-        	<b>task by <a href="/fizhub/user/{{task.creator_name.guest_name}}">{{task.creator_name.guest_name}}</a></b>
-        	<br>
-        	условие задачи:<br>{{ task.task_text }}
-        	
-        	{% if task.picture_href %}
-        	<br><img class="medium" src="{{task.picture_href}}" alt="no image"></div>{% endif %}
-        	
-        	<div class="solutionbutton" >
-        		<a href="/fizhub/{{ task.id }}/solution" name="open solution">открыть решение</a></div>
-        	<div class="solutionbutton" >
-        		<a href="/fizhub/{{ task.id }}/makesolution" name="i know solution!">я знаю решение!</a></div>
-        	<div class="like" ><a href="/fizhub/{{ task.id }}/like" name="like">like &#128077;| {{task.like_count}}</a></div>
-        	<div class="report" ><a href="/fizhub/{{ task.id }}/report" name="report">жалоба &#128078;| {{task.report_count}}</a></div>
-
-        </div>
     
+        <div class="task">
+        	<div class="taskheader">
+        		полезные файлы
+        	</div>
+        	<div class="tasksubpart"><a href="https://drive.google.com/file/d/1LpFdjqN-7zGX-zTLDX7_Jqi9dSw_O8LC/view" target="_blank">3800</a></div>
+        	<div class="tasksubpart"><a href="https://drive.google.com/file/d/1o5JoqdhmDPczh4Toj33a_aSMFGUIizXS/view" target="_blank">savchenko</a></div>
+        	<div class="tasksubpart"><a href="https://drive.google.com/file/d/1nzz52Gi7CmVoVckY915AIqmC6YIkdzAs/view" target="_blank">rc</a></div>
+        </div>
+    	<div class="task">
+    		<div class="taskheader">
+        		полезные файлы
+        	</div>
+        	{% for file in useful_files %}
+        		<div class="tasksubpart"><a href="{{file.file_href}}" target="_blank">{{file.file_name}}</a>
+        			<a href="/fizhub/user/{{file.creator_name.guest_name}}"></a>
+        		</div>
+
+
+        	{% endfor %}
+    	</div>
+    	<div class="task">
+    		<div class="taskheader">
+        		создать новый полезный файл
+        	</div>
+        	
+			<form action="{% url 'physicsesc:sendusefulfile' %}" method="post">	
+    	{% csrf_token %}
+    	<div class="tasksubpart" id="creatorname2"></div>
+
+    	<div class="tasksubpart">
+    	название файла:
+    	<input type="text" id="filename" placeholder="название файла" name="filename">
+    </div>    
+    <div class="tasksubpart">
+    	ссылка на файл:
+    	<input type="text" id="filehref" placeholder="ссылка на файл" name="filehref" >
     </div>
-{% else %}
-    <p>No tasks are available.<br>упс, такого задания нет, но вы можете создать новое<a href="/fizhub/createtask">здесь</a></p>
-{% endif %}
+
+    	<center><input type="submit" class="solutionbutton" name="submit" value="создать"></center>
+
+        	</form>
+
+
+        	
+    	</div>
+    </div>
+
+
+    
 <script type="text/javascript">
-	//<a href="/fizhub/picture/{{task.picture_href}}">////.replace('/','^')
 	openaccountfromcookie("i");
+	writenameandpassword();
+	conditionregister();
 </script>
 </body>
 </html>
