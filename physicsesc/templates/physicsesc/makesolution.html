@@ -24,7 +24,7 @@
 			text=document.getElementById("textarea").value;
 			document.getElementById("sendsolutionbutton").innerHTML='<a id="a" href="/fizhub/{{task.id}}/makesolution3/'+text+'">отправить решение</a>'
 		}
-				function openaccountfromcookie(string){
+		function openaccountfromcookie(string){
 			let cookies=(document.cookie).split(";");
 			//alert(cookies[2]);
 			let cakes=cookies.length;
@@ -47,13 +47,16 @@
 				document.getElementById("creatorname2").remove()
 			}
 			if (cakes>1) {
-				document.getElementById("loginbutton").innerHTML=username;
+				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
 			if (string=="name"){
 				return username
 			} else if (string=="password"){
 				return userpassword
 			}
+		}
+		if ('{{alert}}'){
+			alert('{{alert}}')
 		}
 	</script>
 </head>

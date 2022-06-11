@@ -162,16 +162,29 @@ def sendaccount(request, guest_name,guest_password):
         #raise Http404("Error")
 
 def sendaccountpost(request):
-    if True:
+    try:
         type = su_cut(request.POST['registration_type'], 40)
         guest_name = su_cut(request.POST['username'], 40)
         guest_password = su_cut(request.POST['userpassword'], 40)
         if type == "new":
+
             if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+                try:
+                    os = su_cut(request.META['OS'], 100)
+                except:
+                    os = 'no informations'
+                try:
+                    computername = su_cut(request.META['COMPUTERNAME'], 100)
+                except:
+                    computername = 'no informations'
+                try:
+                    HTTP_USER_AGENT = su_cut(request.META['HTTP_USER_AGENT'], 500)
+                except:
+                    HTTP_USER_AGENT = 'no informations'
                 try:
                     guest_information = su_cut(request.POST['guest_information'], 2000)
                 except:
-                    return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
+                    return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found | информация о пользователе не найдена')
                 new_user = Guest(guest_name=guest_name, guest_password=guest_password, guest_information=guest_information)
                 new_user.save()
                 s = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
@@ -180,7 +193,7 @@ def sendaccountpost(request):
                 session_key = ""
                 for j in range(50):
                     session_key += s[random.randint(0, 125)]
-                new_session_for_user = Guest_session(guest_id=new_user, session_key=session_key)
+                new_session_for_user = Guest_session(guest_id=new_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
                 new_session_for_user.save()
                 template = loader.get_template('physicsesc/succesfullogin.html')
                 context = {
@@ -198,11 +211,23 @@ def sendaccountpost(request):
             else:
                 this_user = Guest.objects.get(guest_name=guest_name)
                 if this_user.guest_password==guest_password:
+                    try:
+                        os = su_cut(request.META['OS'], 100)
+                    except:
+                        os = 'no informations'
+                    try:
+                        computername = su_cut(request.META['COMPUTERNAME'], 100)
+                    except:
+                        computername = 'no informations'
+                    try:
+                        HTTP_USER_AGENT = su_cut(request.META['HTTP_USER_AGENT'], 500)
+                    except:
+                        HTTP_USER_AGENT = 'no informations'
                     s = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
                     session_key = ""
                     for j in range(50):
                         session_key += s[random.randint(0, 125)]
-                    new_session_for_user = Guest_session(guest_id=this_user, session_key=session_key)
+                    new_session_for_user = Guest_session(guest_id=this_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
                     new_session_for_user.save()
                     template = loader.get_template('physicsesc/succesfullogin.html')
                     context = {
@@ -213,7 +238,7 @@ def sendaccountpost(request):
                     return HttpResponse(template.render(context, request))
                 else:
                     return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
-    else:
+    except:
         return HttpResponse("server error")
 def task(request, task_id):
     try:
@@ -500,8 +525,15 @@ def sendusefulfile(request):
 
 def account(request,user_name):
     user_name_request = user_name
-    user = openaccount(request)
     user_request = Guest.objects.get(guest_name=user_name_request)
+    try:
+        user = openaccount(request)
+        if user.id == user_request.id:
+            return myaccount(request)
+    except:
+        user = '1'
+
+
     template = loader.get_template('physicsesc/user.html')
     tasks_count = len(user_request.task_set.all())
     context = {
@@ -511,20 +543,85 @@ def account(request,user_name):
     }
     return HttpResponse(template.render(context,request))
 def myaccount(request):
-    user = openaccount(request)
-    template = loader.get_template('physicsesc/user.html')
-    tasks_count = len(user.task_set.all())
-    context = {
-        'tasks_count': tasks_count,
-        'user': user,
-        'its_me': True
+    try:
+        user = openaccount(request)
+        template = loader.get_template('physicsesc/user.html')
+        tasks_count = len(user.task_set.all())
+        context = {
+            'tasks_count': tasks_count,
+            'user': user,
+            'its_me': True
 
-    }
-    return HttpResponse(template.render(context,request))
+        }
+        return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
 
 
 def settings(request):
-    user = openaccount(request)
+    try:
+        user = openaccount(request)
+        if user.guest_name=='undefined guest':
+            return HttpResponse('войдите сначала в свой аккаунт')
+        template = loader.get_template('physicsesc/settings.html')
+        sessions = user.guest_session_set.all()
+        session_key = su_cut(request.COOKIES['session_key'], 100)
+        context = {
+        'session_key': session_key,
+        'sessions': sessions,
+        'user': user,
+        'its_me': True
+
+        }
+        return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
+def closesession(request, session_key):
+    try:
+        user = openaccount(request)
+        if len(user.guest_session_set.all().filter(session_key=session_key))>0:
+            session = user.guest_session_set.all().get(session_key=session_key)
+            session.delete()
+
+        user = openaccount(request)
+        template = loader.get_template('physicsesc/settings.html')
+        sessions = user.guest_session_set.all()
+        session_key = su_cut(request.COOKIES['session_key'], 100)
+        context = {
+        'session_key': session_key,
+        'sessions': sessions,
+        'user': user,
+        'its_me': True
+
+        }
+        return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
+def changeaccountinformation(request):
+    try:
+        user = openaccount(request)
+        if user=="undefined guest":
+            return HttpResponse('сессия недействительна')
+        guest_information = su_cut(request.POST['guest_information'], 2000)
+        if user.guest_information != guest_information:
+            user.guest_information = guest_information
+            user.save()
+        return settings(request)
+    except:
+        return HttpResponse('сессия недействительна')
+def changepassword(request):
+    try:
+        user = openaccount(request)
+        if user == "undefined guest":
+            return HttpResponse('сессия недействительна')
+        old_password = su_cut(request.POST['old_password'], 40)
+        new_password = su_cut(request.POST['new_password'], 40)
+        if user.guest_password == old_password:
+            user.guest_password = new_password
+            user.save()
+        return settings(request)
+    except:
+        return HttpResponse('сессия недействительна')
 def openaccount(request):
     try:
         user_name = su_cut(request.COOKIES['user_name'], 40)

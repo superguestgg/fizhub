@@ -37,5 +37,7 @@ path('sendusefulfile',views.sendusefulfile,name="sendusefulfile"),
 path('account/<str:user_name>', views.account, name='account'),
 path('myaccount/', views.myaccount, name='myaccount'),
 path('settings/', views.settings, name='settings'),
-
+path('settings/closesession/<str:session_key>', views.closesession, name='closesession'),
+path('changeaccountinformation', views.changeaccountinformation, name='changeaccountinformation'),
+path("changepassword", views.changepassword, name='changepassword'),
 ]

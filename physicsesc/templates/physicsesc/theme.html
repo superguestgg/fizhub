@@ -38,21 +38,27 @@
 				console.log(thiscookie);
 				namethiscookie=thiscookie.split("=")[0];
 				valuethiscookie=thiscookie.split("=")[1];
-				if ((namethiscookie==" username") || (namethiscookie=="username")){
+				if ((namethiscookie==" user_name")){
 					username=valuethiscookie;
-				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
-					userpassword=valuethiscookie;
 				}
 			}
 			console.log(username);
+			//if (username == "undefined guest"){
+			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
+			//} else {
+			//	document.getElementById("creatorname2").remove()
+			//}
 			if (cakes>1) {
-				document.getElementById("loginbutton").innerHTML=username;
+				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
 			if (string=="name"){
 				return username
 			} else if (string=="password"){
 				return userpassword
 			}
+		}
+		if ('{{alert}}'){
+			alert('{{alert}}')
 		}
 	</script>
 </head>

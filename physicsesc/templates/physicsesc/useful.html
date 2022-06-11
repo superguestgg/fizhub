@@ -43,7 +43,7 @@
 				document.getElementById("creatorname2").remove()
 			}
 			if (cakes>1) {
-				document.getElementById("loginbutton").innerHTML=username;
+				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
 			if (string=="name"){
 				return username
@@ -66,6 +66,9 @@
 			if (document.getElementById("creatorname").value=="undefined guest"){
 				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться на сайте <a href='/fizhub/login'>здесь</a>"
 			}
+		}
+		if ('{{alert}}'){
+			alert('{{alert}}')
 		}
 	</script>
 </head>

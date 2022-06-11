@@ -10,6 +10,9 @@ class Guest(models.Model):
 class Guest_session(models.Model):
     guest_id = models.ForeignKey(Guest, on_delete=models.CASCADE)
     session_key = models.CharField(max_length=100)
+    os = models.CharField(max_length=100, default='no name')
+    computername = models.CharField(max_length=100, default='no name')
+    HTTP_USER_AGENT = models.CharField(max_length=500, default='no name')
     def __str__(self):
         return str(self.guest_id)+" key: "+str(self.session_key)
 class Task(models.Model):

@@ -20,22 +20,6 @@
 				document.getElementById("menu").className="menuclosed";
 			}
 		}
-		function savetask(){
-
-			creatorname=document.getElementById("creatorname").value;
-			document.getElementById("sendtaskbutton").innerHTML='<a id="a" href="/physic-in-sesc/user/'+creatorname+'">найти по имени</a>'
-			document.getElementById("sendtaskbutton2").innerHTML='<a id="a2" href="/physic-in-sesc/account/'+creatorname+'">узнать о пользователе</a>'
-		}
-		function openmenu() {
-			if (document.getElementById("menubutton").className=="menubutton") {
-				document.getElementById("menubutton").className="menubutton2";
-				document.getElementById("menu").className="menuopened";
-				
-			} else {
-				document.getElementById("menubutton").className="menubutton";
-				document.getElementById("menu").className="menuclosed";
-			}
-		}
 		function openaccountfromcookie(string){
 			let cookies=(document.cookie).split(";");
 			//alert(cookies[2]);
@@ -67,6 +51,34 @@
 				return userpassword
 			}
 		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
 		if ('{{alert}}'){
 			alert('{{alert}}')
 		}
@@ -75,9 +87,9 @@
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>поиск задач пользователя</center></div>
+		<div class="taskname"><center>настройки</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
-		<div class="loginbutton" id="loginbutton" ><a href="/physic-in-sesc/login">login|войти</a></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
 	<div class="menuclosed" id="menu">
 		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
@@ -96,20 +108,61 @@
 		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
+	
+    <div class="bod">
 
-	<div class="bod">
-		<div class="task">
-			<div class="taskheader"><center>поиск по имени</center></div>
-	 
-    <div class="tasksubpart">
-    	имя создателя:
-    	<input type="text" id="creatorname" value="undefined guest">
+    <div class="task">
+    	<div class="taskheader">
+        	<center><a href='/fizhub/myaccount/'>{{user.guest_name}}</a></center>
+        </div>
+        &nbsp;&nbsp;&nbsp;&nbsp;<a href='/fizhub/myaccount/'>основная информация аккаунта</a>
+        	<br>&nbsp;&nbsp;&nbsp;&nbsp;о себе: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+        	<form action="{% url 'physicsesc:changeaccountinformation' %}" method='post'>
+        		{% csrf_token %}
+        	<textarea name="guest_information" cols="90" rows="10">{{user.guest_information}}</textarea>
+        	<center><input type="submit" class="solutionbutton" value="сохранить"></center>
+        	</form>
+        	</div>
+        	<div class="task">
+        		<div class="taskheader"><center>смена пароля</center>
+        		</div>
+        	<form action="{% url 'physicsesc:changepassword' %}" method='post'>
+        		{% csrf_token %}
+        		<div class="tasksubpart">при изменении пароля действующие сессии не деактивируются сами</div>
+        		<div class="tasksubpart">
+        	старый пароль: <input name="old_password" placeholder="старый пароль"></div>
+        	<div class="tasksubpart">новый пароль: <input name="new_password" placeholder="новый пароль"></div>
+        	<center><input type="submit" class="solutionbutton" value="сохранить"></center>
+        	</form>
+
+        	
+
+
+        </div>
+        
+        <div class="task">
+        	<div class="taskheader"> <center>незакрытые сессии</center>
+        	</div>
+        	<div class="tasksubpart">
+        	ключ текущей сессии: {{session_key}}
+        </div>
+        	{% for session in sessions %}
+        	<div class="tasksubpart">
+        	ключ сессии: {{session.session_key}}<br>
+        	os: {{session.os}}<br>
+        	computername: {{session.computername}}<br>
+        	HTTP_USER_AGENT: {{session.HTTP_USER_AGENT}}<br>
+        	<a href="/fizhub/settings/closesession/{{session.session_key}}">закрыть эту сессию</a>
+        	</div>
+        	{% endfor %}
+        </div>
+        
     </div>
-    <div class="solutionbutton" onclick="savetask()">сохранить поиск по имени</div>
-<div class="solutionbutton" id="sendtaskbutton"><a id="a" href="">найти по имени</a></div>
-<div class="solutionbutton" id="sendtaskbutton2"><a id="a2" href="">узнать о пользователе</a></div>
+
+    
+
 <script type="text/javascript">
 	openaccountfromcookie("i");
 </script>
-</div>
 </body>
+</html>

@@ -43,7 +43,7 @@
 			//	document.getElementById("creatorname2").remove()
 			//}
 			if (cakes>1) {
-				document.getElementById("loginbutton").innerHTML=username;
+				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
 			if (string=="name"){
 				return username
@@ -79,12 +79,15 @@
 
 			
 		}
+		if ('{{alert}}'){
+			alert('{{alert}}')
+		}
 	</script>
 </head>
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>Fizhub</center></div>
+		<div class="taskname"><center>аккаунт</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
@@ -110,7 +113,10 @@
 
     <div class="task">
     	<div class="taskheader">
-        	<center>{{user.guest_name}}</center>
+        	<center>{{user.guest_name}} 
+        		{% if its_me %}
+        		(это вы)
+        	{% endif %}</center>
         </div>
         	<br>&nbsp;&nbsp;&nbsp;&nbsp;о себе: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         	{{user.guest_information}}
@@ -127,7 +133,7 @@
         <div class="task">
         	<div class="taskheader"> это видите только вы
         	</div>
-        	<a href="/fizhub/settings/">настройки</a>
+        	<a href="/fizhub/settings/">настройки &#9881;</a>
         </div>
         {% endif %}
     </div>
