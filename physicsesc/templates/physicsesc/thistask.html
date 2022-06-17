@@ -69,9 +69,9 @@
 		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
 		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
 		<div class="menusubpart"><a href="">олимпиады</a></div>
-		<div class="menusubpart"><a href="">подписки(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/subscribes/">подписки</a></div>
 		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
-		<div class="menusubpart"><a href="">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/my">мое(no)</a></div>
 		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
 		<br>
 
@@ -87,19 +87,24 @@
         	<div class="taskheader"><center><a href="/fizhub/{{task.id}}">{{task.task_name}}</a></center>
         	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
         	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
+        	<i><a href="/fizhub/class/{{task.class_name}}">{{task.class_name}} класс</a></i>
         	<b>task by <a href="/fizhub/user/{{task.creator_name.guest_name}}">{{task.creator_name.guest_name}}</a></b>
         	<br>
         	условие задачи:<br>{{ task.task_text }}
         	
         	{% if task.picture_href %}
-        	<br><img class="medium" src="{{task.picture_href}}" alt="no image"></div>{% endif %}
+        	<br><img class="medium" src="{{task.picture_href}}" alt="no image">
+
+        {% endif %}
+        <div class="like" ><a href="/fizhub/{{ task.id }}/like" name="like">like &#128077;| {{task.like_count}}</a></div>
+        	<div class="report" ><a href="/fizhub/{{ task.id }}/report" name="report">жалоба &#128078;| {{task.report_count}}</a></div>
+        	</div>
         	
         	<div class="solutionbutton" >
         		<a href="/fizhub/{{ task.id }}/solution" name="open solution">открыть решение</a></div>
         	<div class="solutionbutton" >
         		<a href="/fizhub/{{ task.id }}/makesolution" name="i know solution!">я знаю решение!</a></div>
-        	<div class="like" ><a href="/fizhub/{{ task.id }}/like" name="like">like &#128077;| {{task.like_count}}</a></div>
-        	<div class="report" ><a href="/fizhub/{{ task.id }}/report" name="report">жалоба &#128078;| {{task.report_count}}</a></div>
+        	
 
         </div>
     

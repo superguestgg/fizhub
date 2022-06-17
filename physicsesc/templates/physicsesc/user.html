@@ -97,7 +97,7 @@
 		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
 		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
 		<div class="menusubpart"><a href="">олимпиады</a></div>
-		<div class="menusubpart"><a href="">подписки(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/subscribes/">подписки</a></div>
 		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
 		<div class="menusubpart"><a href="/fizhub/my">мое(no)</a></div>
 		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
@@ -122,20 +122,38 @@
         	{{user.guest_information}}
         	<br>
         	&nbsp;&nbsp;&nbsp;&nbsp;этот пользователь опубликовал <a href="/fizhub/user/{{user.guest_name}}">{{tasks_count}} задач</a>
+        	<br> &nbsp;&nbsp;&nbsp;&nbsp;{{user.subscriber_count}} подписчиков
+        	<br> &nbsp;&nbsp;&nbsp;&nbsp;{{user.subscription_count}} подписок
+        	
         	{% if its_me %}
         		<br><br>
         		&nbsp;&nbsp;&nbsp;&nbsp;информацию выше видят о вас все пользователи
+        	{% else %}
+        	<br><br>
+        		&nbsp;&nbsp;&nbsp;&nbsp;{% if subscription %}
+        			вы подписаны <a href="/fizhub/account/{{user.guest_name}}/unsubscribe">отписаться</a>
+        		{% else %}<a href="/fizhub/account/{{user.guest_name}}/makesubscribe">подписаться</a>
+        		{% endif %}
         	{% endif %}
 
 
         </div>
         {% if its_me %}
         <div class="task">
-        	<div class="taskheader"> это видите только вы
+        	<div class="taskheader"> <center>это видите только вы</center>
         	</div>
         	<a href="/fizhub/settings/">настройки &#9881;</a>
         </div>
+        <div class="task">
+        	<div class="taskheader"> <center>ваши <a href="/fizhub/subscribes/">подписки ({{user.subscription_count}})</a></center>
+        	</div>
+        	{% for subscription in subscriptions %}
+        		<div class="tasksubpart"><a href="/fizhub/account/{{subscription.author_id}}/">{{subscription.author_id}}</a></div>
+        	{% endfor %}
+        </div>
+        
         {% endif %}
+
     </div>
 
     

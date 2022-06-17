@@ -20,10 +20,6 @@
 				document.getElementById("menu").className="menuclosed";
 			}
 		}
-		function savesolution(){
-			text=document.getElementById("textarea").value;
-			document.getElementById("sendsolutionbutton").innerHTML='<a id="a" href="/fizhub/{{task.id}}/makesolution3/'+text+'">отправить решение</a>'
-		}
 		function openaccountfromcookie(string){
 			let cookies=(document.cookie).split(";");
 			//alert(cookies[2]);
@@ -41,11 +37,11 @@
 				}
 			}
 			console.log(username);
-			if (username == "undefined guest"){
-				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
-			} else {
-				document.getElementById("creatorname2").remove()
-			}
+			//if (username == "undefined guest"){
+			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
+			//} else {
+			//	document.getElementById("creatorname2").remove()
+			//}
 			if (cakes>1) {
 				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
@@ -55,6 +51,34 @@
 				return userpassword
 			}
 		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
+
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
 		if ('{{alert}}'){
 			alert('{{alert}}')
 		}
@@ -63,7 +87,7 @@
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>новое решение</center></div>
+		<div class="taskname"><center>{{page_name}}</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
@@ -71,11 +95,12 @@
 		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
 		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
 		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
-		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
-		<div class="menusubpart"><a href="">олимпиады</a></div>
+		<div class="menusubpart"><a href="/fizhub/user"><symbol>&#128270;</symbol>создатели</a></div>
+		<div class="menusubpart"><a href="/fizhub/group/">группы</a></div>
+		<div class="menusubpart"><a href="/fizhub/olympiad/">олимпиады</a></div>
 		<div class="menusubpart"><a href="/fizhub/subscribes/">подписки</a></div>
 		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
-		<div class="menusubpart"><a href="/fizhub/my">мое(no)</a></div>
+		<div class="menusubpart"><a href="/fizhub/my">мое</a></div>
 		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
 		<br>
 
@@ -84,32 +109,40 @@
 		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
-	{% if task %}
+	
+	{% if information %}
     <div class="bod">
     
-        <div class="task"><center><a href="/fizhub/{{ task.id }}/">задача {{ task.id }}</a></center>
+        <div class="task">
+        	<div class="taskheader">
+        		
+        		
+        	{{information.information_header}}
+        
+        	<br><img class="small" src="{{task.picture_href}}">
         	
+        </div>
         	
-{% csrf_token %}
-
-    <div class="taskheader">{{ task.task_text }}</div>
-    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-        	<form action="{% url 'physicsesc:sendsolutionpost' %}" method="post">	
-    	{% csrf_token %}
-    	<div class="tasksubpart" id="creatorname2"></div>
-    	<input type="hidden" name="taskid" value="{{task.id}}">
-        <textarea id="textarea" placeholder="ваше решение на задание номер {{ task.id }}" cols='90' rows='10' name="solutiontext"></textarea>
-<div class="solutionbutton"><a href="/fizhub/{{ task.id }}/">назад</a></div>
-
-
-        <center><input type="submit" name="submit" value="отправить решение" class="solutionbutton"></center>
-    </form>
+        	<div id="id_text" class="textplace" onclick='showtext(id)'>{{information.information_text}}</div>
+        	<script type="text/javascript"> hiddentext("id_text");showtext("id_text");hiddentext("id_text")</script>
+        
+        
+        </div>
     
+
+   
+    </div>
 {% else %}
-    <p>No tasks are available.</p>
+		<div class="task">
+        	<div class="taskheader">
+        	No information are available.
+        </div>
+        
+        	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
+        	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
+        </div>
+    
 {% endif %}
-</div>
-</div>
 <script type="text/javascript">
 	openaccountfromcookie("i");
 </script>

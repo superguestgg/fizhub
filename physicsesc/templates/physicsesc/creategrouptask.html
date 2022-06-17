@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1avlM9VJCfUoHMy_hWdTLV9iGz0IWbup-=w1920-h865-iv1">
 	<title>fizhub</title>
 	{% load static %}
 
@@ -37,11 +37,11 @@
 				}
 			}
 			console.log(username);
-			//if (username == "undefined guest"){
-			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
-			//} else {
-			//	document.getElementById("creatorname2").remove()
-			//}
+			if (username == "undefined guest"){
+				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
+			} else {
+				document.getElementById("creatorname2").remove()
+			}
 			if (cakes>1) {
 				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
 			}
@@ -73,7 +73,7 @@
 		function showtext(textid){
 			
 
-			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).innerHTML=massiveofgroups[massiveofgroupids.indexOf(textid)]
 			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
 
 
@@ -96,78 +96,73 @@
 		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
 		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
 		<div class="menusubpart"><a href="/fizhub/user"><symbol>&#128270;</symbol>создатели</a></div>
-		<div class="menusubpart"><a href="/fizhub/group/">группы</a></div>
+		<div class="menusubpart"><a href="/fizhub/group/"><symbol><svg fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><g clip-rule="evenodd" fill-rule="evenodd"><path d="M6.25 3.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm-1.5 3a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0zm-2.06 5.07c.96-.55 2.22-.82 3.56-.82s2.6.27 3.56.82c.98.56 1.69 1.47 1.69 2.68 0 .7-.28 1.3-.78 1.71-.48.39-1.1.54-1.72.54H3.5c-.61 0-1.24-.15-1.72-.54-.5-.4-.78-1-.78-1.71 0-1.21.71-2.12 1.69-2.68zm.75 1.3c-.65.37-.94.84-.94 1.38 0 .3.1.44.22.54.14.11.4.21.78.21H9c.39 0 .64-.1.78-.21.12-.1.22-.25.22-.54 0-.54-.29-1-.94-1.38-.66-.39-1.65-.62-2.81-.62s-2.15.23-2.81.62zM13.75 3.5a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm-1.5 3a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0z"></path></g><path d="M13.75 12.25c-.23 0-.45.01-.68.03a.75.75 0 1 1-.14-1.49c.27-.03.54-.04.82-.04 1.34 0 2.6.27 3.56.82.98.56 1.69 1.47 1.69 2.68 0 .7-.28 1.3-.78 1.71-.48.39-1.1.54-1.72.54h-3a.75.75 0 0 1 0-1.5h3c.39 0 .64-.1.78-.21.12-.1.22-.25.22-.54 0-.54-.29-1-.94-1.38a5.77 5.77 0 0 0-2.81-.62z"></path></g></svg></symbol>группы</a></div>
 		<div class="menusubpart"><a href="/fizhub/olympiad/">олимпиады</a></div>
 		<div class="menusubpart"><a href="/fizhub/subscribes/">подписки</a></div>
 		<div class="menusubpart"><a href="/fizhub/theme"><symbol>&#8376;</symbol>темы</a></div>
 		<div class="menusubpart"><a href="/fizhub/my">мое</a></div>
-		<div class="menusubpart"><a href="/fizhub/createtask">новая задача</a></div>
+		<div class="menusubpart"><a href="/fizhub/createtask"><symbol>&#10010;</symbol>новая задача</a></div>
 		<br>
 
 		<div class="menusubpart"><a href="/fizhub/useful">полезные файлы</a></div>
-		<div class="menusubpart"><a href="/fizhub/login">войти</a></div>
+		<div class="menusubpart"><a href="/fizhub/login"><symbol>&#128682;</symbol>войти</a></div>
 		<div class="menusubpart"><a href="/anonnetwork/">AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
 	
-	{% if latest_tasks_list %}
     <div class="bod">
-    {% for task in latest_tasks_list %}
-        <div class="task">
-        	<div class="taskheader">
-        		
-        		
-        	<a href="/fizhub/{{ task.id }}/">{{ task.task_name }}</a>
-        	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
-        	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
-        	<i><a href="/fizhub/class/{{task.class_name}}">{{task.class_name}}</a></i>
-        	<b><a href="/fizhub/user/{{task.creator_name.guest_name}}">task by {{task.creator_name.guest_name}}</a></b>
-        	<br><img class="small" src="{{task.picture_href}}">
-        	<div class="reactions_menu">
-        	<like><a href="/fizhub/{{ task.id }}/like" name="like"> &#128077;| {{task.like_count}}</a></like>
-        	<report><a href="/fizhub/{{ task.id }}/report" name="report"> &#128078;| {{task.report_count}}</a></report>
-        </div>
-        </div>
-        	
-        	<div id="{{task.id}}_text" class="textplace" onclick='showtext(id)'>{{task.task_text}}</div>
-        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
-        
-        
-        </div>
-    {% endfor %}
+    	<div class="pagemenu">
+    		<a href="/fizhub/group/"><symbol>&#8962;</symbol>группы</a>&nbsp;&nbsp;&nbsp;
+    		{% if is_author or is_helper %}
+    		<a href="/fizhub/group/{{group.id}}/creategrouptask/"><symbol>&#10010;</symbol>создать задание</a>&nbsp;&nbsp;
+    		<a href="/fizhub/group/{{group.id}}/creategrouptheme/"><symbol>&#10010;</symbol>создать тему</a>&nbsp;&nbsp;&nbsp;
+    		{% endif %}
+    		<a href="/fizhub/group/my/">статистика</a>&nbsp;&nbsp;&nbsp;
+    		<a href="/fizhub/group/{{group.id}}/theme/">темы</a>&nbsp;&nbsp;&nbsp;
+    		{% if is_author %} вы автор
+    		{% elif is_helper %} вы помощник
+    		{% else %} вы ученик
+    		{% endif %}
+    		
 
-    <div class="message">
-        	{% if pages|add:'-1' %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
-     
-     {% endif %}
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
-
-     {% if next_page %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
-     {% else %}
-
-     {% endif %}
-
-
-
-        	<br>
-        		
-     
-        </div>
+    	</div>
+    	<div class="task">   
+    <div class="taskheader"><center>новое задание</center></div>
+    <form action="{% url 'physicsesc:sendgrouptaskpost' %}" method="post" enctype="multipart/form-data">	
+    	{% csrf_token %}
+    <div class="tasksubpart" id="creatorname2"> 
     </div>
-{% else %}
+    	<input type="hidden" name="group_id" value="{{group.id}}">
+    	<div class="tasksubpart">номер задания(id): <input type="number" name="task_id" placeholder="тема задания"></div>
+    	<div class="tasksubpart">тема задания(подгруппа): <select type="text" name="group_theme" placeholder="тема задания">
+    		{% for theme in themes %}
+    			<option value="{{theme.group_theme_name}}">{{theme.group_theme_name}}</option>
+    		{% endfor %}
+    	</select></div>
+    	
+    	
+    	
+    	<div class="tasksubpart">комментарий: <input type="text" name="task_comment" placeholder="what?"></div>
+    	
+
+        
+        
+        
+
+		<center><input type="submit" value="отправить задачу" class="solutionbutton"></center>
+        </form>
+
+    
+    </div>
+
 		<div class="task">
-        	<div class="taskheader">
-        	No tasks are available.
-        </div>
-        {% if page_name %}
-        	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
+        	
+        
         	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
         	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
         </div>
     
-{% endif %}
+
 <script type="text/javascript">
 	openaccountfromcookie("i");
 </script>

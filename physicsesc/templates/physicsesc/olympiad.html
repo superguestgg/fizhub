@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1avlM9VJCfUoHMy_hWdTLV9iGz0IWbup-=w1920-h865-iv1">
 	<title>fizhub</title>
 	{% load static %}
 
@@ -51,14 +51,14 @@
 				return userpassword
 			}
 		}
-		let massiveoftaskids=[]
-		let massiveoftasks=[]
+		let massiveofolympiadids=[]
+		let massiveofolympiads=[]
 		function hiddentext(textid){
 			let text=document.getElementById(textid).innerHTML
 			let minitext=text.substring(0,90)
 			minitext=minitext+"..."
-			massiveoftaskids.push(textid)
-			massiveoftasks.push(text)
+			massiveofolympiadids.push(textid)
+			massiveofolympiads.push(text)
 			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
 			if (text.length>90){
 				document.getElementById(textid).innerHTML="краткое условие: "+minitext
@@ -73,7 +73,7 @@
 		function showtext(textid){
 			
 
-			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).innerHTML=massiveofolympiads[massiveofolympiadids.indexOf(textid)]
 			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
 
 
@@ -95,7 +95,7 @@
 		<div class="menusubpart"><a href="/fizhub/main"><symbol>&#8962;</symbol>главная</a></div>
 		<div class="menusubpart"><a href="/fizhub/new"><symbol>&#8679;</symbol>новое</a></div>
 		<div class="menusubpart"><a href="/fizhub/best"><symbol>&#9734;</symbol>лучшее</a></div>
-		<div class="menusubpart"><a href="/fizhub/user"><symbol>&#128270;</symbol>создатели</a></div>
+		<div class="menusubpart"><a href="/fizhub/user">создатели</a></div>
 		<div class="menusubpart"><a href="/fizhub/group/">группы</a></div>
 		<div class="menusubpart"><a href="/fizhub/olympiad/">олимпиады</a></div>
 		<div class="menusubpart"><a href="/fizhub/subscribes/">подписки</a></div>
@@ -110,27 +110,25 @@
 		<p>&#946; version</p>
 	</div>
 	
-	{% if latest_tasks_list %}
     <div class="bod">
-    {% for task in latest_tasks_list %}
+    	<div class="pagemenu"></div>
+    	{% if olympiad_list %}
+    {% for olympiad in olympiad_list %}
         <div class="task">
         	<div class="taskheader">
-        		
-        		
-        	<a href="/fizhub/{{ task.id }}/">{{ task.task_name }}</a>
-        	<i><a href="/fizhub/theme/{{task.theme1_name}}">{{task.theme1_name}}</a></i>
-        	<i><a href="/fizhub/theme/{{task.theme2_name}}">{{task.theme2_name}}</a></i>
-        	<i><a href="/fizhub/class/{{task.class_name}}">{{task.class_name}}</a></i>
-        	<b><a href="/fizhub/user/{{task.creator_name.guest_name}}">task by {{task.creator_name.guest_name}}</a></b>
-        	<br><img class="small" src="{{task.picture_href}}">
-        	<div class="reactions_menu">
-        	<like><a href="/fizhub/{{ task.id }}/like" name="like"> &#128077;| {{task.like_count}}</a></like>
-        	<report><a href="/fizhub/{{ task.id }}/report" name="report"> &#128078;| {{task.report_count}}</a></report>
-        </div>
+        	<a href="/fizhub/olympiad/{{ olympiad.id }}/">{{ olympiad.olympiad_name }}</a>
+        	<i>{{olympiad.olympiad_part_count}} этапов</i>
+        	<i>{{olympiad.olympiad_participant_count}} участников</i>
+        	<i><a href="/fizhub/class/{{olympiad.class_name}}">{{olympiad.class_name}}</a></i>
+        	<b><a href="/fizhub/account/{{olympiad.olympiad_author.guest_name}}">olympiad by {{olympiad.olympiad_author.guest_name}}</a></b>
+        	<br><img class="small" src="{{olympiad.picture_href}}">
+        	
+        	
+        
         </div>
         	
-        	<div id="{{task.id}}_text" class="textplace" onclick='showtext(id)'>{{task.task_text}}</div>
-        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
+        	<div id="{{olympiad.id}}_text" class="textplace" onclick='showtext(id)'>{{olympiad.olympiad_description}}</div>
+        	<script type="text/javascript"> hiddentext("{{olympiad.id}}_text");showtext("{{olympiad.id}}_text");hiddentext("{{olympiad.id}}_text")</script>
         
         
         </div>
@@ -159,7 +157,7 @@
 {% else %}
 		<div class="task">
         	<div class="taskheader">
-        	No tasks are available.
+        	No olympiads are available.
         </div>
         {% if page_name %}
         	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
