@@ -5,7 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote
+from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote, Olympiad, Olympiad_part, Olympiad_task, Group, Group_student, Group_author_helper, Group_theme, Group_task
 from django.template import loader
 from django.urls import reverse
 import random
@@ -31,8 +31,8 @@ def main(request):
     return main_page(request,1)
 def main_page(request,page_number):
     page_number = max(1,page_number)
-    latest_tasks_list = Task.objects.all()[(page_number-1)*50:page_number*50]
-    page_count = len(Task.objects.all())//50+1
+    latest_tasks_list = Task.objects.filter(task_type_private=False)[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
@@ -49,8 +49,8 @@ def new(request):
     return new_page(request, 1)
 def new_page(request, page_number):
     page_number = max(1, page_number)
-    latest_tasks_list = Task.objects.order_by('-pub_date')[(page_number-1)*50:page_number*50]
-    page_count = len(Task.objects.all())//50+1
+    latest_tasks_list = Task.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
@@ -66,7 +66,24 @@ def best(request):
     return best_page(request, 1)
 def best_page(request, page_number):
     page_number = max(1, page_number)
-    latest_tasks_list = (Task.objects.order_by('like')[::-1])[(page_number-1)*50:page_number*50]
+    latest_tasks_list = (Task.objects.filter(task_type_private=False).order_by('-like_count'))[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.filter(task_type_private=False))//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/fizhub.html')
+    context = {
+        'latest_tasks_list': latest_tasks_list,
+        'page_name': 'best',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    return HttpResponse(template.render(context, request))
+def my(request):
+    return my_page(request,1)
+def my_page(request, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    latest_tasks_list = (Task.objects.filter(creator_name=user))[(page_number-1)*50:page_number*50]
     page_count = len(Task.objects.all())//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
@@ -83,7 +100,7 @@ def theme(request):
 def themepost(request):
     theme1_name = request.POST['theme1']
     theme2_name = request.POST['theme2']
-    latest_tasks_list = Task.objects.filter(theme1_name=theme1_name)
+    latest_tasks_list = Task.objects.filter(task_type_private=False).filter(theme1_name=theme1_name)
     if theme2_name!="No theme":
         latest_tasks_list = latest_tasks_list.filter(theme2_name=theme2_name)
     template = loader.get_template('physicsesc/fizhub.html')
@@ -92,14 +109,21 @@ def themepost(request):
     }
     return HttpResponse(template.render(context, request))
 def themefind(request,theme_name1):
-    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1)[:40]
+    latest_tasks_list = Task.objects.filter(task_type_private=False).filter(theme1_name=theme_name1)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
     }
     return HttpResponse(template.render(context, request))
 def themefind2(request,theme_name1,theme_name2):
-    latest_tasks_list = Task.objects.filter(theme1_name=theme_name1, theme2_name=theme_name2)[:40]
+    latest_tasks_list = Task.objects.filter(task_type_private=False).filter(theme1_name=theme_name1, theme2_name=theme_name2)[:40]
+    template = loader.get_template('physicsesc/fizhub.html')
+    context = {
+        'latest_tasks_list': latest_tasks_list,
+    }
+    return HttpResponse(template.render(context, request))
+def classfind(request,class_name):
+    latest_tasks_list = Task.objects.filter(task_type_private=False).filter(class_name=class_name)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
@@ -110,7 +134,7 @@ def user(request):
     return render(request, 'physicsesc/userfind.html')
 def userfind(request,user_name):
     try:
-        latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.all()
+        latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.filter(task_type_private=False)
 
         page_number = 1
         page_count = len(latest_tasks_list) // 50 + 1
@@ -128,7 +152,7 @@ def userfind(request,user_name):
         return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
 def userfind_page(request,user_name):
     try:
-        latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.all()
+        latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.filter(task_type_private=False)
 
         page_number = 1
         page_count = len(latest_tasks_list) // 50 + 1
@@ -315,7 +339,7 @@ def solution(request, task_id):
 def solution_vote(request, task_id, solution_id, vote_type):
     try:
         task = Task.objects.get(pk=task_id)
-        solution_set = Solution.objects.filter(task=task.id)[:100]
+        solution_set = Solution.objects.filter(task=task.id).order_by('-votes_count', 'votes_against_count')[:100]
         solution = Solution.objects.get(task=task.id, id=solution_id)
         try:
             user_name = su_cut(request.COOKIES['user_name'], 40)
@@ -441,15 +465,28 @@ def sendtaskpost(request):
             user = Guest.objects.get(guest_name=user_name)
 
         task_name=su_cut(request.POST['taskheader'], 50)
-        task_text=su_cut(request.POST['textarea'], 1500)
+        task_text=su_cut(request.POST['textarea'], 3000)
         theme1_name = su_cut(request.POST['theme1'], 30)
         theme2_name = su_cut(request.POST['theme2'], 30)
+        class_name = su_cut(str(request.POST['class_name']), 10)
+        if class_name.isdigit()==False:
+            class_name=11
+        class_name=int(class_name)
+        class_name=min(max(class_name, 7), 100)
+        try:
+            if request.POST['task_type_private']:
+                task_type_private = True
+            else:
+                task_type_private = False
+        except:
+            task_type_private = False
         picture_url=su_cut(request.POST['pictureurl'], 100)
         if len(task_text)>=10 and len(task_name)>2 and task_name.count(" ")<len(task_name):
             if user.guest_rights==0:
-                user.task_set.create(task_name=task_name,task_text=task_text, pub_date=timezone.now(),picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                user.task_set.create(task_name=task_name,task_text=task_text, pub_date=timezone.now(),picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name, class_name=class_name, task_type_private=task_type_private)
+                task_id=user.task_set.get(task_name=task_name).id
                 #taskid= user.task_set.all()[-1:-2]
-                return HttpResponse('succesful <br> <a href="/physic-in-sesc/new">last tasks</a>')
+                return HttpResponse('succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/'+str(task_id)+'">your task</a>')
             elif user.guest_rights>=1:
                 try:
                     userfile = request.FILES['file']
@@ -458,20 +495,30 @@ def sendtaskpost(request):
                         fs = FileSystemStorage()
                         filename = fs.save(user_name+"_"+userfile.name, userfile)
                         uploaded_file_url = fs.url(filename)
-                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(),picture_href=uploaded_file_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(),picture_href=uploaded_file_url, theme1_name=theme1_name, theme2_name=theme2_name, class_name=class_name, task_type_private=task_type_private)
                         user.guest_rights=user.guest_rights-1
+                        task_id = user.task_set.get(task_name=task_name).id
                         user.save()
-                        return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+                        return HttpResponse(
+                            'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/' + str(
+                                task_id) + '">your task</a>')
                     elif  filesize>=3000000:
                         return HttpResponse('picture size too big<a href="/physic-in-sesc/main">main page</a>')
                     elif filesize>0:
                         return HttpResponse('picture size not enough big<a href="/physic-in-sesc/main">main page</a>')
                     else:
-                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
-                        return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+
+                        user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name, class_name=class_name, task_type_private=task_type_private)
+                        task_id = user.task_set.get(task_name=task_name).id
+                        return HttpResponse(
+                            'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/' + str(
+                                task_id) + '">your task</a>')
                 except:
-                    user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
-                    return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+                    user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name, class_name=class_name, task_type_private=task_type_private)
+                    task_id = user.task_set.get(task_name=task_name).id
+                    return HttpResponse(
+                        'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/' + str(
+                            task_id) + '">your task</a>')
 
         return HttpResponse("password incorrect or недостаточная длина условия или названия задачи")
     except:
@@ -523,7 +570,7 @@ def sendusefulfile(request):
     except:
         return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
 
-def account(request,user_name):
+def account(request, user_name):
     user_name_request = user_name
     user_request = Guest.objects.get(guest_name=user_name_request)
     try:
@@ -533,24 +580,129 @@ def account(request,user_name):
     except:
         user = '1'
 
-
+    if len(user.subscription_set.filter(author_id=user_request.id))>0:
+        subscription = True
+    else:
+        subscription = False
     template = loader.get_template('physicsesc/user.html')
     tasks_count = len(user_request.task_set.all())
     context = {
         'tasks_count': tasks_count,
         'user': user_request,
-
+        'subscription': subscription,
     }
     return HttpResponse(template.render(context,request))
+def makesubscribe(request, user_name):
+    user_name_request = user_name
+    user_request = Guest.objects.get(guest_name=user_name_request)
+    try:
+        user = openaccount(request)
+        if user.id == user_request.id:
+            return myaccount(request)
+    except:
+        user = '1'
+    if user.guest_name == 'undefined guest':
+        return HttpResponse('войдите сначала в свой аккаунт')
+    template = loader.get_template('physicsesc/user.html')
+    tasks_count = len(user_request.task_set.all())
+    if len(user.subscription_set.filter(author_id=user_request.id))==0:
+        user.subscription_set.create(author_id=user_request.id)
+        user.subscription_count = user.subscription_count + 1
+        user.save()
+        user_request.subscriber_count = user_request.subscriber_count + 1
+        user_request.save()
+        context = {
+            'tasks_count': tasks_count,
+            'user': user_request,
+            'subscription': True,
+        }
+    else:
+        context = {
+            'tasks_count': tasks_count,
+            'user': user_request,
+            'alert': 'вы уже подписаны на этого пользователя',
+            'subscription': True,
+
+        }
+    return HttpResponse(template.render(context,request))
+def unsubscribe(request, user_name):
+    user_name_request = user_name
+    user_request = Guest.objects.get(guest_name=user_name_request)
+    try:
+        user = openaccount(request)
+        if user.id == user_request.id:
+            return myaccount(request)
+    except:
+        user = '1'
+    if user.guest_name == 'undefined guest':
+        return HttpResponse('войдите сначала в свой аккаунт')
+    template = loader.get_template('physicsesc/user.html')
+    tasks_count = len(user_request.task_set.all())
+    if len(user.subscription_set.filter(author_id=user_request.id))>0:
+        subscription=user.subscription_set.get(author_id=user_request.id)
+        subscription.delete()
+        user.subscription_count = user.subscription_count - 1
+        user.save()
+        user_request.subscriber_count = user_request.subscriber_count - 1
+        user_request.save()
+        context = {
+            'tasks_count': tasks_count,
+            'user': user_request,
+            'subscription': False,
+
+        }
+    else:
+        context = {
+            'tasks_count': tasks_count,
+            'user': user_request,
+            'alert': 'вы не подписаны на этого пользователя',
+            'subscription': False,
+
+        }
+    return HttpResponse(template.render(context,request))
+def subscribes(request):
+    return subscribes_page(request,1)
+def subscribes_page(request,page_number):
+    if True:
+        page_number = max(1, page_number)
+        user = openaccount(request)
+        if user.guest_name=='undefined guest':
+            return HttpResponse('войдите сначала в свой аккаунт')
+        template = loader.get_template('physicsesc/subscribes.html')
+
+        subscriptions = user.subscription_set.all()[50*(page_number-1):50*page_number]
+        page_count = len(subscriptions) // 50 + 1
+        next_page = page_number < page_count
+        authors_id_list = []
+        for subscription in subscriptions:
+            authors_id_list.append(subscription.author_id)
+        authors_list = Guest.objects.filter(id__in = authors_id_list)
+        context = {
+            'authors_list': authors_list,
+            'pages': page_number,
+            'next_page': next_page,
+            'page_name': 'subscribes',
+            'pagescount': page_count,
+        }
+
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse('сессия недействительна')
+
 def myaccount(request):
     try:
         user = openaccount(request)
         template = loader.get_template('physicsesc/user.html')
         tasks_count = len(user.task_set.all())
+        subscriptions = user.subscription_set.all()[:100]
+        for subscription in subscriptions:
+
+            subscription.author_id = Guest.objects.get(id=subscription.author_id).guest_name
         context = {
             'tasks_count': tasks_count,
             'user': user,
-            'its_me': True
+            'its_me': True,
+            'subscriptions': subscriptions,
 
         }
         return HttpResponse(template.render(context,request))
@@ -622,6 +774,492 @@ def changepassword(request):
         return settings(request)
     except:
         return HttpResponse('сессия недействительна')
+
+def olympiad(request):
+    return olympiad_page(request, 1)
+def olympiad_page(request, page_number):
+    user = openaccount(request)
+    page_number = max(1,page_number)
+    olympiad_list = Olympiad.objects.all()[(page_number-1)*50:page_number*50]
+    page_count = len(olympiad_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/olympiad.html')
+    context = {
+        'olympiad_list': olympiad_list,
+        'page_name': 'olympiad',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+
+
+def all_group(request):
+    return all_group_page(request, 1)
+def all_group_page(request, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    group_list = Group.objects.filter(group_private_type=False)[(page_number-1)*50:page_number*50]
+    page_count = len(group_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/group.html')
+    context = {
+        'group_list': group_list,
+        'page_name': 'group',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+
+
+def new_group(request):
+    return new_group_page(request, 1)
+def new_group_page(request, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    group_list = Group.objects.filter(group_private_type=False)[(page_number-1)*50:page_number*50:-1]
+    page_count = len(group_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/group.html')
+    context = {
+        'group_list': group_list,
+        'page_name': 'group/new',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def popular_group(request):
+    return popular_group_page(request, 1)
+def popular_group_page(request, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    group_list = Group.objects.filter(group_private_type=False).order_by('-student_count')[(page_number-1)*50:page_number*50]
+    page_count = len(group_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/group.html')
+    context = {
+        'group_list': group_list,
+        'page_name': 'group/popular',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def creategroup(request):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    template = loader.get_template('physicsesc/creategroup.html')
+    context = {
+        'page_name': 'creategroup',
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def sendgrouppost(request):
+    if True:
+        user=openaccount(request)
+        t=0
+        if user.guest_name=="undefined guest":
+            return HttpResponse('сначала войдите в свой аккаунт')
+        user_name=user.guest_name
+        group_name=su_cut(request.POST['taskheader'], 50)
+        group_description=su_cut(request.POST['textarea'], 3000)
+        group_password = su_cut(request.POST['taskheader'], 50)
+        try:
+            if request.POST['group_type_password']:
+                group_type_password = True
+            else:
+                group_type_password = False
+        except:
+            group_type_password = False
+        try:
+            if request.POST['group_private_type']:
+                group_private_type = True
+            else:
+                group_private_type = False
+        except:
+            group_private_type = False
+        try:
+            if request.POST['group_application_type']:
+                group_application_type = True
+            else:
+                group_application_type = False
+        except:
+            group_application_type = False
+        picture_url=su_cut(request.POST['pictureurl'], 100)
+        if len(group_description)>=10 and len(group_name)>2 and group_name.count(" ")<len(group_name):
+            if user.guest_rights==0:
+                user.group_set.create(group_name=group_name,group_description=group_description, picture_href=picture_url, group_type_password=group_type_password, group_password=group_password, group_private_type=group_private_type, group_application_type=group_application_type)
+                group_id=user.group_set.get(group_name=group_name).id
+                group = Group.objects.get(id=group_id)
+                group.group_theme_set.create(group_theme_name='main')
+                #taskid= user.task_set.all()[-1:-2]
+                return HttpResponse('succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/group/'+str(group_id)+'">your group</a>')
+            elif user.guest_rights>=1:
+                try:
+                    userfile = request.FILES['file']
+                    filesize= userfile.size
+                    if filesize>100 and filesize<3000000:
+                        fs = FileSystemStorage()
+                        filename = fs.save(user_name+"_"+userfile.name, userfile)
+                        uploaded_file_url = fs.url(filename)
+                        user.group_set.create(group_name=group_name, group_description=group_description, picture_href=uploaded_file_url, group_type_password=group_type_password, group_password=group_password, group_private_type=group_private_type, group_application_type=group_application_type)
+                        user.guest_rights=user.guest_rights-1
+                        group_id = user.group_set.get(group_name=group_name).id
+                        group = Group.objects.get(id=group_id)
+                        group.group_theme_set.create(group_theme_name='main')
+                        user.save()
+                        return HttpResponse(
+                            'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/group/' + str(
+                                group_id) + '">your group</a>')
+                    elif  filesize>=3000000:
+                        return HttpResponse('picture size too big<a href="/physic-in-sesc/main">main page</a>')
+                    elif filesize>0:
+                        return HttpResponse('picture size not enough big<a href="/physic-in-sesc/main">main page</a>')
+                    else:
+
+                        user.group_set.create(group_name=group_name, group_description=group_description, picture_href=picture_url, group_type_password=group_type_password, group_password=group_password, group_private_type=group_private_type, group_application_type=group_application_type)
+                        group_id = user.group_set.get(group_name=group_name).id
+                        group = Group.objects.get(id=group_id)
+                        group.group_theme_set.create(group_theme_name='main')
+                        return HttpResponse(
+                            'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/group/' + str(
+                                group_id) + '">your group</a>')
+                except:
+                    user.group_set.create(group_name=group_name, group_description=group_description, picture_href=picture_url, group_type_password=group_type_password, group_password=group_password, group_private_type=group_private_type, group_application_type=group_application_type)
+                    group_id = user.group_set.get(group_name=group_name).id
+                    group = Group.objects.get(id=group_id)
+                    group.group_theme_set.create(group_theme_name='main')
+                    return HttpResponse(
+                        'succesful <br> <a href="/physic-in-sesc/new">last tasks</a><br><a href="/fizhub/group/' + str(
+                            group_id) + '">your group</a>')
+
+        return HttpResponse("password incorrect or недостаточная длина условия или названия задачи")
+    else:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+def groupfind(request):
+    return HttpResponse('later.........')
+def my_group(request):
+    return my_group_page(request, 1)
+def my_group_page(request, page_number):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    page_number = max(1, page_number)
+    group_list = Group.objects.filter(group_private_type=False, author=user)[(page_number-1)*50:page_number*50]
+    page_count = len(group_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/group.html')
+    context = {
+        'group_list': group_list,
+        'page_name': 'group/my',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+
+def student_group(request):
+    return student_group_page(request, 1)
+def student_group_page(request, page_number):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    page_number = max(1, page_number)
+    group_student_list = user.group_student_set.filter(application_type=True)
+    group_id_list = []
+    for group_student in group_student_list:
+        group_id_list.append(group_student.group.id)
+    group_list = Group.objects.filter(id__in=group_id_list)[(page_number-1)*50:page_number*50]
+    page_count = len(group_list)//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/group.html')
+    context = {
+        'group_list': group_list,
+        'page_name': 'group/student',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+
+def thisgroup(request, group_id):
+    return group_page(request, group_id, 1)
+def group_page(request, group_id, page_number):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    page_number=max(1, page_number)
+    group = Group.objects.get(id=group_id)
+    can_open = 0
+    is_author = False
+    is_helper = False
+    if group.author == user:
+        can_open = 2
+        is_author = True
+
+    elif len(group.group_author_helper_set.filter(author_helper=user))>0:
+        if group.group_author_helper_set.filter(author_helper=user).application_type == True:
+            can_open = 2
+            is_helper = True
+
+        else:
+            can_open = 1
+            return HttpResponse('bad')
+    elif len(group.group_student_set.filter(student=user))>0:
+        if group.group_student_set.get(student=user).application_type == True:
+            can_open = 2
+
+        else:
+            can_open = 1
+            return HttpResponse('bad')
+    if can_open == 2:
+        group_task_list = group.group_task_set.all()
+        group_task_list_id = []
+        for group_task in group_task_list:
+            group_task_list_id.append(group_task.task.id)
+        task_list = Task.objects.filter(id__in=group_task_list_id)
+        page_count = len(task_list)//50+1
+        task_list = task_list[50*(page_number-1):50*page_number]
+        next_page = (page_count > page_number)
+        template = loader.get_template('physicsesc/thisgroup.html')
+        context = {
+            'is_author': is_author,
+            'is_helper': is_helper,
+            'group': group,
+            'task_list': task_list,
+            'page_name': 'group/'+str(group.id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page
+        }
+        return HttpResponse(template.render(context,request))
+    elif can_open==0:
+        return creategroupapplication(request, group_id)
+def creategrouptask(request, group_id):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+
+
+    group = Group.objects.get(id=group_id)
+    can_open = 0
+    is_author = False
+    is_helper = False
+    if group.author == user:
+        can_open = 2
+        is_author = True
+
+    elif len(group.group_author_helper_set.filter(author_helper=user)) > 0:
+        if group.group_author_helper_set.filter(author_helper=user).application_type == True:
+            can_open = 2
+            is_helper = True
+
+        else:
+            can_open = 1
+            return HttpResponse('bad')
+    elif len(group.group_student_set.filter(student=user)) > 0:
+        if group.group_student_set.get(student=user).application_type == True:
+            can_open = 2
+
+        else:
+            can_open = 1
+            return HttpResponse('bad')
+    if can_open == 2 and (is_helper or is_author):
+
+        themes = group.group_theme_set.all()
+        template = loader.get_template('physicsesc/creategrouptask.html')
+        context = {
+            'themes': themes,
+            'is_author': is_author,
+            'is_helper': is_helper,
+            'group': group,
+            'page_name': 'добавить задание'
+        }
+
+        return HttpResponse(template.render(context, request))
+    elif can_open == 2:
+        return HttpResponse('ученик не может добавлять задачи')
+    elif can_open==0:
+        return creategroupapplication(request, group_id)
+def sendgrouptaskpost(request):
+    if True:
+        user = openaccount(request)
+        t = 0
+        if user.guest_name == "undefined guest":
+            return HttpResponse('сначала войдите в свой аккаунт')
+        user_name = user.guest_name
+        task_id = su_cut(str(request.POST['task_id']), 10)
+        group_id = su_cut(request.POST['group_id'], 10)
+        if task_id.isdigit()==False:
+            return HttpResponse('не в это раз, хакер')
+        if group_id.isdigit()==False:
+            return HttpResponse('не в это раз, хакер')
+        task_id = int(task_id)
+        group_id = int(group_id)
+        group = Group.objects.get(id=group_id)
+        task = Task.objects.get(id=task_id)
+
+        task_comment = su_cut(request.POST['task_comment'], 3000)
+        group_theme = su_cut(request.POST['group_theme'], 50)
+
+        theme = group.group_theme_set.get(group_theme_name=group_theme)
+        theme.task_count = theme.task_count+1
+        group.group_task_set.create(group_theme=theme, task_comment=task_comment, task=task)
+
+        return group_page(request, group_id, 1)
+    else:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+def grouptheme(request,group_id):
+    return grouptheme_page(request,group_id,1)
+def grouptheme_page(request, group_id, page_number):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    page_number=max(1, page_number)
+    group = Group.objects.get(id=group_id)
+    opengroup1 = opengroup(user, group_id)
+    if opengroup1 in ['author', 'helper', 'student']:
+        group_theme_list = group.group_theme_set.all()
+        theme_list = group_theme_list
+        page_count = len(theme_list)//50+1
+        theme_list = theme_list[50*(page_number-1):50*page_number]
+        next_page = (page_count > page_number)
+        template = loader.get_template('physicsesc/thisgrouptheme.html')
+        context = {
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'theme_list': theme_list,
+            'page_name': 'group/'+str(group.id)+'/theme',
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page
+        }
+        return HttpResponse(template.render(context,request))
+    elif opengroup1=='no':
+        return creategroupapplication(request, group_id)
+
+def creategrouptheme(request, group_id):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+
+
+    group = Group.objects.get(id=group_id)
+    opengroup1 = opengroup(user, group_id)
+    if opengroup1 in ['author', 'helper']:
+
+        themes = group.group_theme_set.all()
+        template = loader.get_template('physicsesc/creategrouptheme.html')
+        context = {
+            'themes': themes,
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'page_name': 'добавить тему'
+        }
+
+        return HttpResponse(template.render(context, request))
+    elif opengroup1 == 'student':
+        return HttpResponse('ученик не может добавлять темы')
+    elif opengroup1=='no':
+        return creategroupapplication(request, group_id)
+def sendgroupthemepost(request):
+    if True:
+        user = openaccount(request)
+        t = 0
+        if user.guest_name == "undefined guest":
+            return HttpResponse('сначала войдите в свой аккаунт')
+        user_name = user.guest_name
+        group_theme_name = su_cut(str(request.POST['group_theme_name']), 50)
+        group_theme_description = su_cut(request.POST['group_theme_description'], 3000)
+        group_id = su_cut(request.POST['group_id'], 10)
+        if group_id.isdigit()==False:
+            return HttpResponse('не в это раз, хакер')
+        group_id = int(group_id)
+        if opengroup(user, group_id) in ['author', 'helper']:
+            group = Group.objects.get(id=group_id)
+            if len(group.group_theme_set.filter(group_theme_name=group_theme_name))>0:
+                return HttpResponse('такоая тема уже существует')
+            group.group_theme_set.create(group_theme_name=group_theme_name, group_theme_description=group_theme_description)
+            group.group_theme_count = group.group_theme_count + 1
+            group.save()
+            return group_page(request, group_id, 1)
+        else:
+            return HttpResponse('у вас нет прав')
+    else:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
+
+def creategroupapplication(request, group_id):
+    user = openaccount(request)
+    group = Group.objects.get(id=group_id)
+    template = loader.get_template('creategroupapplication')
+    context = {
+        'group': group,
+
+
+    }
+    return HttpResponse(template.render(context, request))
+def sendgroupapplicationpost(request):
+    user = openaccount(request)
+    t = 0
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    user_name = user.guest_name
+    group_id = su_cut(request.POST['group_id'], 10)
+    if group_id.isdigit() == False:
+        return HttpResponse('не в это раз, хакер')
+    group_id = int(group_id)
+    group = Group.objects.get(id=group_id)
+    if len(group.group_student_set.filter(student=user))>0:
+        return HttpResponse('вы уже подали заявку в эту группу')
+    if group.group_type_password == True:
+        group_password = su_cut(request.POST['group_password'], 50)
+        if group_password == group.group_password:
+            t=1
+        else:
+            return HttpResponse('пароль неверный, ........')
+    else:
+        t=1
+    if t==1:
+        if group.group_application_type==False:
+            group.group_student_set.create(student=user, application_type=True)
+            group.student_count = group.student_count + 1
+            group.save()
+        elif group.group_application_type==True:
+            group.group_student_set.create(student=user, application_type=False)
+            return HttpResponse('заявка успешно создана')
+    return group_page(request, group_id, 1)
+
+
+def opengroup(user, group_id):
+    group = Group.objects.get(id=group_id)
+    can_open = 'no'
+
+    if group.author == user:
+        can_open = 'author'
+    elif len(group.group_author_helper_set.filter(author_helper=user)) > 0:
+        if group.group_author_helper_set.filter(author_helper=user).application_type == True:
+            can_open = 'helper'
+        else:
+            can_open = 'application'
+    elif len(group.group_student_set.filter(student=user)) > 0:
+        if group.group_student_set.get(student=user).application_type == True:
+            can_open = 'student'
+        else:
+            can_open = 'application'
+    return can_open
+
+
 def openaccount(request):
     try:
         user_name = su_cut(request.COOKIES['user_name'], 40)
@@ -635,3 +1273,4 @@ def openaccount(request):
     return user
 def antiddos(request):
     print(request.META.HTTP_COOKIE)
+
