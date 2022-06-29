@@ -144,39 +144,69 @@
     		
 
     	</div>
-    	{% if theme_list %}
-    {% for theme in theme_list %}
+    	{% if participant_helper %}
         <div class="task">
         	<div class="taskheader">
         		
         		
-        	<a href="/fizhub/group/{{group.id}}/theme/{{ theme.group_theme_name }}/">{{ theme.group_theme_name }}</a>
-        	
-        	
-        	<b>{{theme.task_count}} заданий</b>
+        	помощники
         	
         	
         </div>
-        	
-        	<div id="{{task.id}}_text" class="textplace" onclick='showtext(id)'>{{theme.group_theme_description}}</div>
-        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
-        
-        
-        </div>
-    {% endfor %}
+        	{% for application_helper in participant_helper %}
+        <div class='tasksubpart'>
+        	<a href="/fizhub/account/{{application_helper.author_helper.guest_name}}">{{application_helper.author_helper.guest_name}}</a>
 
-    <div class="message">
-        	{% if pages|add:'-1' %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
+        	<div class="solutionbutton"><a href="/fizhub/group/{{group.id}}/groupparticipant/{{application_helper.author_helper.guest_name}}/helperdelete">уволить</a></div>
+        	</div>
+        	{% endfor %}
+        </div>
+    
+
+           	{% else %}
+		<div class="task">
+        	<div class="taskheader">
+        	нет помощников.
+        </div>
+        
+        	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
+        	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
+        </div>
+    
+
+        
+        	
+     
      
      {% endif %}
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
+     
+     	{% if participant_student %}
+        <div class="task">
+        	<div class="taskheader">
+        		
+        		
+        	ученики
+        	
+        	
+        </div>
+        	{% for application_student in participant_student %}
+        <div class='tasksubpart'>
+        	<a href="/fizhub/account/{{application_student.student.guest_name}}">{{application_student.student.guest_name}}</a>
 
-     {% if next_page %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
-     {% else %}
+        	<div class="solutionbutton"><a href="/fizhub/group/{{group.id}}/groupparticipant/{{application_student.student.guest_name}}/studentdelete">удалить</a></div>
+        </div>
+        	
+        
+        {% endfor %}
+        </div>
+    
 
-     {% endif %}
+    
+        	
+     
+     
+     
+    
 
 
 
@@ -185,18 +215,22 @@
      
         </div>
     </div>
-{% else %}
+           	{% else %}
 		<div class="task">
         	<div class="taskheader">
-        	No themes are available.
+        	нет учеников.
         </div>
-        {% if page_name %}
-        	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
+        
         	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
         	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
         </div>
     
-{% endif %}
+
+        
+        	
+     
+     
+     {% endif %}
 <script type="text/javascript">
 	openaccountfromcookie("i");
 </script>

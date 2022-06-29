@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/11uFEgBLJrQad2thw05g3GgJxyKm7YZ8f=w1920-h865-iv3">
+	<title>view</title>
+	{% load static %}
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<style type="text/css">
+		body{
+	background-image: linear-gradient(to top left, #764, #def);
+}
+
+		.slaidopened{
+
+			position: fixed;
+			top: 0px;
+			left: 0px;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		.slaidclosedleft{
+			transform: rotate(0deg);
+			position: fixed;
+			top: 0px;
+			left: -100%;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		.slaidclosedright{
+			transform: rotate(45deg);
+			position: fixed;
+			top: 0px;
+			left: 200%;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		.slaidclosedright2{
+			transform: rotate(0deg);
+			position: fixed;
+			top: -200%;
+			left: 0%;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		.slaidclosedright3{
+			transform: rotate(0deg);
+			position: fixed;
+			top: 100%;
+			left: 0%;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		.slaidclosedright4{
+			transform: rotate(0deg);
+			position: fixed;
+			top: 0px;
+			left: 200%;
+			height: 100%;
+			width: 100%;
+			background-image: linear-gradient(to top left, #764, #def);
+			color: #000;
+			font-size: 20px;
+			padding: 30px;
+			padding-top: 50px;
+			transition: 0.3s ease-in-out;
+
+		}
+		h1{
+		font-size: 40px;
+		color: #432;
+		text-shadow: 10px 10px 3px #543;
+		margin: 40px;
+		}
+		p{
+		font-size: 25px;
+		color: #543;
+		margin: 10px;
+		}
+		.nextbutton{
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+	border: 2px solid #543;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 24px;
+	background-color: #ba9;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 8px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+	text-align: center;
+	color: #432;
+	}
+ 	.nextbutton:hover{
+	border: 2px solid #543;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 24px;
+	background-color: #987;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 10px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+	text-align: center;
+	color: #432;
+		}
+	.backbutton{
+	position: fixed;
+	bottom: 10px;
+	left: 10px;
+	border: 2px solid #543;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 24px;
+	background-color: #ba9;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 8px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+	text-align: center;
+	color: #432;
+	}
+ 	.backbutton:hover{
+	border: 2px solid #543;
+	border-radius: 5px;
+	padding: 5px;
+	font-size: 24px;
+	background-color: #987;
+	margin: auto;
+	width: 300px;
+	max-width: calc(100% - 10px);
+	transition: 0.3s ease-in-out;
+	margin-top: 5px;
+	text-align: center;
+	color: #432;
+		}
+
+
+
+	</style>
+	<script type="text/javascript">
+		now=0;
+		
+		function next(){
+			document.getElementById(now).className="slaidclosedleft";
+			now=now+1;
+			document.getElementById(now).className="slaidopened"
+		}
+		function back(){
+			document.getElementById(now).className="slaidclosedright";
+			now=now-1;
+			document.getElementById(now).className="slaidopened"
+		}
+
+	</script>
+	<title>Presentation</title>
+</head>
+<body>
+	<div class="slaidopened" id="0">
+		<h1><center>{{article.article_name}}</center></h1>
+		<p>{{article.article_description}}</p>
+	<div class="nextbutton" onclick="next()">следующий слайд</div>
+	
+	</div>
+	{% if article_pages %}
+{% for article_page in article_pages %}
+	<div class="slaidclosedright2" id="noid">
+		<h1><center>{{article_page.article_page_name}} </center></h1>
+		<p>{{article_page.article_page_text}}</p>
+	<div class="backbutton" onclick="back()"> &lArr; предыдущий слайд</div>
+	<div class="nextbutton" onclick="next()"> следующий слайд &rArr; </div>
+	
+	</div>
+{% endfor %}
+{% else %}
+	<div class="slaidclosedright2" id="1">
+		<h1><center> ошибка </center></h1>
+		<p>здесь нет страниц<br>так уж вышло</p>
+	<div class="backbutton" onclick="back()"> &lArr; предыдущий слайд</div>
+	<div class="nextbutton" onclick="next()"> следующий слайд &rArr; </div>
+	</div>
+{% endif%}
+
+	<div class="slaidclosedright2" id="{{article.article_page_count|add:'+1'}}">
+		<h1><center>все!!!</center></h1>
+		<p>всем спасибо за внимание</p>
+
+	
+	<div class="backbutton" onclick="back()">предыдущий слайд</div>
+	</div>
+	<script type="text/javascript">
+		
+
+		lastpage = 0;
+		for (i=0;i<1000;i++){
+			lastpage = lastpage + 1;
+			console.log(lastpage)
+			document.getElementById("noid").id=lastpage;
+		}
+	</script>
+</body>
+</html>

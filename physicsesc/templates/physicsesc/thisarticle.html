@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/11uFEgBLJrQad2thw05g3GgJxyKm7YZ8f=w1920-h865-iv3">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
 	{% load static %}
 
@@ -51,34 +51,6 @@
 				return userpassword
 			}
 		}
-		let massiveoftaskids=[]
-		let massiveoftasks=[]
-		function hiddentext(textid){
-			let text=document.getElementById(textid).innerHTML
-			let minitext=text.substring(0,90)
-			minitext=minitext+"..."
-			massiveoftaskids.push(textid)
-			massiveoftasks.push(text)
-			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
-			if (text.length>90){
-				document.getElementById(textid).innerHTML="краткое условие: "+minitext
-				
-
-			} else {
-				document.getElementById(textid).innerHTML=text		
-					
-			}
-
-		}
-		function showtext(textid){
-			
-
-			document.getElementById(textid).innerHTML=massiveofgroups[massiveofgroupids.indexOf(textid)]
-			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
-
-
-			
-		}
 		if ('{{alert}}'){
 			alert('{{alert}}')
 		}
@@ -87,7 +59,7 @@
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>{{page_name}}</center></div>
+		<div class="taskname"><center>{{task.id}}</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/fizhub/login">login|войти</a></div>
 	</div>
@@ -124,80 +96,34 @@
 		<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
 		<p>&#946; version</p>
 	</div>
-	
+	{% if article %}
     <div class="bod">
-    	<div class="pagemenu">
-    		<a href="/fizhub/group/"><symbol>&#8617;</symbol>группы</a>&nbsp;&nbsp;&nbsp;
-    		<a href="/fizhub/group/{{group.id}}/"><symbol>&#8962;</symbol>группа</a>&nbsp;&nbsp;&nbsp;
-    		{% if is_author or is_helper %}
-    		<a href="/fizhub/group/{{group.id}}/creategrouptask/"><symbol>&#10010;</symbol>создать задание</a>&nbsp;&nbsp;
-    		<a href="/fizhub/group/{{group.id}}/creategrouptheme/"><symbol>&#10010;</symbol>создать тему</a>&nbsp;&nbsp;&nbsp;
-    		<a href="/fizhub/group/{{group.id}}/groupapplication/">заявки</a>&nbsp;&nbsp;&nbsp;
-    		<a href="/fizhub/group/{{group.id}}/groupparticipant/">участники ({{group.author_helper_count}}|{{group.student_count}})</a>&nbsp;&nbsp;&nbsp;
-    		{% endif %}
-    		
-    		<a href="/fizhub/group/{{group.id}}/theme/">темы</a>&nbsp;&nbsp;&nbsp;
-    		{% if is_author %} вы автор
-    		{% elif is_helper %} вы помощник
-    		{% else %} вы ученик
-    		{% endif %}
-    		
-
-    	</div>
-    	{% if theme_list %}
-    {% for theme in theme_list %}
+    	
         <div class="task">
         	<div class="taskheader">
-        		
-        		
-        	<a href="/fizhub/group/{{group.id}}/theme/{{ theme.group_theme_name }}/">{{ theme.group_theme_name }}</a>
+        	<a href="/fizhub/article/{{ article.id }}/">{{ article.article_name }}</a>
+        	<i><a href="/fizhub/articles/theme/{{article.article_theme1_name}}/">{{article.article_theme1_name}}</a></i>
+        	<i><a href="/fizhub/articles/theme/{{article.article_theme2_name}}/">{{article.article_theme2_name}}</a></i>
+        	<i>{{article.article_page_count}} страниц</i>
+        	<b><a href="/fizhub/account/{{article.author.guest_name}}">article by {{article.author.guest_name}}</a></b>
         	
+        <div class="like" ><a href="/fizhub/article/{{ article.id }}/vote_for" name="like">like &#128077;| {{article.article_vote_count}}</a></div>
+        	<div class="report" ><a href="/fizhub/article/{{ article.id }}/vote_against" name="report">жалоба &#128078;| {{article.article_vote_against_count}}</a></div>
+        	</div>
+        	{{article.article_description}}
+        	<div class="solutionbutton" >
+        		<a href="/fizhub/article/{{ article.id }}/view/" name="open view">просмотр</a></div>
+ 
         	
-        	<b>{{theme.task_count}} заданий</b>
-        	
-        	
-        </div>
-        	
-        	<div id="{{task.id}}_text" class="textplace" onclick='showtext(id)'>{{theme.group_theme_description}}</div>
-        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
-        
-        
-        </div>
-    {% endfor %}
 
-    <div class="message">
-        	{% if pages|add:'-1' %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
-     
-     {% endif %}
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
-
-     {% if next_page %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
-     {% else %}
-
-     {% endif %}
-
-
-
-        	<br>
-        		
-     
-        </div>
-    </div>
-{% else %}
-		<div class="task">
-        	<div class="taskheader">
-        	No themes are available.
-        </div>
-        {% if page_name %}
-        	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
-        	<div class="solutionbutton" ><a href="/fizhub/new">last tasks</a></div>
-        	<div class="solutionbutton" ><a href="/fizhub/main">main</a></div>
         </div>
     
+    </div>
+{% else %}
+    <p>No tasks are available.<br>упс, такого задания нет, но вы можете создать новое<a href="/fizhub/createtask">здесь</a></p>
 {% endif %}
 <script type="text/javascript">
+	//<a href="/fizhub/picture/{{task.picture_href}}">////.replace('/','^')
 	openaccountfromcookie("i");
 </script>
 </body>
