@@ -9,6 +9,7 @@ class Guest(models.Model):
     subscriber_count = models.IntegerField(default=0)
     subscription_count = models.IntegerField(default=0)
     task_count = models.IntegerField(default=0)
+    article_count = models.IntegerField(default=0)
     def __str__(self):
         return self.guest_name
 class Guest_session(models.Model):
@@ -98,6 +99,32 @@ class Group_author_helper(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     author_helper = models.ForeignKey(Guest, on_delete=models.CASCADE)
     application_type = models.BooleanField(default=False)
+
+
+
+class Article(models.Model):
+    author = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    article_name = models.CharField(max_length=50, default="no name")
+    article_theme1_name = models.CharField(max_length=50, default="no name")
+    article_theme2_name = models.CharField(max_length=50, default="no name")
+    article_page_count = models.IntegerField(default=0)
+    article_vote_count = models.IntegerField(default=0)
+    article_vote_against_count = models.IntegerField(default=0)
+    article_private_type = models.BooleanField(default=False)
+    article_description = models.CharField(max_length=3000, default="no name")
+class Article_vote(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    vote_type = models.BooleanField(default=True)
+    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+
+class Article_page(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    article_page_name = models.CharField(max_length=50, default="no name")
+    article_page_number = models.IntegerField(default=1)
+    article_page_text = models.CharField(max_length=3000, default="no name")
+
+
+
 
 class Olympiad(models.Model):
     olympiad_name = models.CharField(max_length=100, default="no name")

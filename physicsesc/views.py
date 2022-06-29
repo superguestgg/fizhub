@@ -5,8 +5,9 @@ from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote, Olympiad, Olympiad_part, Olympiad_task, Group, Group_student, Group_author_helper, Group_theme, Group_task
+from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote, Olympiad, Olympiad_part, Olympiad_task, Group, Group_student, Group_author_helper, Group_theme, Group_task, Article, Article_vote, Article_page
 from django.template import loader
+from django.db.models import Q
 from django.urls import reverse
 import random
 def su_cut(string, l):
@@ -28,7 +29,9 @@ def index(request):
     except:
         return HttpResponse('<a href="/physic-in-sesc/main">main page</a>')
 def main(request):
-    return main_page(request,1)
+    template = loader.get_template('physicsesc/fizhubmain.html')
+    context = {}
+    return HttpResponse(template.render(context,request))
 def main_page(request,page_number):
     page_number = max(1,page_number)
     latest_tasks_list = Task.objects.filter(task_type_private=False)[(page_number-1)*50:page_number*50]
@@ -40,7 +43,26 @@ def main_page(request,page_number):
         'page_name': 'main',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'pagemenu': True,
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def maintask(request):
+    return maintask_page(request,1)
+def maintask_page(request,page_number):
+    page_number = max(1,page_number)
+    latest_tasks_list = Task.objects.filter(task_type_private=False)[(page_number-1)*50:page_number*50]
+    page_count = len(Task.objects.filter(task_type_private=False))//50+1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/fizhub.html')
+    context = {
+        'latest_tasks_list': latest_tasks_list,
+        'page_name': 'main',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page,
+        'pagemenu': True,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -58,7 +80,8 @@ def new_page(request, page_number):
         'page_name': 'new',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'pagemenu': True,
     }
     return HttpResponse(template.render(context, request))
 def best(request):
@@ -75,7 +98,8 @@ def best_page(request, page_number):
         'page_name': 'best',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'pagemenu': True,
     }
     return HttpResponse(template.render(context, request))
 def my(request):
@@ -92,7 +116,8 @@ def my_page(request, page_number):
         'page_name': 'best',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'pagemenu': True,
     }
     return HttpResponse(template.render(context, request))
 def theme(request):
@@ -692,12 +717,17 @@ def subscribes_page(request,page_number):
 def myaccount(request):
     try:
         user = openaccount(request)
+
         template = loader.get_template('physicsesc/user.html')
+
         tasks_count = len(user.task_set.all())
+
         subscriptions = user.subscription_set.all()[:100]
+
         for subscription in subscriptions:
 
             subscription.author_id = Guest.objects.get(id=subscription.author_id).guest_name
+
         context = {
             'tasks_count': tasks_count,
             'user': user,
@@ -705,7 +735,7 @@ def myaccount(request):
             'subscriptions': subscriptions,
 
         }
-        return HttpResponse(template.render(context,request))
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('сессия недействительна')
 
@@ -999,29 +1029,9 @@ def group_page(request, group_id, page_number):
         return HttpResponse('сначала войдите в свой аккаунт')
     page_number=max(1, page_number)
     group = Group.objects.get(id=group_id)
-    can_open = 0
-    is_author = False
-    is_helper = False
-    if group.author == user:
-        can_open = 2
-        is_author = True
+    opengroup1 = opengroup(user, group_id)
 
-    elif len(group.group_author_helper_set.filter(author_helper=user))>0:
-        if group.group_author_helper_set.filter(author_helper=user).application_type == True:
-            can_open = 2
-            is_helper = True
-
-        else:
-            can_open = 1
-            return HttpResponse('bad')
-    elif len(group.group_student_set.filter(student=user))>0:
-        if group.group_student_set.get(student=user).application_type == True:
-            can_open = 2
-
-        else:
-            can_open = 1
-            return HttpResponse('bad')
-    if can_open == 2:
+    if opengroup1 in ['student', 'author', 'helper']:
         group_task_list = group.group_task_set.all()
         group_task_list_id = []
         for group_task in group_task_list:
@@ -1032,8 +1042,8 @@ def group_page(request, group_id, page_number):
         next_page = (page_count > page_number)
         template = loader.get_template('physicsesc/thisgroup.html')
         context = {
-            'is_author': is_author,
-            'is_helper': is_helper,
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
             'group': group,
             'task_list': task_list,
             'page_name': 'group/'+str(group.id),
@@ -1042,8 +1052,12 @@ def group_page(request, group_id, page_number):
             'next_page': next_page
         }
         return HttpResponse(template.render(context,request))
-    elif can_open==0:
+    elif opengroup1=='no':
         return creategroupapplication(request, group_id)
+    elif opengroup1=='application':
+        return HttpResponse('вы подали заявку в эту группу')
+    else:
+        return HttpResponse('вы подали заявку в эту группу')
 def creategrouptask(request, group_id):
     user = openaccount(request)
     if user.guest_name == "undefined guest":
@@ -1051,45 +1065,30 @@ def creategrouptask(request, group_id):
 
 
     group = Group.objects.get(id=group_id)
-    can_open = 0
-    is_author = False
-    is_helper = False
-    if group.author == user:
-        can_open = 2
-        is_author = True
 
-    elif len(group.group_author_helper_set.filter(author_helper=user)) > 0:
-        if group.group_author_helper_set.filter(author_helper=user).application_type == True:
-            can_open = 2
-            is_helper = True
+    opengroup1 = opengroup(user, group_id)
 
-        else:
-            can_open = 1
-            return HttpResponse('bad')
-    elif len(group.group_student_set.filter(student=user)) > 0:
-        if group.group_student_set.get(student=user).application_type == True:
-            can_open = 2
-
-        else:
-            can_open = 1
-            return HttpResponse('bad')
-    if can_open == 2 and (is_helper or is_author):
+    if opengroup1 in ['author', 'helper']:
 
         themes = group.group_theme_set.all()
         template = loader.get_template('physicsesc/creategrouptask.html')
         context = {
             'themes': themes,
-            'is_author': is_author,
-            'is_helper': is_helper,
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
             'group': group,
             'page_name': 'добавить задание'
         }
 
         return HttpResponse(template.render(context, request))
-    elif can_open == 2:
+    elif opengroup1 == 'student':
         return HttpResponse('ученик не может добавлять задачи')
-    elif can_open==0:
+    elif opengroup1 == 'no':
         return creategroupapplication(request, group_id)
+    elif opengroup1 == 'application':
+        return HttpResponse('вы подали заявку в эту группу')
+    else:
+        return HttpResponse('вы подали заявку в эту группу')
 def sendgrouptaskpost(request):
     if True:
         user = openaccount(request)
@@ -1119,7 +1118,7 @@ def sendgrouptaskpost(request):
     else:
         return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
 def grouptheme(request,group_id):
-    return grouptheme_page(request,group_id,1)
+    return grouptheme_page(request,group_id, 1)
 def grouptheme_page(request, group_id, page_number):
     user = openaccount(request)
     if user.guest_name == "undefined guest":
@@ -1199,10 +1198,52 @@ def sendgroupthemepost(request):
     else:
         return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
 
+def groupthemetask(request, group_id, theme_name):
+    return groupthemetask_page(request, group_id, theme_name, 1)
+def groupthemetask_page(request, group_id, theme_name, page_number):
+    user = openaccount(request)
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    page_number = max(1, page_number)
+    group = Group.objects.get(id=group_id)
+    opengroup1 = opengroup(user, group_id)
+    if len(group.group_theme_set.filter(group_theme_name=theme_name))>0:
+        theme = group.group_theme_set.get(group_theme_name=theme_name)
+    else:
+        return HttpResponse("тема не найдена")
+    if opengroup1 in ['student', 'author', 'helper']:
+        group_task_list = group.group_task_set.filter(group_theme=theme)
+        group_task_list_id = []
+        for group_task in group_task_list:
+            group_task_list_id.append(group_task.task.id)
+        task_list = Task.objects.filter(id__in=group_task_list_id)
+        page_count = len(task_list)//50+1
+        task_list = task_list[50*(page_number-1):50*page_number]
+        next_page = (page_count > page_number)
+        template = loader.get_template('physicsesc/thisgroup.html')
+        context = {
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'task_list': task_list,
+            'page_name': 'group/'+str(group.id)+"/theme/"+str(theme_name),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page
+        }
+        return HttpResponse(template.render(context,request))
+    elif opengroup1=='no':
+        return creategroupapplication(request, group_id)
+    elif opengroup1=='application':
+        return HttpResponse('вы подали заявку в эту группу')
+    else:
+        return HttpResponse('как')
+
+
 def creategroupapplication(request, group_id):
     user = openaccount(request)
     group = Group.objects.get(id=group_id)
-    template = loader.get_template('creategroupapplication')
+    template = loader.get_template('physicsesc/creategroupapplication.html')
     context = {
         'group': group,
 
@@ -1239,7 +1280,343 @@ def sendgroupapplicationpost(request):
             group.group_student_set.create(student=user, application_type=False)
             return HttpResponse('заявка успешно создана')
     return group_page(request, group_id, 1)
+def groupapplication(request, group_id):
+    user = openaccount(request)
+    opengroup1 = opengroup(user, group_id)
+    group = Group.objects.get(id=group_id)
+    if opengroup1 in ['author', 'helper']:
+        applications_student = group.group_student_set.filter(application_type=False)[:100]
+        applications_helper = group.group_author_helper_set.filter(application_type=False)[:100]
+        template = loader.get_template('physicsesc/groupapplication.html')
+        context = {
 
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'page_name': 'заявки',
+            'applications_helper': applications_helper,
+            'applications_student': applications_student,
+        }
+        return HttpResponse(template.render(context, request))
+    elif opengroup1 == 'student':
+        return HttpResponse('ваша заявка уже утверждена(вы ученик и не можете просматривать заявки)')
+    elif opengroup1 == 'application':
+        return HttpResponse('ваша заявка уже на проверке')
+    elif opengroup1 == 'no':
+        return creategroupapplication(request, group_id)
+def approvegroupapplication(request, group_id, user_name, approve_type):
+    user=openaccount(request)
+    user_request = Guest.objects.get(guest_name=user_name)
+    group = Group.objects.get(id=group_id)
+    opengroup1 = opengroup(user, group_id)
+    if opengroup1 in ['author', 'helper']:
+        alert = 'ошибка сервера'
+        if approve_type == 'studentaccept':
+            if group.group_student_set.filter(student = user_request, application_type=False):
+                alert = 'успешно'
+                group.student_count = group.student_count + 1
+                group.save()
+                application = group.group_student_set.get(student=user_request)
+                application.application_type = True
+                application.save()
+        elif approve_type == 'studentdelete':
+            if group.group_student_set.filter(student = user_request):
+                alert='успешно'
+                application = group.group_student_set.get(student=user_request)
+                if application.application_type == True:
+                    group.student_count = group.student_count - 1
+                    group.save()
+                application.delete()
+
+        elif approve_type == 'helperaccept':
+            if group.group_author_helper_set.filter(author_helper = user_request, application_type=False):
+                alert = 'успешно'
+                group.author_helper_count = group.author_helper_count + 1
+                group.save()
+                application = group.group_author_helper_set.get(author_helper=user_request)
+                application.application_type = True
+                application.save()
+        elif approve_type == 'helperdelete':
+            if group.group_author_helper_set.filter(author_helper = user_request):
+                alert='успешно'
+                application = group.group_author_helper_set.get(author_helper=user_request)
+                if application.application_type == True:
+                    group.author_helper_count = group.author_helper_count - 1
+                    group.save()
+                application.delete()
+        else:
+            alert = 'действие не распознано'
+        applications_student = group.group_student_set.filter(application_type=False)[:100]
+        applications_helper = group.group_author_helper_set.filter(application_type=False)[:100]
+        template = loader.get_template('physicsesc/groupapplication.html')
+        context = {
+
+            'is_author': (opengroup1 == 'author'),
+            'is_helper': (opengroup1 == 'helper'),
+            'group': group,
+            'alert': alert,
+            'page_name': 'заявки',
+            'applications_helper': applications_helper,
+            'applications_student': applications_student,
+        }
+        return HttpResponse(template.render(context, request))
+    elif opengroup1 == 'student':
+        return HttpResponse('у вас нет прав')
+    elif opengroup1 == 'application':
+        return HttpResponse('у вас нет прав')
+    elif opengroup1 == 'no':
+        return HttpResponse('у вас нет прав')
+
+
+def groupparticipant(request, group_id):
+    user = openaccount(request)
+    opengroup1 = opengroup(user, group_id)
+    group = Group.objects.get(id=group_id)
+    if opengroup1 in ['author', 'helper']:
+        participant_student = group.group_student_set.filter(application_type=True)[:100]
+        if opengroup1 == 'author':
+            participant_helper = group.group_author_helper_set.filter(application_type=True)[:100]
+        else:
+            participant_helper = False
+        template = loader.get_template('physicsesc/groupparticipant.html')
+        context = {
+
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'page_name': 'участники',
+            'participant_student': participant_student,
+            'participant_helper': participant_helper,
+        }
+        return HttpResponse(template.render(context, request))
+    elif opengroup1 == 'student':
+        return HttpResponse('ваша заявка уже утверждена(вы ученик и не можете просматривать участников)')
+    elif opengroup1 == 'application':
+        return HttpResponse('ваша заявка уже на проверке')
+    elif opengroup1 == 'no':
+        return HttpResponse('у вас нет прав')
+def approvegroupparticipant(request, group_id, user_name, approve_type):
+    user = openaccount(request)
+    user_request = Guest.objects.get(guest_name=user_name)
+    group = Group.objects.get(id=group_id)
+    opengroup1 = opengroup(user, group_id)
+    if opengroup1 in ['author', 'helper']:
+        alert = 'ошибка сервера'
+        if approve_type == 'studentaccept':
+            if group.group_student_set.filter(student = user_request, application_type=False):
+                alert = 'успешно'
+                group.student_count = group.student_count + 1
+                group.save()
+                application = group.group_student_set.get(student=user_request)
+                application.application_type = True
+                application.save()
+        elif approve_type == 'studentdelete':
+            if group.group_student_set.filter(student = user_request):
+                alert = 'успешно'
+                application = group.group_student_set.get(student=user_request)
+                if application.application_type == True:
+                    group.student_count = group.student_count - 1
+                    group.save()
+                application.delete()
+
+        elif approve_type == 'helperaccept':
+            if group.group_author_helper_set.filter(author_helper = user_request, application_type=False):
+                alert = 'успешно'
+                group.author_helper_count = group.author_helper_count + 1
+                group.save()
+                application = group.group_author_helper_set.get(author_helper=user_request)
+                application.application_type = True
+                application.save()
+        elif approve_type == 'helperdelete':
+            if group.group_author_helper_set.filter(author_helper = user_request):
+                alert='успешно'
+                application = group.group_author_helper_set.get(author_helper=user_request)
+                if application.application_type == True:
+                    group.author_helper_count = group.author_helper_count - 1
+                    group.save()
+                application.delete()
+        else:
+            alert = 'действие не распознано'
+        participant_student = group.group_student_set.filter(application_type=True)[:100]
+        if opengroup1 == 'author':
+            participant_helper = group.group_author_helper_set.filter(application_type=True)[:100]
+        else:
+            participant_helper = False
+        template = loader.get_template('physicsesc/groupparticipant.html')
+        context = {
+
+            'is_author': (opengroup1=='author'),
+            'is_helper': (opengroup1=='helper'),
+            'group': group,
+            'alert': alert,
+            'page_name': 'участники',
+            'participant_student': participant_student,
+            'participant_helper': participant_helper,
+        }
+        return HttpResponse(template.render(context, request))
+    elif opengroup1 == 'student':
+        return HttpResponse('у вас нет прав')
+    elif opengroup1 == 'application':
+        return HttpResponse('у вас нет прав')
+    elif opengroup1 == 'no':
+        return HttpResponse('у вас нет прав')
+
+def livephysics(request):
+    user = openaccount(request)
+    return HttpResponse('п....., да я ....')
+    template = loader.get_template('physicsesc/livephysics.html')
+    context = {}
+
+    return HttpResponse(template.render(context, request))
+
+def articles1(request):
+    return articles(request, 'main')
+def articles(request, page_name):
+    return articles_page(request, page_name, 1)
+def articles_page(request, page_name, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    if page_name == 'main':
+        articles_list = Article.objects.filter(article_private_type=False)[(page_number - 1) * 50:page_number * 50]
+    elif page_name == 'best':
+        articles_list = Article.objects.filter(article_private_type=False).order_by('-article_vote_count', 'article_vote_against_count')[(page_number - 1) * 50:page_number * 50]
+    elif page_name == 'new':
+        articles_list = Article.objects.filter(article_private_type=False)[(page_number - 1) * 50:page_number * 50]
+        articles_list = articles_list[::-1]
+    elif page_name == 'my':
+        articles_list = Article.objects.filter(article_private_type=False, author=user)[(page_number - 1) * 50:page_number * 50]
+    else:
+        return HttpResponse('запрос не распознан, иди нах..')
+    page_count = len(Article.objects.filter(article_private_type=False)) // 50 + 1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/articles.html')
+    context = {
+        'articles_list': articles_list,
+        'page_name': 'articles/'+page_name,
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page,
+        'pagemenu': True,
+    }
+    # antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def articletheme(request, theme_name):
+    return articletheme_page(request, theme_name, 1)
+def articletheme_page(request, theme_name, page_number):
+    user = openaccount(request)
+    page_number = max(1, page_number)
+    articles_list = Article.objects.filter(article_private_type=False).filter(Q(article_theme1_name=theme_name) | Q(article_theme2_name=theme_name))
+    page_count = len(Article.objects.filter(article_private_type=False)) // 50 + 1
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/articles.html')
+    context = {
+        'articles_list': articles_list,
+        'page_name': 'articles/theme/'+theme_name,
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page,
+        'pagemenu': True,
+    }
+    # antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def createarticle(request):
+    template = loader.get_template('physicsesc/createarticle.html')
+    page_name = 'createarticle'
+    context = {
+        'page_name': 'articles/' + page_name,
+        'pagemenu': True,
+    }
+    return HttpResponse(template.render(context, request))
+
+def sendarticlepost(request):
+    user = openaccount(request)
+    t = 0
+    if user.guest_name == "undefined guest":
+        return HttpResponse('сначала войдите в свой аккаунт')
+    user_name = user.guest_name
+    try:
+        article_private_type = request.POST['article_private_type']
+        article_private_type = True
+    except:
+        article_private_type = False
+    article_name = request.POST['article_name']
+    article_theme1_name = request.POST['article_theme1_name']
+    article_theme2_name = request.POST['article_theme2_name']
+    article_description = request.POST['article_description']
+    article_page_count = str(request.POST['pagecount'])
+    if article_page_count.isdigit():
+        article_page_count = int(article_page_count)
+    else:
+        return HttpResponse('server error')
+    article = Article(author=user, article_name=article_name, article_theme1_name=article_theme1_name, article_theme2_name=article_theme2_name, article_page_count=article_page_count, article_private_type=article_private_type, article_description=article_description)
+    article.save()
+    for i in range (1, article_page_count+1):
+        article_page_name = request.POST['article_page_name_'+str(i)]
+        article_page_text = request.POST['article_page_text_' + str(i)]
+        article.article_page_set.create(article_page_name=article_page_name, article_page_text=article_page_text, article_page_number=i)
+
+
+    return articles_page(request, 'my', 1)
+
+def article(request,article_id):
+    user = openaccount(request)
+    article = Article.objects.get(id=article_id)
+    template = loader.get_template('physicsesc/thisarticle.html')
+    context = {
+        'article': article,
+    }
+    return HttpResponse(template.render(context, request))
+def article_view(request, article_id):
+    user = openaccount(request)
+    article = Article.objects.get(id=article_id)
+    article_pages = article.article_page_set.all()
+    template = loader.get_template('physicsesc/thisarticleview.html')
+    context = {
+        'article': article,
+        'article_pages': article_pages,
+    }
+    return HttpResponse(template.render(context,request))
+def article_vote(request, article_id, vote_type):
+    if True:
+        user = openaccount(request)
+        article = Article.objects.get(id=article_id)
+        if vote_type == "vote_for":
+            vote_type = True
+        elif vote_type == "vote_against":
+            vote_type = False
+        else:
+            return HttpResponse("нет такого варианта голоса")
+        if len(article.article_vote_set.filter(guest=user)) <= 0:
+            if vote_type==True:
+                article.article_vote_count = article.article_vote_count + 1
+                article.save()
+            elif vote_type == False:
+                article.article_vote_against_count = article.article_vote_against_count + 1
+                article.save()
+            article_vote = Article_vote(article=article, vote_type=vote_type, guest=user)
+            article_vote.save()
+            return render(request, 'physicsesc/thisarticle.html', {'article': article})
+        else:
+            if article.article_vote_set.get(guest=user).vote_type == vote_type:
+                return render(request, 'physicsesc/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку'})
+            else:
+                if vote_type == True:
+                    article.article_vote_against_count = article.article_vote_against_count - 1
+                    article.article_vote_count = article.article_vote_count + 1
+                    article.save()
+                elif vote_type == False:
+                    article.article_vote_count = article.article_vote_count - 1
+                    article.article_vote_against_count = article.article_vote_against_count + 1
+                    article.save()
+
+            vote = article.article_vote_set.get(guest=user)
+            vote.vote_type = vote_type
+            vote.save()
+            return render(request, 'physicsesc/thisarticle.html', {'article': article})
+
+
+
+    return render(request, 'physicsesc/thisarticle.html', {'article': article})
 
 def opengroup(user, group_id):
     group = Group.objects.get(id=group_id)
