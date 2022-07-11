@@ -81,9 +81,9 @@
 
 			
 		}
-		if ('{{alert}}'){
-			alert('{{alert}}')
-		}
+		//if ('{{alert}}'){
+		//	alert('{{alert}}')
+		//}
 
 
 
@@ -181,15 +181,15 @@
 
 		}
 
-		field_width = 100;
-		field_height = 100;
-		field_scale = 1;
-		field_gy = 10;
-		field_gx = 0;
-		field_ey = 0;
-		field_ex = 0;
-		field_bz = 0;
-		field_canfallout = 0;
+		field_width = {{field.width}};
+		field_height = {{field.height}};
+		field_scale = {{field.scale}};
+		field_gy = {{field.gy}};
+		field_gx = {{field.gx}};
+		field_ey = {{field.ey}};
+		field_ex = {{field.ex}};
+		field_bz = {{field.bz}};
+		field_canfallout = {{field.canfallout}};
 
 		objects=[];
 		objects_count = 0;
@@ -547,6 +547,7 @@
 			`
 		}
 		}
+
 	</script>
 </head>
 <body>
@@ -603,7 +604,7 @@
 
     	</div>
 
-    	<div id="objects"></div>
+    	<div id="objects">{{simulation}}</div>
     	<div class="field" style="width: 100px; height:100px" id="field"></div>
 
 
@@ -623,7 +624,52 @@
     	</div>
 <script type="text/javascript">
 	openaccountfromcookie("i");
+	
+	//let simulation = {{simulation}}
+	//console.log(simulation)
 	createobjectmenu();
+	let object_time_list=document.getElementById("objects").innerHTML
+	function simulation (object_time_list){
+		objects_time_list_end=object_time_list.replace("'","",1000)
+		objects_time_list_end=objects_time_list_end.split(",")
+		object_time_list=object_time_list.replace("'","",10000).replace("[","",10).replace("]","",10)
+		object_time_list=object_time_list.split(",")
+		console.log(object_time_list.length)
+		comma_count=object_time_list.length
+		
+		for (let t=0;t<object_time_list.length;t++){
+			objects_this_turn=object_time_list[t].split("|")
+			objects_count=objects_this_turn.length
+
+			console.log(objects_count)
+			for (let j=0;j<objects_this_turn.length;j++){
+				objects_this_turn[j]=objects_this_turn[j].split("_")
+			}
+			objects_time_list_end[t]=objects_this_turn;
+			//showobjects();
+			
+		}
+		console.log(objects_time_list_end);
+		document.getElementById("objects").innerHTML=objects_time_list_end
+
+
+	}
+
+	function playsimulation(objects_time_list_end){
+		simulationturn=0
+		setInterval("playsimulationturn(objects_time_list_end)", 100);
+
+
+	}
+	function playsimulationturn(objects_time_list_end){
+		objects = objects_time_list_end[simulationturn];
+		showobjects();
+		simulationturn++;
+
+
+	}
+	simulation(object_time_list);
+	playsimulation(objects_time_list_end);
 </script>
 </body>
 </html>
