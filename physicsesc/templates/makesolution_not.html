@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	
+
+	
+	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
+	<script type="text/javascript">
+		
+		if ('{{alert}}'){
+			alert('{{alert}}')
+		}
+
+		
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubutton" id="menubutton" onclick="openmenu()">|||</div>
+		<div class="taskname">задача {{task.pk }}</div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="main">главная</a><br>
+		<a href="new">новое</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="">категории(no)</a><br>
+		<a href="">мое(no)</a><br>
+	</div>
+	{% if task %}
+    <div class="bod">
+    
+        <div class="task"><a href="/physic-in-sesc/{{ task.id }}/">{{ task.solution_set.all }}</a>
+        	
+        	<form action="{% url 'physic-in-sesc:makesolution2' task.id %}" method="post">
+{% csrf_token %}
+<fieldset>
+    <legend><h1>{{ task.task_text }}</h1></legend>
+    {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+        <input type="text" name="choice" id="choice{{ forloop.counter }}" value="{{ choice.id }}">
+</fieldset>
+<input type="submit" value="Vote">
+</form>
+        </div>
+    
+    </div>
+{% else %}
+    <p>No tasks are available.</p>
+{% endif %}
+</body>
+</html>
