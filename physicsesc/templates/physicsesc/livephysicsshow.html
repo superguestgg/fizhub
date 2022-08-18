@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/livephysics.css">
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/11uFEgBLJrQad2thw05g3GgJxyKm7YZ8f=w1920-h865-iv3">
 	<title>fizhub</title>
 	{% load static %}
@@ -403,7 +404,7 @@
 
 		function showobject(id,x,y,width,height,borderradius){
 			xs=x*field_scale + document.getElementById("field").getBoundingClientRect().x
-			ys=y*field_scale+document.getElementById("field").getBoundingClientRect().y
+			ys=y*field_scale + document.getElementById("field").getBoundingClientRect().y
 			widths=width*field_scale
 			heights=height*field_scale
 			borderradius = borderradius*field_scale
@@ -416,6 +417,21 @@
 			`
 		}
 
+		function showobject_update(id,x,y,width,height,borderradius){
+			xs=x*field_scale + document.getElementById("field").getBoundingClientRect().x
+			ys=y*field_scale + document.getElementById("field").getBoundingClientRect().y
+			widths=width*field_scale
+			heights=height*field_scale
+			borderradius = borderradius*field_scale
+			widths = (widths)*(widths>=2)+2*(widths<2)
+			heights = (heights)*(heights>=2)+2*(heights<2)
+			object=document.getElementById(id);
+			object.style=`position: fixed; left: ${xs}px; top: ${ys}px; height: ${heights}px; width: ${widths}px; border-radius: ${borderradius}px; background-color: #fff; z-index:1000; transition:0.1s linear;`
+
+			
+		
+		}
+
 		function showobjects(){
 			document.getElementById("objects").innerHTML=""
 			for (let i=0;i<objects_count; i++){
@@ -423,7 +439,19 @@
 			}
 		}
 
+		function showobjects_update(){
+			
+			for (let i=0;i<objects_count; i++){
+				showobject_update(i,objects[i][1],objects[i][2],objects[i][3],objects[i][4],objects[i][5])
+			}
+		}
 
+		function create_field(){
+			document.getElementById("field").style.width=field_width*field_scale+"px";
+					
+			document.getElementById("field").style.height=field_height*field_scale+"px";
+
+		}
 
 		function allobjectsmenu(){
 			let d=document.getElementById("lfmenumain")
@@ -454,7 +482,11 @@
 				str=str+`</div>`
 			}
 			str=str+`<br>
-			<input type="submit" value="провести симуляцию 10секунд" class="lfmenusubpart">
+			<div class="lfmenusubpart">симуляция
+			<div class="lfmenusubpartsubpart">длительность <input type="number" name="simulation_time" placeholder="длительность симуляции" value="{{simulation_time}}">с</div>
+			<div class="lfmenusubpartsubpart">точность <input type="number" name="deltatime" placeholder="точность симуляции" value="{{deltatime}}">с</div>
+			<input type="submit" value="провести симуляцию" class="lfmenusubpart">
+			</div>
 			</form>`
 			d.innerHTML=str
 		}
@@ -468,7 +500,7 @@
 			lfmenumain=document.getElementById("lfmenumain")
 			if (objects[id][0]=="matpoint"){
 			lfmenumain.innerHTML=`
-			<div class='lfmenusubpart' >создание объекта</div>
+			<div class='lfmenusubpart' >изменение объекта</div>
 
 
 
@@ -629,6 +661,12 @@
 	//console.log(simulation)
 	createobjectmenu();
 	let object_time_list=document.getElementById("objects").innerHTML
+
+
+	deltatime=(({{deltatime}})/1)*1000;
+	simulation_time={{simulation_time}}
+
+
 	function simulation (object_time_list){
 		objects_time_list_end=object_time_list.replace("'","",1000)
 		objects_time_list_end=objects_time_list_end.split(",")
@@ -651,23 +689,26 @@
 		}
 		console.log(objects_time_list_end);
 		document.getElementById("objects").innerHTML=objects_time_list_end
-
+		objects = objects_time_list_end[0];
+		showobjects();
 
 	}
 
 	function playsimulation(objects_time_list_end){
 		simulationturn=0
-		setInterval("playsimulationturn(objects_time_list_end)", 100);
+		setInterval("playsimulationturn(objects_time_list_end)", deltatime);
 
 
 	}
 	function playsimulationturn(objects_time_list_end){
 		objects = objects_time_list_end[simulationturn];
-		showobjects();
+		showobjects_update();
 		simulationturn++;
+		if (simulationturn >= objects_time_list_end.length){simulationturn=0}
 
 
 	}
+	create_field();
 	simulation(object_time_list);
 	playsimulation(objects_time_list_end);
 </script>

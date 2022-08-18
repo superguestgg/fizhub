@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/livephysics.css">
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/11uFEgBLJrQad2thw05g3GgJxyKm7YZ8f=w1920-h865-iv3">
 	<title>fizhub</title>
 	{% load static %}
@@ -255,7 +256,7 @@
 			<div class='lfmenusubpart' > за поле нельзя выпасть <input type="range" name="canfallout_map" id="canfallout_map" min="0" max="1" step="1" value="${field_canfallout}" oninput="showcoordinate('map','canfallout','0')"> <coordinate id='coordinate_map_canfallout' > ${field_canfallout} </coordinate></div>
 
 			<div class='lfmenusubpart' >я лох?<input type="checkbox" name="canfallout_map" id="canfallout_map"></div>
-
+			<br>
 
 			
 			`
@@ -454,7 +455,11 @@
 				str=str+`</div>`
 			}
 			str=str+`<br>
+			<div class="lfmenusubpart">
+			<div class="lfmenusubpartsubpart">длительность <input type="number" name="simulation_time" placeholder="длительность симуляции" value="10">с</div>
+			<div class="lfmenusubpartsubpart">точность <input type="number" name="deltatime" placeholder="точность симуляции" step="0.01" value="0.1">с</div>
 			<input type="submit" value="провести симуляцию 10секунд" class="lfmenusubpart">
+			</div>
 			</form>`
 			d.innerHTML=str
 		}

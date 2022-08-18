@@ -3,57 +3,23 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
-	{% load static %}
+	
 
-	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	
+	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
 	<script type="text/javascript">
-		function openmenu() {
-			if (document.getElementById("menubutton").className=="menubutton") {
-				document.getElementById("menubutton").className="menubutton2";
-				document.getElementById("menu").className="menuopened";
-				
-			} else {
-				document.getElementById("menubutton").className="menubutton";
-				document.getElementById("menu").className="menuclosed";
-			}
-		}
-		function openaccountfromcookie(string){
-			let cookies=(document.cookie).split(";");
-			//alert(cookies[2]);
-			let cakes=cookies.length;
-			//alert(cakes);
-			let username="undefined guest";
-			let userpassword="1234";
-			for (let i =1;i<cakes;i++){
-				thiscookie=cookies[i]+"";
-				console.log(thiscookie);
-				namethiscookie=thiscookie.split("=")[0];
-				valuethiscookie=thiscookie.split("=")[1];
-				if ((namethiscookie==" user_name")){
-					username=valuethiscookie;
-				}
-			}
-			console.log(username);
-			//if (username == "undefined guest"){
-			//	document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться <a href='/fizhub/login'>здесь</a> "
-			//} else {
-			//	document.getElementById("creatorname2").remove()
-			//}
-			if (cakes>1) {
-				document.getElementById("loginbutton").innerHTML=`<a href="/fizhub/myaccount">${username}</a>`;
-			}
-			if (string=="name"){
-				return username
-			} else if (string=="password"){
-				return userpassword
-			}
-		}
+		
 		if ('{{alert}}'){
 			alert('{{alert}}')
 		}
+
+		
 	</script>
 </head>
 <body>

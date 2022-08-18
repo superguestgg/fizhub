@@ -3,26 +3,23 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
 	<title>fizhub</title>
-	{% load static %}
+	
 
-	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	
+	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
 	<script type="text/javascript">
-		function openmenu() {
-			if (document.getElementById("menubutton").className=="menubutton") {
-				document.getElementById("menubutton").className="menubutton2";
-				document.getElementById("menu").className="menuopened";
-				
-			} else {
-				document.getElementById("menubutton").className="menubutton";
-				document.getElementById("menu").className="menuclosed";
-			}
+		
+		if ('{{alert}}'){
+			alert('{{alert}}')
 		}
-		function savesolution(){
-			text=document.getElementById("textarea").value;
-			document.getElementById("sendsolutionbutton").innerHTML='<a id="a" href="/physic-in-sesc/{{task.id}}/makesolution3/'+text+'">отправить решение</a>'
-		}
+
+		
 	</script>
 </head>
 <body>
