@@ -1,15 +1,20 @@
 from django.db import models
 from django.utils import timezone
+def su_cut(string, l):
+    if len(string) > l:
+        string = string[0:l]
+    return string
 class Guest(models.Model):
     guest_name = models.CharField(max_length=40)
     guest_information = models.CharField(max_length=2000, default="no information")
     guest_password = models.CharField(max_length=40, default="1234")
-    guest_icon_href = models.CharField(max_length=200, default="https://no")
+    guest_icon_href = models.CharField(max_length=200, default="https://ustanovkaos.ru/wp-content/uploads/2022/02/06-psevdo-pustaya-ava.jpg")
     guest_rights = models.IntegerField(default=0)
     subscriber_count = models.IntegerField(default=0)
     subscription_count = models.IntegerField(default=0)
     task_count = models.IntegerField(default=0)
     article_count = models.IntegerField(default=0)
+    color_theme = models.CharField(max_length=40, default="darkblue")
     def __str__(self):
         return self.guest_name
 class Guest_session(models.Model):
@@ -23,6 +28,27 @@ class Guest_session(models.Model):
 class Subscription(models.Model):
     author_id = models.IntegerField(default=1)
     subscriber = models.ForeignKey(Guest, on_delete=models.CASCADE)
+
+
+class Private_chat(models.Model):
+    authors = models.ManyToManyField(Guest)
+    author_1_not_checked_messages_count = models.IntegerField(default=0)
+    author_2_not_checked_messages_count = models.IntegerField(default=0)
+    def __str__(self):
+        return str(self.authors.all()[0])+" & "+str(self.authors.all()[1])
+
+class Private_message(models.Model):
+    is_answer = models.BooleanField(default=False)
+    answer_for = models.CharField(default="", max_length=3000)
+    answer_for_id = models.IntegerField(default=0)
+    private_chat = models.ForeignKey(Private_chat, on_delete=models.CASCADE)
+    author = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    message_text = models.CharField(max_length=3000, default="no text")
+    pub_date = models.DateTimeField('date published')
+    is_read = models.BooleanField(default=False)
+    def __str__(self):
+        return str(self.private_chat)+":___"+str(su_cut(self.message_text,50))
+
 class Task(models.Model):
     task_name = models.CharField(max_length=50, default='no name')
     task_text = models.CharField(max_length=3000)
@@ -112,17 +138,22 @@ class Article(models.Model):
     article_vote_against_count = models.IntegerField(default=0)
     article_private_type = models.BooleanField(default=False)
     article_description = models.CharField(max_length=3000, default="no name")
+    def __str__(self):
+        return str(self.article_name)+" by "+str(self.author)
 class Article_vote(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     vote_type = models.BooleanField(default=True)
     guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return str(self.vote_type)+ " for "+str(self.article)
 class Article_page(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE)
     article_page_name = models.CharField(max_length=50, default="no name")
     article_page_number = models.IntegerField(default=1)
     article_page_text = models.CharField(max_length=3000, default="no name")
-
+    def __str__(self):
+        return str(self.article_page_name)+" from "+str(self.article)
 
 
 
