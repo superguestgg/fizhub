@@ -5,9 +5,10 @@ from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Task, Solution, Guest, Usefulfiles, Guest_session, Like, Report, Vote, Olympiad, Olympiad_part, Olympiad_task, Group, Group_student, Group_author_helper, Group_theme, Group_task, Article, Article_vote, Article_page
+from .models import Task, Solution, Subscription, Guest, Usefulfiles, Guest_session, Like, Report, Vote, Olympiad, Olympiad_part, Olympiad_task, Group, Group_student, Group_author_helper, Group_theme, Group_task, Article, Article_vote, Article_page, Private_chat, Private_message
 from django.template import loader
 from django.db.models import Q
+from .livephysicssimulation import livephysicssimulation
 from django.urls import reverse
 import random
 def su_cut(string, l):
@@ -21,8 +22,10 @@ def index(request):
 
         #task.task_text="hi for all. you in my project fizhub, where you can post your physic tasks"
         template = loader.get_template('physicsesc/fizhub.html')
+        user = openaccount(request)
         context = {
             'latest_tasks_list': latest_tasks_list,
+            'theme_name': user.color_theme,
         }
         # antiddos(request=request)
         return HttpResponse((template.render(context, request)))
@@ -30,7 +33,8 @@ def index(request):
         return HttpResponse('<a href="/physic-in-sesc/main">main page</a>')
 def main(request):
     template = loader.get_template('physicsesc/fizhubmain.html')
-    context = {}
+    user = openaccount(request)
+    context = {'theme_name': user.color_theme,'color_theme': user.color_theme,}
     return HttpResponse(template.render(context,request))
 def main_page(request,page_number):
     page_number = max(1,page_number)
@@ -38,6 +42,7 @@ def main_page(request,page_number):
     page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
         'page_name': 'main',
@@ -45,6 +50,7 @@ def main_page(request,page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -56,6 +62,7 @@ def maintask_page(request,page_number):
     page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
         'page_name': 'main',
@@ -63,6 +70,7 @@ def maintask_page(request,page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -75,6 +83,7 @@ def new_page(request, page_number):
     page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
         'page_name': 'new',
@@ -82,6 +91,7 @@ def new_page(request, page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def best(request):
@@ -93,6 +103,7 @@ def best_page(request, page_number):
     page_count = len(Task.objects.filter(task_type_private=False))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
         'page_name': 'best',
@@ -100,28 +111,33 @@ def best_page(request, page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def my(request):
-    return my_page(request,1)
+    return my_page(request, 1)
 def my_page(request, page_number):
     user = openaccount(request)
     page_number = max(1, page_number)
     latest_tasks_list = (Task.objects.filter(creator_name=user))[(page_number-1)*50:page_number*50]
-    page_count = len(Task.objects.all())//50+1
+    page_count = len(Task.objects.filter(creator_name=user))//50+1
     next_page = page_number < page_count
     template = loader.get_template('physicsesc/fizhub.html')
     context = {
         'latest_tasks_list': latest_tasks_list,
-        'page_name': 'best',
+        'page_name': 'my',
         'pages': page_number,
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def theme(request):
-    return render(request, 'physicsesc/theme.html')
+    template = loader.get_template('physicsesc/theme.html')
+    user=openaccount(request)
+    context={'color_theme':user.color_theme}
+    return HttpResponse(template.render(context, request))
 def themepost(request):
     theme1_name = request.POST['theme1']
     theme2_name = request.POST['theme2']
@@ -129,34 +145,42 @@ def themepost(request):
     if theme2_name!="No theme":
         latest_tasks_list = latest_tasks_list.filter(theme2_name=theme2_name)
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def themefind(request,theme_name1):
     latest_tasks_list = Task.objects.filter(task_type_private=False).filter(theme1_name=theme_name1)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
+    user=openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def themefind2(request,theme_name1,theme_name2):
     latest_tasks_list = Task.objects.filter(task_type_private=False).filter(theme1_name=theme_name1, theme2_name=theme_name2)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def classfind(request,class_name):
     latest_tasks_list = Task.objects.filter(task_type_private=False).filter(class_name=class_name)[:40]
     template = loader.get_template('physicsesc/fizhub.html')
+    user = openaccount(request)
     context = {
         'latest_tasks_list': latest_tasks_list,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def user(request):
 
-    return render(request, 'physicsesc/userfind.html')
+    return render(request, 'physicsesc/userfind.html',{'color_theme':openaccount(request).color_theme})
 def userfind(request,user_name):
     try:
         latest_tasks_list = Guest.objects.get(guest_name=user_name).task_set.filter(task_type_private=False)
@@ -165,12 +189,15 @@ def userfind(request,user_name):
         page_count = len(latest_tasks_list) // 50 + 1
         next_page = page_number < page_count
         template = loader.get_template('physicsesc/fizhub.html')
+        user = openaccount(request)
         context = {
+            'main_link': "/fizhub/account/"+str(user_name),
             'latest_tasks_list': latest_tasks_list,
             'page_name': 'user/'+user_name,
             'pages': page_number,
             'pagescount': page_count,
-            'next_page': next_page
+            'next_page': next_page,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
@@ -183,19 +210,26 @@ def userfind_page(request,user_name):
         page_count = len(latest_tasks_list) // 50 + 1
         next_page = page_number < page_count
         template = loader.get_template('physicsesc/fizhub.html')
+        user = openaccount(request)
         context = {
             'latest_tasks_list': latest_tasks_list,
             'page_name': 'best',
             'pages': page_number,
             'pagescount': page_count,
-            'next_page': next_page
+            'next_page': next_page,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error<br><a href="/physic-in-sesc/main">main page</a>')
 
 def login(request):
-    return render(request, 'physicsesc/login.html')
+    user = openaccount(request)
+    context = {
+        'color_theme': user.color_theme,
+    }
+    template = loader.get_template('physicsesc/login.html')
+    return HttpResponse(template.render(context, request))
 def sendaccount(request, guest_name,guest_password):
     #try:
     if (len(Guest.objects.filter(guest_name=guest_name)))==0:
@@ -294,7 +328,36 @@ def task(request, task_id):
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thistask.html', {'task': task})
+    user = openaccount(request)
+    if task.creator_name.id == user.id:
+        is_me = True
+    else:
+        is_me = False
+    return render(request, 'physicsesc/thistask.html', {'task': task, 'is_me': is_me, 'color_theme':openaccount(request).color_theme})
+def task_delete(request, task_id):
+    try:
+        task = Task.objects.get(pk=task_id)
+        user = openaccount(request)
+        if task.creator_name.id == user.id:
+            is_me = True
+        else:
+            is_me = False
+        if user.guest_name!="undefined guest":
+            if is_me:
+
+                task.delete()
+
+            else:
+                return render(request, 'physicsesc/thistask.html', {'task': task, 'is_me': is_me, 'alert': 'сначала войдите в свой аккаунт', 'color_theme':openaccount(request).color_theme})
+        else:
+            return render(request, 'physicsesc/thistask.html',
+                          {'task': task, 'is_me': is_me, 'color_theme': openaccount(request).color_theme, 'alert':'сначала войдите в свой аккаунт'})
+
+
+    except Task.DoesNotExist:
+        raise Http404("Task does not exist")
+    return render(request, 'physicsesc/thistask.html', {'task': task, 'color_theme':openaccount(request).color_theme, 'is_me': is_me, 'alert': 'succesful deleted'})
+
 def like(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
@@ -318,12 +381,12 @@ def like(request, task_id):
             like.save()
 
         else:
-            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу'})
+            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу', 'color_theme':openaccount(request).color_theme})
 
 
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thistask.html', {'task': task})
+    return render(request, 'physicsesc/thistask.html', {'task': task, 'color_theme':openaccount(request).color_theme})
 def report(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
@@ -347,11 +410,11 @@ def report(request, task_id):
             report = Report(task=task, guest=user)
             report.save()
         else:
-            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу'})
+            return render(request, 'physicsesc/thistask.html', {'task': task, 'alert': 'вы уже оценили эту задачу', 'color_theme':openaccount(request).color_theme})
 
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thistask.html', {'task': task})
+    return render(request, 'physicsesc/thistask.html', {'task': task, 'color_theme':openaccount(request).color_theme})
 def solution(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
@@ -360,7 +423,7 @@ def solution(request, task_id):
         #solution = Solution.objects.get(pk=task_id)
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thissolution.html', {'task': task,'solution_set':solution_set})
+    return render(request, 'physicsesc/thissolution.html', {'task': task,'solution_set':solution_set,'color_theme':openaccount(request).color_theme})
 def solution_vote(request, task_id, solution_id, vote_type):
     try:
         task = Task.objects.get(pk=task_id)
@@ -391,10 +454,10 @@ def solution_vote(request, task_id, solution_id, vote_type):
                 solution.save()
             vote = Vote(task=task, solution=solution, vote_type=vote_type, guest=user)
             vote.save()
-            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
+            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set,'color_theme':openaccount(request).color_theme})
         else:
             if solution.vote_set.get(guest=user).vote_type == vote_type:
-                return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set, 'alert': 'вы уже так оценили эту задачу'})
+                return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set, 'alert': 'вы уже так оценили эту задачу','color_theme':openaccount(request).color_theme})
             else:
                 if vote_type == True:
                     solution.votes_against_count = solution.votes_against_count - 1
@@ -408,20 +471,20 @@ def solution_vote(request, task_id, solution_id, vote_type):
             vote = solution.vote_set.get(guest=user)
             vote.vote_type = vote_type
             vote.save()
-            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
+            return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set,'color_theme':openaccount(request).color_theme})
 
 
         #solution = Solution.objects.get(pk=task_id)
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set})
+    return render(request, 'physicsesc/thissolution.html', {'task': task, 'solution_set': solution_set,'color_theme':openaccount(request).color_theme})
 
 def makesolution(request, task_id):
     try:
         task = Task.objects.get(pk=task_id)
     except Task.DoesNotExist:
         raise Http404("Task does not exist")
-    return render(request, 'physicsesc/makesolution.html', {'task': task})
+    return render(request, 'physicsesc/makesolution.html', {'task': task,'color_theme':openaccount(request).color_theme})
 def makesolution3(request, task_id, solution_text):
     try:
         task = Task.objects.get(pk=task_id)
@@ -464,6 +527,7 @@ def sendsolutionpost(request):
         # Redisplay the question voting form.
         return render(request, 'physicsesc/fizhub.html', {
             'task': task,
+            'color_theme':openaccount(request).color_theme,
             'error_message': "You didn't select a solution.",
         })
     else:
@@ -475,7 +539,12 @@ def sendsolutionpost(request):
         return HttpResponseRedirect(reverse('physic-in-sesc:solution', args=(task.id,)))
 """
 def createtask(request):
-        return render(request, 'physicsesc/createtask.html')
+    user = openaccount(request)
+    context = {
+        'color_theme': user.color_theme,
+    }
+    template = loader.get_template('physicsesc/createtask.html')
+    return HttpResponse(template.render(context, request))
 def sendtaskpost(request):
     try:
         t=1
@@ -574,8 +643,10 @@ def sendtaskwithpicture(request, task_text,picture_url,theme1_name, theme2_name,
 def useful(request):
     useful_files = Usefulfiles.objects.all()[:50]
     template=loader.get_template('physicsesc/useful.html')
+    user = openaccount(request)
     context = {
         'useful_files': useful_files,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context,request))
 def sendusefulfile(request):
@@ -615,6 +686,7 @@ def account(request, user_name):
         'tasks_count': tasks_count,
         'user': user_request,
         'subscription': subscription,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context,request))
 def makesubscribe(request, user_name):
@@ -640,6 +712,7 @@ def makesubscribe(request, user_name):
             'tasks_count': tasks_count,
             'user': user_request,
             'subscription': True,
+            'color_theme': user.color_theme,
         }
     else:
         context = {
@@ -647,6 +720,7 @@ def makesubscribe(request, user_name):
             'user': user_request,
             'alert': 'вы уже подписаны на этого пользователя',
             'subscription': True,
+            'color_theme': user.color_theme,
 
         }
     return HttpResponse(template.render(context,request))
@@ -674,6 +748,7 @@ def unsubscribe(request, user_name):
             'tasks_count': tasks_count,
             'user': user_request,
             'subscription': False,
+            'color_theme': user.color_theme,
 
         }
     else:
@@ -682,6 +757,7 @@ def unsubscribe(request, user_name):
             'user': user_request,
             'alert': 'вы не подписаны на этого пользователя',
             'subscription': False,
+            'color_theme': user.color_theme,
 
         }
     return HttpResponse(template.render(context,request))
@@ -693,21 +769,53 @@ def subscribes_page(request,page_number):
         user = openaccount(request)
         if user.guest_name=='undefined guest':
             return HttpResponse('войдите сначала в свой аккаунт')
-        template = loader.get_template('physicsesc/subscribes.html')
+        template = loader.get_template('physicsesc/guest_list.html')
 
         subscriptions = user.subscription_set.all()[50*(page_number-1):50*page_number]
-        page_count = len(subscriptions) // 50 + 1
+        page_count = len(user.subscription_set.all()) // 50 + 1
         next_page = page_number < page_count
         authors_id_list = []
         for subscription in subscriptions:
             authors_id_list.append(subscription.author_id)
-        authors_list = Guest.objects.filter(id__in = authors_id_list)
+        guest_list = Guest.objects.filter(id__in = authors_id_list)
         context = {
-            'authors_list': authors_list,
+            'page_name_text': 'подписки',
+            'guest_list': guest_list,
             'pages': page_number,
             'next_page': next_page,
             'page_name': 'subscribes',
             'pagescount': page_count,
+            'color_theme': user.color_theme,
+        }
+
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse('сессия недействительна')
+def subscribers(request):
+    return subscribers_page(request, 1)
+def subscribers_page(request,page_number):
+    if True:
+        page_number = max(1, page_number)
+        user = openaccount(request)
+        if user.guest_name=='undefined guest':
+            return HttpResponse('войдите сначала в свой аккаунт')
+        template = loader.get_template('physicsesc/guest_list.html')
+
+        subscriptions = Subscription.objects.filter(author_id=user.id)[50*(page_number-1):50*page_number]
+        page_count = len(Subscription.objects.filter(author_id=user.id)) // 50 + 1
+        next_page = page_number < page_count
+        authors_id_list = []
+        for subscription in subscriptions:
+            authors_id_list.append(subscription.subscriber.id)
+        guest_list = Guest.objects.filter(id__in = authors_id_list)
+        context = {
+            'page_name_text': 'подписчики',
+            'guest_list': guest_list,
+            'pages': page_number,
+            'next_page': next_page,
+            'page_name': 'subscribes',
+            'pagescount': page_count,
+            'color_theme': user.color_theme,
         }
 
         return HttpResponse(template.render(context, request))
@@ -715,7 +823,7 @@ def subscribes_page(request,page_number):
         return HttpResponse('сессия недействительна')
 
 def myaccount(request):
-    try:
+    if True:
         user = openaccount(request)
 
         template = loader.get_template('physicsesc/user.html')
@@ -724,19 +832,29 @@ def myaccount(request):
 
         subscriptions = user.subscription_set.all()[:100]
 
+        subscribers = Subscription.objects.filter(author_id=user.id)[:100]
+
         for subscription in subscriptions:
+            subscription.task_count = Guest.objects.get(id=subscription.author_id).task_count
+
+            subscription.subscriber_count = Guest.objects.get(id=subscription.author_id).subscriber_count
+
+            subscription.subscription_count = Guest.objects.get(id=subscription.author_id).subscription_count
 
             subscription.author_id = Guest.objects.get(id=subscription.author_id).guest_name
+
 
         context = {
             'tasks_count': tasks_count,
             'user': user,
             'its_me': True,
             'subscriptions': subscriptions,
+            'subscribers': subscribers,
+            'color_theme': user.color_theme,
 
         }
         return HttpResponse(template.render(context, request))
-    except:
+    else:
         return HttpResponse('сессия недействительна')
 
 
@@ -752,10 +870,23 @@ def settings(request):
         'session_key': session_key,
         'sessions': sessions,
         'user': user,
-        'its_me': True
+        'its_me': True,
+        'color_theme': user.color_theme,
 
         }
         return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
+def changecolortheme(request):
+    try:
+        user = openaccount(request)
+        if user=="undefined guest":
+            return HttpResponse('сессия недействительна')
+        color_theme = su_cut(request.POST['color_theme'], 2000)
+        if user.color_theme != color_theme:
+            user.color_theme = color_theme
+            user.save()
+        return settings(request)
     except:
         return HttpResponse('сессия недействительна')
 def closesession(request, session_key):
@@ -773,7 +904,8 @@ def closesession(request, session_key):
         'session_key': session_key,
         'sessions': sessions,
         'user': user,
-        'its_me': True
+        'its_me': True,
+        'color_theme': user.color_theme,
 
         }
         return HttpResponse(template.render(context,request))
@@ -819,7 +951,8 @@ def olympiad_page(request, page_number):
         'page_name': 'olympiad',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -839,7 +972,8 @@ def all_group_page(request, page_number):
         'page_name': 'group',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -859,7 +993,8 @@ def new_group_page(request, page_number):
         'page_name': 'group/new',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -877,7 +1012,8 @@ def popular_group_page(request, page_number):
         'page_name': 'group/popular',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -888,6 +1024,7 @@ def creategroup(request):
     template = loader.get_template('physicsesc/creategroup.html')
     context = {
         'page_name': 'creategroup',
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -991,7 +1128,8 @@ def my_group_page(request, page_number):
         'page_name': 'group/my',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -1016,7 +1154,8 @@ def student_group_page(request, page_number):
         'page_name': 'group/student',
         'pages': page_number,
         'pagescount': page_count,
-        'next_page': next_page
+        'next_page': next_page,
+        'color_theme': user.color_theme,
     }
     #antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -1049,7 +1188,8 @@ def group_page(request, group_id, page_number):
             'page_name': 'group/'+str(group.id),
             'pages': page_number,
             'pagescount': page_count,
-            'next_page': next_page
+            'next_page': next_page,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context,request))
     elif opengroup1=='no':
@@ -1077,7 +1217,8 @@ def creategrouptask(request, group_id):
             'is_author': (opengroup1=='author'),
             'is_helper': (opengroup1=='helper'),
             'group': group,
-            'page_name': 'добавить задание'
+            'page_name': 'добавить задание',
+            'color_theme': user.color_theme,
         }
 
         return HttpResponse(template.render(context, request))
@@ -1141,7 +1282,8 @@ def grouptheme_page(request, group_id, page_number):
             'page_name': 'group/'+str(group.id)+'/theme',
             'pages': page_number,
             'pagescount': page_count,
-            'next_page': next_page
+            'next_page': next_page,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context,request))
     elif opengroup1=='no':
@@ -1164,7 +1306,8 @@ def creategrouptheme(request, group_id):
             'is_author': (opengroup1=='author'),
             'is_helper': (opengroup1=='helper'),
             'group': group,
-            'page_name': 'добавить тему'
+            'page_name': 'добавить тему',
+            'color_theme': user.color_theme,
         }
 
         return HttpResponse(template.render(context, request))
@@ -1229,7 +1372,8 @@ def groupthemetask_page(request, group_id, theme_name, page_number):
             'page_name': 'group/'+str(group.id)+"/theme/"+str(theme_name),
             'pages': page_number,
             'pagescount': page_count,
-            'next_page': next_page
+            'next_page': next_page,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context,request))
     elif opengroup1=='no':
@@ -1246,6 +1390,7 @@ def creategroupapplication(request, group_id):
     template = loader.get_template('physicsesc/creategroupapplication.html')
     context = {
         'group': group,
+        'color_theme': user.color_theme,
 
 
     }
@@ -1296,6 +1441,7 @@ def groupapplication(request, group_id):
             'page_name': 'заявки',
             'applications_helper': applications_helper,
             'applications_student': applications_student,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     elif opengroup1 == 'student':
@@ -1358,6 +1504,7 @@ def approvegroupapplication(request, group_id, user_name, approve_type):
             'page_name': 'заявки',
             'applications_helper': applications_helper,
             'applications_student': applications_student,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     elif opengroup1 == 'student':
@@ -1387,6 +1534,7 @@ def groupparticipant(request, group_id):
             'page_name': 'участники',
             'participant_student': participant_student,
             'participant_helper': participant_helper,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     elif opengroup1 == 'student':
@@ -1452,6 +1600,7 @@ def approvegroupparticipant(request, group_id, user_name, approve_type):
             'page_name': 'участники',
             'participant_student': participant_student,
             'participant_helper': participant_helper,
+            'color_theme': user.color_theme,
         }
         return HttpResponse(template.render(context, request))
     elif opengroup1 == 'student':
@@ -1461,13 +1610,42 @@ def approvegroupparticipant(request, group_id, user_name, approve_type):
     elif opengroup1 == 'no':
         return HttpResponse('у вас нет прав')
 
+
+
+
+
 def livephysics(request):
     user = openaccount(request)
-    return HttpResponse('п....., да я ....')
+    #return HttpResponse('п....., да я ....')
     template = loader.get_template('physicsesc/livephysics.html')
-    context = {}
+    context = {'color_theme': user.color_theme,}
 
     return HttpResponse(template.render(context, request))
+
+def livephysicsshow(request):
+    simulation = livephysicssimulation(request)
+    #return HttpResponse(simulation)
+    if simulation[0] == 'error':
+        template = loader.get_template('physicsesc/livephysics.html')
+        context = {'alert': (simulation[1]),
+        }
+
+        return HttpResponse(template.render(context, request))
+    template = loader.get_template("physicsesc/livephysicsshow.html")
+    context = {
+        'simulation': simulation[1],
+        'field': simulation[2],
+        'simulation_time': simulation[3],
+        'deltatime': simulation[4],
+    }
+    return HttpResponse(template.render(context,request))
+
+
+
+
+
+
+
 
 def articles1(request):
     return articles(request, 'main')
@@ -1497,6 +1675,7 @@ def articles_page(request, page_name, page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     # antiddos(request=request)
     return HttpResponse((template.render(context, request)))
@@ -1516,15 +1695,18 @@ def articletheme_page(request, theme_name, page_number):
         'pagescount': page_count,
         'next_page': next_page,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     # antiddos(request=request)
     return HttpResponse((template.render(context, request)))
 def createarticle(request):
+    user = openaccount(request)
     template = loader.get_template('physicsesc/createarticle.html')
     page_name = 'createarticle'
     context = {
         'page_name': 'articles/' + page_name,
         'pagemenu': True,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 
@@ -1564,6 +1746,7 @@ def article(request,article_id):
     template = loader.get_template('physicsesc/thisarticle.html')
     context = {
         'article': article,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context, request))
 def article_view(request, article_id):
@@ -1574,6 +1757,7 @@ def article_view(request, article_id):
     context = {
         'article': article,
         'article_pages': article_pages,
+        'color_theme': user.color_theme,
     }
     return HttpResponse(template.render(context,request))
 def article_vote(request, article_id, vote_type):
@@ -1595,10 +1779,10 @@ def article_vote(request, article_id, vote_type):
                 article.save()
             article_vote = Article_vote(article=article, vote_type=vote_type, guest=user)
             article_vote.save()
-            return render(request, 'physicsesc/thisarticle.html', {'article': article})
+            return render(request, 'physicsesc/thisarticle.html', {'article': article, 'color_theme':openaccount(request).color_theme})
         else:
             if article.article_vote_set.get(guest=user).vote_type == vote_type:
-                return render(request, 'physicsesc/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку'})
+                return render(request, 'physicsesc/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку', 'color_theme':openaccount(request).color_theme})
             else:
                 if vote_type == True:
                     article.article_vote_against_count = article.article_vote_against_count - 1
@@ -1612,11 +1796,11 @@ def article_vote(request, article_id, vote_type):
             vote = article.article_vote_set.get(guest=user)
             vote.vote_type = vote_type
             vote.save()
-            return render(request, 'physicsesc/thisarticle.html', {'article': article})
+            return render(request, 'physicsesc/thisarticle.html', {'article': article,'color_theme':openaccount(request).color_theme})
 
 
 
-    return render(request, 'physicsesc/thisarticle.html', {'article': article})
+    return render(request, 'physicsesc/thisarticle.html', {'article': article,'color_theme':openaccount(request).color_theme})
 
 def opengroup(user, group_id):
     group = Group.objects.get(id=group_id)
@@ -1637,13 +1821,175 @@ def opengroup(user, group_id):
     return can_open
 
 
+
+
+
+def private_chats(request):
+    return private_chats_page(request,1)
+def private_chats_page(request,page_number):
+    page_number = max(1,page_number)
+    user = openaccount(request)
+    chats_list = user.private_chat_set.all()[(page_number-1)*50:page_number*50]
+    page_count = len(user.private_chat_set.all())//50+1
+    for chat in chats_list:
+        chat.other_author=chat.authors.exclude(id=user.id)[0]
+        if (chat.authors.all()[0]==user):
+            chat.not_checked_messages = chat.author_1_not_checked_messages_count
+            chat.author_1_not_checked_messages_count = 0
+        else:
+            chat.not_checked_messages = chat.author_2_not_checked_messages_count
+            chat.author_2_not_checked_messages_count = 0
+
+        if len(chat.private_message_set.all())>0:
+            chat.last_message = chat.private_message_set.all()[len(chat.private_message_set.all())-1]
+        else:
+            chat.last_message = "нет сообщений"
+        #print((chat.last_message.message_text))
+    next_page = page_number < page_count
+    template = loader.get_template('physicsesc/chats.html')
+    context = {
+        'chats_list': chats_list,
+        'page_name': 'chats/private',
+        'page_name': 'chat/',
+        'page_name_text': 'личные чаты',
+        'pages': page_number,
+        'pagescount': page_count,
+        'next_page': next_page,
+        'pagemenu': True,
+        'color_theme': user.color_theme,
+    }
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def private_chat(request, user_name):
+    return private_chat_page(request, user_name, 1)
+def private_chat_page(request, user_name, page_number):
+    page_number = max(1,page_number)
+    user = openaccount(request)
+    user_request = Guest.objects.get(guest_name=user_name)
+    if len(Private_chat.objects.filter(authors=user.id).filter(authors=user_request.id))>0:
+        this_chat = Private_chat.objects.filter(authors=user.id).get(authors=user_request.id)
+        messages_list = this_chat.private_message_set.all()[(page_number-1)*50:page_number*50]
+        page_count = len(this_chat.private_message_set.all())//50+1
+        for message in messages_list:
+            if message.author.id == user_request.id:
+                if message.is_read == False:
+                    message.is_read = True
+                    message.save()
+                    message.not_read = True
+                else:
+                    message.not_read = False
+            else:
+                if message.is_read == False:
+                    message.not_read = True
+                else:
+                    message.not_read = False
+            message.is_my = message.author.id == user.id
+        next_page = page_number < page_count
+        if (this_chat.authors.all()[0] == user):
+            this_chat.author_1_not_checked_messages_count = 0
+            this_chat.save()
+        else:
+            this_chat.author_2_not_checked_messages_count = 0
+            this_chat.save()
+
+        # chats
+        chats_list = get_private_chats(user)
+
+        context = {
+            'chats_list': chats_list,
+            'messages_list': messages_list,
+            'page_name': 'chat/user/' + user_name + '/',
+            'page_name_text': user_name,
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': False,
+            'color_theme': user.color_theme,
+            'user_request': user_request,
+            'main_link': '/fizhub/account/'+user_name,
+
+        }
+    else:
+        # chats
+        chats_list = get_private_chats(user)
+
+        context = {
+            'chats_list': chats_list,
+            'page_name': 'chat/user/' + user_name + '/',
+            'page_name_text': user_name,
+            'pages': page_number,
+
+            'pagemenu': False,
+            'color_theme': user.color_theme,
+            'user_request': user_request,
+        }
+    template = loader.get_template('physicsesc/private_chat.html')
+
+    #antiddos(request=request)
+    return HttpResponse((template.render(context, request)))
+def get_private_chats(user):
+    chats_list = user.private_chat_set.all()[:200]
+    for chat in chats_list:
+        if (chat.authors.all()[0] == user):
+
+            chat.not_checked_messages = chat.author_1_not_checked_messages_count
+        else:
+
+            chat.not_checked_messages = chat.author_2_not_checked_messages_count
+        chat.other_author = chat.authors.exclude(id=user.id)[0]
+        if len(chat.private_message_set.all()) > 0:
+            chat.last_message = chat.private_message_set.all()[len(chat.private_message_set.all()) - 1]
+        else:
+            chat.last_message = "нет сообщений"
+
+    return chats_list
+
+
+
+def sendprivatemessagepost(request):
+    if True:
+        user = openaccount(request)
+        user_request_id = su_cut(request.POST['user_request_id'], 100)
+        user_request = Guest.objects.get(id=user_request_id)
+        message_text = su_cut(request.POST['message_text'], 3000)
+        if len(Private_chat.objects.filter(authors=user.id).filter(authors=user_request.id))>0:
+
+            chat = Private_chat.objects.filter(authors=user.id).get(authors=user_request.id)
+        else:
+            chat = Private_chat()
+            chat.save()
+            chat.authors.add(user_request.id)
+            chat.authors.add(user.id)
+
+            chat.save()
+
+
+        if len(message_text)>0:
+            chat.private_message_set.create(message_text=message_text, author=user, pub_date=timezone.now())
+            if (chat.authors.all()[0] == user):
+                chat.author_2_not_checked_messages_count += 1
+            else:
+                chat.author_1_not_checked_messages_count += 1
+            chat.save()
+        return private_chat(request, user_request.guest_name)
+
+        return HttpResponse('ddos attack identified and reflected <a href="/physic-in-sesc/main">main page|главная страница(go fuck)</a>')
+    else:
+        return HttpResponse('server error<br><a href="/physic-in-sesc/main>main page</a>')
+
+
+
+
 def openaccount(request):
     try:
         user_name = su_cut(request.COOKIES['user_name'], 40)
         session_key = su_cut(request.COOKIES['session_key'], 100)
         user = Guest.objects.get(guest_name=user_name)
+
         if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
-            return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+            #return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
+            user_name = 'undefined guest'
+            user = Guest.objects.get(guest_name=user_name)
     except:
         user_name = 'undefined guest'
         user = Guest.objects.get(guest_name=user_name)
