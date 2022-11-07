@@ -28,7 +28,7 @@ class Guest(models.Model):
 
 class Guest_session(models.Model):
     guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
-    session_key = models.CharField(max_length=100)
+    session_key = models.CharField(max_length=100, default="its impossible")
     os = models.CharField(max_length=100, default='no name')
     computername = models.CharField(max_length=100, default='no name')
     HTTP_USER_AGENT = models.CharField(max_length=500, default='no name')
@@ -58,15 +58,15 @@ class University(models.Model):
 
 class Ticket(models.Model):
     ticket_name = models.CharField(max_length=100, default='no name')
-    author = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
     ticket_text = models.CharField(max_length=10000, default='no text')
     ticket_type_private = models.BooleanField(default=False)
     pub_date = models.DateTimeField('date published')
-    university_name = models.ForeignKey(University, on_delete=models.SET_NULL)
+    university = models.ForeignKey(University, on_delete=models.SET_NULL)
     study_direction = models.CharField(max_length=50, default="fiit")
-    subject_name = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
-    like_count = models.IntegerField(default=0)
-    dislike_count = models.IntegerField(default=0)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
+    vote_for_count = models.IntegerField(default=0)
+    vote_against_count = models.IntegerField(default=0)
     picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
 
     def __str__(self):
@@ -75,19 +75,15 @@ class Ticket(models.Model):
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
 
-class Like(models.Model):
+class Vote_ticket(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    vote_type = models.BooleanField(default=True)
 
-class Dislike(models.Model):
-    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
-
-
-class Session_tickets(models.Model):
+class Session(models.Model):
     session_name = models.CharField(max_length=50, default="no name")
     session_description = models.CharField(max_length=5000, default="no description")
-    author = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
     university = models.ForeignKey(University, on_delete=models.SET_NULL)
     tickets = models.ManyToManyField(Ticket)
 
@@ -97,10 +93,11 @@ class Session_tickets(models.Model):
 
 class Theorem(models.Model):
     theorem_name = models.CharField(max_length=50, default="no name")
-    author = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
     theorem_text = models.CharField(max_length=10000, default='no text')
+    theorem_proof = models.CharField(max_length=10000, default='no text')
     pub_date = models.DateTimeField('date published')
-    subject_name = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
     vote_for_count = models.IntegerField(default=0)
     vote_against_count = models.IntegerField(default=0)
     picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
@@ -113,16 +110,16 @@ class Theorem(models.Model):
 
 class Vote_theorem(models.Model):
     theorem = models.ForeignKey(Theorem, on_delete=models.CASCADE)
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
     vote_type = models.BooleanField(default=True)
 
 
 class Definition(models.Model):
     definition_name = models.CharField(max_length=50, default="no name")
-    author = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE, default=1)
     definition_text = models.CharField(max_length=10000, default='no text')
     pub_date = models.DateTimeField('date published')
-    subject_name = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_NULL, default=1)
     vote_for_count = models.IntegerField(default=0)
     vote_against_count = models.IntegerField(default=0)
     picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
@@ -135,7 +132,7 @@ class Definition(models.Model):
 
 class Vote_definition(models.Model):
     definition = models.ForeignKey(Definition, on_delete=models.CASCADE)
-    guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
+    by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
     vote_type = models.BooleanField(default=True)
 
 
