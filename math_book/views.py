@@ -5,7 +5,7 @@ from django.core.files.storage import FileSystemStorage
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Subject, University, Ticket, Guest, Session_tickets, Guest_session, Vote_ticket, Theorem, Vote_theorem, Definition, Vote_definition
+from .models import Subject, University, Ticket, Guest, Session, Guest_session, Vote_ticket, Theorem, Vote_theorem, Definition, Vote_definition
 from django.template import loader
 from django.db.models import Q
 from django.urls import reverse
@@ -98,7 +98,7 @@ def get_subject(request, subject_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_subject(request):
-	return show_subject(request,no)
+	return show_subject(request,'all')
 def show_subject(request,sort_type):
 	return show_subject_page(request,sort_type,1)
 def show_subject_page(request,sort_type,page_number):
@@ -106,7 +106,7 @@ def show_subject_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		subjects_list = Subject.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(Subject.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listSubject.html')
 		context = {
@@ -116,7 +116,87 @@ def show_subject_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def show_all_tickets_from_subject(request, subject_id):
+	return show_tickets_from_subject(request, subject_id, 'all')
+def show_tickets_from_subject(request, subject_id, sort_type):
+	return show_tickets_from_subject_page(request, subject_id, sort_type, 1)
+def show_tickets_from_subject_page(request, subject_id, sort_type, page_number):
+	try:
+		guest = open_account_guest(request)
+		subject = Subject.objects.get(pk=subject_id)
+		ticket_set = subject.ticket_set
+		page_count = len(ticket_set)
+		next_page = page_number > page_count
+		tickets_list = subject.ticket_set[:100]
+		template = loader.get_template('math_book/listTicket.html')
+		context = {
+			'tickets_list': tickets_list,
+			'page_name': sort_type,
+			'pages': page_number,
+			'pagescount': page_count,
+			'next_page': next_page,
+			'pagemenu': True,
+			'color_theme': guest.color_theme,
+		}
+		return render(request, template, context)
+def show_all_theorems_from_subject(request, subject_id):
+	return show_theorems_from_subject(request, subject_id, 'all')
+def show_theorems_from_subject(request, subject_id, sort_type):
+	return show_theorems_from_subject_page(request, subject_id, sort_type, 1)
+def show_theorems_from_subject_page(request, subject_id, sort_type, page_number):
+	try:
+		guest = open_account_guest(request)
+		subject = Subject.objects.get(pk=subject_id)
+		theorem_set = subject.theorem_set
+		page_count = len(theorem_set)
+		next_page = page_number > page_count
+		theorems_list = subject.theorem_set[:100]
+		template = loader.get_template('math_book/listTheorem.html')
+		context = {
+			'theorems_list': theorems_list,
+			'page_name': sort_type,
+			'pages': page_number,
+			'pagescount': page_count,
+			'next_page': next_page,
+			'pagemenu': True,
+			'color_theme': guest.color_theme,
+		}
+		return render(request, template, context)
+def show_all_definitions_from_subject(request, subject_id):
+	return show_definitions_from_subject(request, subject_id, 'all')
+def show_definitions_from_subject(request, subject_id, sort_type):
+	return show_definitions_from_subject_page(request, subject_id, sort_type, 1)
+def show_definitions_from_subject_page(request, subject_id, sort_type, page_number):
+	try:
+		guest = open_account_guest(request)
+		subject = Subject.objects.get(pk=subject_id)
+		definition_set = subject.definition_set
+		page_count = len(definition_set)
+		next_page = page_number > page_count
+		definitions_list = subject.definition_set[:100]
+		template = loader.get_template('math_book/listDefinition.html')
+		context = {
+			'definitions_list': definitions_list,
+			'page_name': sort_type,
+			'pages': page_number,
+			'pagescount': page_count,
+			'next_page': next_page,
+			'pagemenu': True,
+			'color_theme': guest.color_theme,
+		}
+		return render(request, template, context)
+def create_subject(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_subject.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -144,7 +224,7 @@ def get_university(request, university_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_university(request):
-	return show_university(request,no)
+	return show_university(request,'all')
 def show_university(request,sort_type):
 	return show_university_page(request,sort_type,1)
 def show_university_page(request,sort_type,page_number):
@@ -152,7 +232,7 @@ def show_university_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		universitys_list = University.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(University.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listUniversity.html')
 		context = {
@@ -162,7 +242,64 @@ def show_university_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def show_all_tickets_from_university(request, university_id):
+	return show_tickets_from_university(request, university_id, 'all')
+def show_tickets_from_university(request, university_id, sort_type):
+	return show_tickets_from_university_page(request, university_id, sort_type, 1)
+def show_tickets_from_university_page(request, university_id, sort_type, page_number):
+	try:
+		guest = open_account_guest(request)
+		university = University.objects.get(pk=university_id)
+		ticket_set = university.ticket_set
+		page_count = len(ticket_set)
+		next_page = page_number > page_count
+		tickets_list = university.ticket_set[:100]
+		template = loader.get_template('math_book/listTicket.html')
+		context = {
+			'tickets_list': tickets_list,
+			'page_name': sort_type,
+			'pages': page_number,
+			'pagescount': page_count,
+			'next_page': next_page,
+			'pagemenu': True,
+			'color_theme': guest.color_theme,
+		}
+		return render(request, template, context)
+def show_all_sessions_from_university(request, university_id):
+	return show_sessions_from_university(request, university_id, 'all')
+def show_sessions_from_university(request, university_id, sort_type):
+	return show_sessions_from_university_page(request, university_id, sort_type, 1)
+def show_sessions_from_university_page(request, university_id, sort_type, page_number):
+	try:
+		guest = open_account_guest(request)
+		university = University.objects.get(pk=university_id)
+		session_set = university.session_set
+		page_count = len(session_set)
+		next_page = page_number > page_count
+		sessions_list = university.session_set[:100]
+		template = loader.get_template('math_book/listSession.html')
+		context = {
+			'sessions_list': sessions_list,
+			'page_name': sort_type,
+			'pages': page_number,
+			'pagescount': page_count,
+			'next_page': next_page,
+			'pagemenu': True,
+			'color_theme': guest.color_theme,
+		}
+		return render(request, template, context)
+def create_university(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_university.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -208,7 +345,7 @@ def get_ticket(request, ticket_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_ticket(request):
-	return show_ticket(request,no)
+	return show_ticket(request,'all')
 def show_ticket(request,sort_type):
 	return show_ticket_page(request,sort_type,1)
 def show_ticket_page(request,sort_type,page_number):
@@ -216,7 +353,7 @@ def show_ticket_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		tickets_list = Ticket.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(Ticket.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listTicket.html')
 		context = {
@@ -226,7 +363,18 @@ def show_ticket_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def create_ticket(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_ticket.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -251,10 +399,10 @@ def send_vote_ticket(request, ticket_id, vote_type):
 				ticket.save()
 			vote_ticket = Vote_ticket(ticket=ticket, vote_type=vote_type, guest=guest)
 			vote_ticket.save()
-			return render(request, 'math_book/thisarticle.html', {'article': article, 'color_theme':open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_ticket.html', {'vote_ticket': vote_ticket, 'color_theme':open_account_guest(request).color_theme})
 		else:
 			if ticket.vote_ticket_set.get(guest=guest).vote_type == vote_type:
-				return render(request, 'math_book/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
+				return render(request, 'math_book/thisVote_ticket.html', {'vote_ticket': vote_ticket, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
 			else:
 				if vote_type == True:
 					ticket.vote_against_count = ticket.vote_against_count - 1
@@ -267,9 +415,9 @@ def send_vote_ticket(request, ticket_id, vote_type):
 			vote_ticket = ticket.vote_ticket_set.get(guest=guest)
 			vote_ticket.vote_type = vote_type
 			vote_ticket.save()
-			return render(request, 'math_book/thisarticle.html',{'ticket': ticket, 'color_theme': open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_ticket.html',{'ticket': ticket, 'color_theme': open_account_guest(request).color_theme})
 	except:
-		return render(request, 'math_book/thisarticle.html',{'ticket': ticket, 'color_theme': open_account_guest(request).color_theme})
+		return render(request, 'math_book/thisVote_ticket.html',{'ticket': ticket, 'color_theme': open_account_guest(request).color_theme})
 def send_session(request, university_id):
 	try:
 		university = University.objects.get(id=university_id)
@@ -292,7 +440,7 @@ def get_session(request, session_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_session(request):
-	return show_session(request,no)
+	return show_session(request,'all')
 def show_session(request,sort_type):
 	return show_session_page(request,sort_type,1)
 def show_session_page(request,sort_type,page_number):
@@ -300,7 +448,7 @@ def show_session_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		sessions_list = Session.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(Session.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listSession.html')
 		context = {
@@ -310,7 +458,18 @@ def show_session_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def create_session(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_session.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -347,7 +506,7 @@ def get_theorem(request, theorem_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_theorem(request):
-	return show_theorem(request,no)
+	return show_theorem(request,'all')
 def show_theorem(request,sort_type):
 	return show_theorem_page(request,sort_type,1)
 def show_theorem_page(request,sort_type,page_number):
@@ -355,7 +514,7 @@ def show_theorem_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		theorems_list = Theorem.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(Theorem.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listTheorem.html')
 		context = {
@@ -365,7 +524,18 @@ def show_theorem_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def create_theorem(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_theorem.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -390,10 +560,10 @@ def send_vote_theorem(request, theorem_id, vote_type):
 				theorem.save()
 			vote_theorem = Vote_theorem(theorem=theorem, vote_type=vote_type, guest=guest)
 			vote_theorem.save()
-			return render(request, 'math_book/thisarticle.html', {'article': article, 'color_theme':open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_theorem.html', {'vote_theorem': vote_theorem, 'color_theme':open_account_guest(request).color_theme})
 		else:
 			if theorem.vote_theorem_set.get(guest=guest).vote_type == vote_type:
-				return render(request, 'math_book/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
+				return render(request, 'math_book/thisVote_theorem.html', {'vote_theorem': vote_theorem, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
 			else:
 				if vote_type == True:
 					theorem.vote_against_count = theorem.vote_against_count - 1
@@ -406,9 +576,9 @@ def send_vote_theorem(request, theorem_id, vote_type):
 			vote_theorem = theorem.vote_theorem_set.get(guest=guest)
 			vote_theorem.vote_type = vote_type
 			vote_theorem.save()
-			return render(request, 'math_book/thisarticle.html',{'theorem': theorem, 'color_theme': open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_theorem.html',{'theorem': theorem, 'color_theme': open_account_guest(request).color_theme})
 	except:
-		return render(request, 'math_book/thisarticle.html',{'theorem': theorem, 'color_theme': open_account_guest(request).color_theme})
+		return render(request, 'math_book/thisVote_theorem.html',{'theorem': theorem, 'color_theme': open_account_guest(request).color_theme})
 def send_definition(request, subject_id):
 	try:
 		subject = Subject.objects.get(id=subject_id)
@@ -440,7 +610,7 @@ def get_definition(request, definition_id):
 		}
 		return HttpResponse(template.render(context, request))
 def show_all_definition(request):
-	return show_definition(request,no)
+	return show_definition(request,'all')
 def show_definition(request,sort_type):
 	return show_definition_page(request,sort_type,1)
 def show_definition_page(request,sort_type,page_number):
@@ -448,7 +618,7 @@ def show_definition_page(request,sort_type,page_number):
 		guest = open_account_guest(request)
 		page_number = max(1, page_number)
 		definitions_list = Definition.objects.filter(task_type_private=False).order_by('-pub_date')[(page_number-1)*50:page_number*50]
-		page_count = len(Task.objects.filter(task_type_private=False))//50+1
+		page_count = len(Definition.objects.filter(task_type_private=False))//50+1
 		next_page = page_number < page_count
 		template = loader.get_template('math_book/listDefinition.html')
 		context = {
@@ -458,7 +628,18 @@ def show_definition_page(request,sort_type,page_number):
 			'pagescount': page_count,
 			'next_page': next_page,
 			'pagemenu': True,
-			'color_theme': user.color_theme,
+			'color_theme': guest.color_theme,
+		}
+		return HttpResponse(template.render(context, request))
+	except:
+		return HttpResponse('error')
+def create_definition(request):
+	try:
+		guest = open_account_guest(request)
+		template = loader.get_template('math_book/create_definition.html')
+		context = {
+			'guest': guest,
+			'color_theme': guest.color_theme,
 		}
 		return HttpResponse(template.render(context, request))
 	except:
@@ -483,10 +664,10 @@ def send_vote_definition(request, definition_id, vote_type):
 				definition.save()
 			vote_definition = Vote_definition(definition=definition, vote_type=vote_type, guest=guest)
 			vote_definition.save()
-			return render(request, 'math_book/thisarticle.html', {'article': article, 'color_theme':open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_definition.html', {'vote_definition': vote_definition, 'color_theme':open_account_guest(request).color_theme})
 		else:
 			if definition.vote_definition_set.get(guest=guest).vote_type == vote_type:
-				return render(request, 'math_book/thisarticle.html', {'article': article, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
+				return render(request, 'math_book/thisVote_definition.html', {'vote_definition': vote_definition, 'alert': 'вы уже поставили такую оценку', 'color_theme':open_account_guest(request).color_theme})
 			else:
 				if vote_type == True:
 					definition.vote_against_count = definition.vote_against_count - 1
@@ -499,6 +680,6 @@ def send_vote_definition(request, definition_id, vote_type):
 			vote_definition = definition.vote_definition_set.get(guest=guest)
 			vote_definition.vote_type = vote_type
 			vote_definition.save()
-			return render(request, 'math_book/thisarticle.html',{'definition': definition, 'color_theme': open_account_guest(request).color_theme})
+			return render(request, 'math_book/thisVote_definition.html',{'definition': definition, 'color_theme': open_account_guest(request).color_theme})
 	except:
-		return render(request, 'math_book/thisarticle.html',{'definition': definition, 'color_theme': open_account_guest(request).color_theme})
+		return render(request, 'math_book/thisVote_definition.html',{'definition': definition, 'color_theme': open_account_guest(request).color_theme})
