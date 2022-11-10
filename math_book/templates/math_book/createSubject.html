@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>math_book</title>
+	
+
+	
+	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
+	<script type="text/javascript">
+		
+		if ('{{alert}}'){
+			alert('{{alert}}')
+		}
+
+		
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>новая задача</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/math_book/login">login|войти</a></div>
+	</div>
+	<div class="menuclosed" id="menu">
+
+	<div class="menusubpart"><a href="/math_book/main/"><symbol>&#8962;</symbol>главная</a></div>
+		<div class="menusubpart"><a href="/math_book/Guests/"><symbol>&#8962;</symbol>Guest</a></div>
+		<div class="menusubpart"><a href="/math_book/Subjects/"><symbol>&#8962;</symbol>Subject</a></div>
+		<div class="menusubpart"><a href="/math_book/Universitys/"><symbol>&#8962;</symbol>University</a></div>
+		<div class="menusubpart"><a href="/math_book/Tickets/"><symbol>&#8962;</symbol>Ticket</a></div>
+		<div class="menusubpart"><a href="/math_book/Sessions/"><symbol>&#8962;</symbol>Session</a></div>
+		<div class="menusubpart"><a href="/math_book/Theorems/"><symbol>&#8962;</symbol>Theorem</a></div>
+		<div class="menusubpart"><a href="/math_book/Definitions/"><symbol>&#8962;</symbol>Definition</a></div>
+
+		<div class="menusubpart"><a href="/math_book/livephysics/"><symbol>&#9872;</symbol>живая физика</a></div>
+		<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
+		<p>&#946; version</p>
+	</div>
+	
+    <div class="bod">
+    
+        <div class="task">
+        	
+        	
+
+
+    <div class="taskheader"><center>новая задача</center></div>
+   
+    <form action="{% url 'math_book:send_postsubject' %}" method="post" enctype="multipart/form-data">	
+    	{% csrf_token %}
+            +++authors
+
+		<div class="tasksubpart">subject_name of subject<input type="text" name="subject_subject_name" placeholder="subject_name of subject"></div>
+		<div class="tasksubpart">subject_description of subject<input type="text" name="subject_subject_description" placeholder="subject_description of subject"></div>
+		<div class="tasksubpart">picture_href of subject<input type="text" name="subject_picture_href" placeholder="picture_href of subject"></div>    <div class="tasksubpart" id="creatorname2"> 
+    </div>
+
+    <div class="tasksubpart">
+    	тема1:
+    	<select type="text" id="theme1" name="theme1">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
+
+    	</select>
+    </div><div class="tasksubpart">	
+    	тема2:
+    	<select type="text" id="theme2" name="theme2">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
+
+    	</select>
+    </div>
+    	<div class="tasksubpart">класс задачи(класс в школе)<input type="number" name="class_name" placeholder="класс"></div>
+    	<div class="tasksubpart">задача приватная(доступна только по ссылке)<input type="checkbox" name="task_type_private" ></div>
+        <textarea id="textarea" placeholder="условие задачи" cols='90' rows='10' name="textarea"></textarea>
+        <div class="tasksubpart">ссылка на картинку<input type="text" value="https://" id="pictureurl" name="pictureurl"></div>
+        <div class="tasksubpart">только для админа и друзей загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="" name="file"></div>
+
+		<center><input type="submit" value="отправить задачу" class="solutionbutton"></center>
+        </form>
+    
+    
+
+    
+
+</div>
+
+</div>
+<script type="text/javascript">
+
+	openaccountfromcookie();
+</script>
+</body>
+</html>
