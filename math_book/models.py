@@ -2,9 +2,9 @@ from django.db import models
 from django.utils import timezone
 
 
-def su_cut(string, len):
-    if len(string) > len:
-        string = string[0:len]
+def su_cut(string, len_string):
+    if len(string) > len_string:
+        string = string[0:len_string]
     return string
 
 
@@ -13,7 +13,7 @@ class Guest(models.Model):
     guest_information = models.CharField(max_length=2000, default="no information")
     guest_password = models.CharField(max_length=50, default="1234")
     guest_icon_href = models.CharField(max_length=200,
-                                       default="https://ustanovkaos.ru/wp-content/uploads/2022/02/06-psevdo-pustaya-ava.jpg")
+                                       default="https://rkn.gov.ru/i/eagle_s.svg")
     guest_rights = models.IntegerField(default=0)
     subscriber_count = models.IntegerField(default=0)
     subscription_count = models.IntegerField(default=0)
@@ -39,22 +39,22 @@ class Guest_session(models.Model):
 
 class Subject(models.Model):
     subject_name = models.CharField(max_length=50, default="no name")
-    subject_description = models.CharField(max_length=5000, default='no description')
-    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
+    subject_text = models.CharField(max_length=10000, default='no text')
+    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/i/eagle_s.svg")
 
     def __str__(self):
-        return str(self.subject_name)+"__"+su_cut(str(self.subject_description), 50)
+        return str(self.subject_name)+"__"+su_cut(str(self.subject_text), 50)
 
 
 class University(models.Model):
     university_shortname = models.CharField(max_length=50, default="noshortname")
     university_name = models.CharField(max_length=100, default="no name")
     university_site = models.CharField(max_length=50, default="no link")
-    university_description = models.CharField(max_length=5000, default='no description')
-    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
+    university_text = models.CharField(max_length=10000, default='no text')
+    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/i/eagle_s.svg")
 
     def __str__(self):
-        return str(self.university_name)+"__"+su_cut(str(self.university_description), 50)
+        return str(self.university_name)+"__"+su_cut(str(self.university_text), 50)
 
 class Ticket(models.Model):
     ticket_name = models.CharField(max_length=100, default='no name')
@@ -67,7 +67,7 @@ class Ticket(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.SET_DEFAULT, default=1)
     vote_for_count = models.IntegerField(default=0)
     vote_against_count = models.IntegerField(default=0)
-    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
+    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/i/eagle_s.svg")
 
     def __str__(self):
         return (self.ticket_name + " text: " + self.ticket_text)
@@ -82,13 +82,13 @@ class Vote_ticket(models.Model):
 
 class Session(models.Model):
     session_name = models.CharField(max_length=50, default="no name")
-    session_description = models.CharField(max_length=5000, default="no description")
+    session_text = models.CharField(max_length=10000, default="no text")
     by_guest = models.ForeignKey(Guest, on_delete=models.SET_DEFAULT, default=1)
     university = models.ForeignKey(University, on_delete=models.SET_DEFAULT, default=1)
     tickets = models.ManyToManyField(Ticket)
 
     def __str__(self):
-        return str(self.session_name)+"__"+su_cut(str(self.session_description), 50)
+        return str(self.session_name)+"__"+su_cut(str(self.session_text), 50)
 
 
 class Theorem(models.Model):
@@ -100,7 +100,7 @@ class Theorem(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.SET_DEFAULT, default=1)
     vote_for_count = models.IntegerField(default=0)
     vote_against_count = models.IntegerField(default=0)
-    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
+    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/i/eagle_s.svg")
 
     def __str__(self):
         return (self.theorem_name + " text: " + self.theorem_text)
@@ -122,7 +122,7 @@ class Definition(models.Model):
     subject = models.ForeignKey(Subject, on_delete=models.SET_DEFAULT, default=1)
     vote_for_count = models.IntegerField(default=0)
     vote_against_count = models.IntegerField(default=0)
-    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/")
+    picture_href = models.CharField(max_length=100, default="https://rkn.gov.ru/i/eagle_s.svg")
 
     def __str__(self):
         return (self.definition_name + " text: " + self.definition_text)
