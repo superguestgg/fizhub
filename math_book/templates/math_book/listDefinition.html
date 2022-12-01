@@ -114,7 +114,8 @@
         	<div id="{{definition.id}}_text" class="textplace" onclick='showtext(id)'>{{definition.definition_text}}</div>
         	<script type="text/javascript"> hiddentext("{{definition.id}}_text");showtext("{{definition.id}}_text");hiddentext("{{definition.id}}_text")</script>
 <div class ="reactions_menu">
-		<like> <a href = "/math_book/definition/{{definition.id}}/vote_for"> likes : {{definition.vote_for_count}} </a> </like></div>        
+		<like> <a href = "/math_book/definition/{{definition.id}}/vote_for"> &#128077; {{definition.vote_for_count}} </a> </like>
+		<report> <a href = "/math_book/definition/{{definition.id}}/vote_against"> &#128078; {{definition.vote_against_count}} </a> </report></div>        
         
         </div>
     {% endfor %}

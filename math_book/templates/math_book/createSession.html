@@ -25,7 +25,7 @@
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>новая задача</center></div>
+		<div class="taskname"><center>создание session</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/math_book/login">login|войти</a></div>
 	</div>
@@ -63,14 +63,7 @@
     <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
-</div>	<div class="menuclosed" id="menu">
-		
-
-
-		<div class="menusubpart"><a href="/math_book/livephysics/"><symbol>&#9872;</symbol>живая физика</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
-		<p>&#946; version</p>
-	</div>
+</div>
 	
     <div class="bod">
     
@@ -78,16 +71,14 @@
         	
         	
 
-{}% url 'math_book:sendpost_session' %}
-    <div class="taskheader"><center>новая задача</center></div>
+    <div class="taskheader"><center>новая session</center></div>
    
-    <form action="{% url 'math_book:sendpost_session' %}" method="post" enctype="multipart/form-data">	
+    <form action="{% url 'math_book:send_session' %}" method="post" enctype="multipart/form-data">	
     	{% csrf_token %}
 
-		<div class="tasksubpart">number of university of session<input type="number" name="session_session_text" placeholder="1"></div>            +++authors
-
-		<div class="tasksubpart">session_name of session<input type="text" name="session_session_name" placeholder="session_name of session"></div>
-		<div class="tasksubpart">session_text of session<input type="text" name="session_session_text" placeholder="session_text of session"></div>    <div class="tasksubpart" id="creatorname2"> 
+		<div class="tasksubpart">number of university of session<input type="number" name="university_id" placeholder="1"></div>
+		<div class="tasksubpart">session_name of session<input type="text" name="session_name" placeholder="session_name of session"></div>
+		<div class="tasksubpart">session_text of session<input type="text" name="session_text" placeholder="session_text of session"></div>    <div class="tasksubpart" id="creatorname2"> 
     </div>
 
     <div class="tasksubpart">
@@ -104,28 +95,14 @@
     		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
 
     	</select>
-    </div><div class="tasksubpart">	
-    	тема2:
-    	<select type="text" id="theme2" name="theme2">
-    		<option value="No theme">No theme</option>
-    		<option value="электричество">электричество</option>
-    		<option value="динамика">динамика</option>
-    		<option value="механика">механика</option>
-    		<option value="конденсаторы">конденсаторы</option>
-    		<option value="рычаги">рычаги</option>
-    		<option value="флуд">флуд</option>
-    		<option value="обсуждение сайта">обсуждение сайта</option>
-    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
-
-    	</select>
     </div>
-    	<div class="tasksubpart">класс задачи(класс в школе)<input type="number" name="class_name" placeholder="класс"></div>
+
     	<div class="tasksubpart">задача приватная(доступна только по ссылке)<input type="checkbox" name="task_type_private" ></div>
         <textarea id="textarea" placeholder="условие задачи" cols='90' rows='10' name="textarea"></textarea>
         <div class="tasksubpart">ссылка на картинку<input type="text" value="https://" id="pictureurl" name="pictureurl"></div>
         <div class="tasksubpart">только для админа и друзей загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="" name="file"></div>
 
-		<center><input type="submit" value="отправить задачу" class="solutionbutton"></center>
+		<center><input type="submit" value="отправить session" class="solutionbutton"></center>
         </form>
     
     

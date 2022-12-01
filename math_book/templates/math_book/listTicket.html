@@ -115,7 +115,8 @@
         	<div id="{{ticket.id}}_text" class="textplace" onclick='showtext(id)'>{{ticket.ticket_text}}</div>
         	<script type="text/javascript"> hiddentext("{{ticket.id}}_text");showtext("{{ticket.id}}_text");hiddentext("{{ticket.id}}_text")</script>
 <div class ="reactions_menu">
-		<like> <a href = "/math_book/ticket/{{ticket.id}}/vote_for"> likes : {{ticket.vote_for_count}} </a> </like></div>        
+		<like> <a href = "/math_book/ticket/{{ticket.id}}/vote_for"> &#128077; {{ticket.vote_for_count}} </a> </like>
+		<report> <a href = "/math_book/ticket/{{ticket.id}}/vote_against"> &#128078; {{ticket.vote_against_count}} </a> </report></div>        
         
         </div>
     {% endfor %}
