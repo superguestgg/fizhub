@@ -4,26 +4,23 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
-	+++style
-	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
 
-	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
-	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
-	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
+
+<script type="text/javascript">
+if ('{{alert}}'){
+	alert('{{alert}}')
+}
+</script>
+<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+
+<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
+
+<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
 	
 	<title>math_book</title>
 	
 
-	+++script
-	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
-	<script type="text/javascript">
-		
-		if ('{{alert}}'){
-			alert('{{alert}}')
-		}
-
-	</script>
 </head>
 <body>
 	<div class="header"> 
@@ -77,7 +74,7 @@
     <div class="bod">
     	
         <div class="task">
-        	<div class="taskheader"><center><a href="/math_book/session/{{session.id}}">{{session.session_name}}</a></center>
+        	<div class="taskheader"><center><a href="/math_book/session/{{session.id}}/">{{session.session_name}}</a></center>
 
 		<i> <a href = "/math_book/university/{{session.university.id}}/">university: {{session.university.university_name}} </a> </i>
 		<b> by <a href = "/math_book/guest/{{session.by_guest.guest.id}}/"> {{session.by_guest.guest_name}} </a> </b>        	{% if is_me %}<b>это ваше</b>{% endif %}
@@ -88,10 +85,7 @@
         	<br><img class="medium" src="{{session.picture_href}}" alt="no image">
 
         {% endif %}
-        <div class="reactions_menu">
-        	<div class="like" ><a href="/math_book/session/{{ session.id }}/vote_for" name="like">like &#128077;| {{session.vote_for_count}}</a></div>
-        	<div class="report" ><a href="/math_book/session/{{ session.id }}/vote_against" name="report">жалоба &#128078;| {{session.vote_against_count}}</a></div>
-        </div>
+
 
         	{% if is_me %}
         	<div class="reactions_menu">
@@ -100,12 +94,7 @@
         	{% endif %}
 
         	</div>
-        	
-        	<div class="solutionbutton" >
-        		<a href="/math_book/{{ task.id }}/solution" name="open solution">открыть решение</a></div>
-        	<div class="solutionbutton" >
-        		<a href="/math_book/{{ task.id }}/makesolution" name="i know solution!">я знаю решение!</a></div>
-        	
+        	<center>привязанные объекты</center><br>
 
         </div>
     

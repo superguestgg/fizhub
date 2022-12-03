@@ -4,23 +4,25 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
-	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/lightbluetheme.css' %}">
-	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
-	<script type="text/javascript" src="https://superguestgg.github.io/me/fizhub/fizhub.js"></script>
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+
+<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
+
+<script type="text/javascript">
+if ('{{alert}}'){
+	alert('{{alert}}')
+}
+</script>
+<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+
+<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
+
+<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
+
 	<title>math_book</title>
 	
 
 	
-	<script type="text/javascript" src="{% static 'physicsesc/fizhub.js' %}"></script>
-	<script type="text/javascript">
-		
-		if ('{{alert}}'){
-			alert('{{alert}}')
-		}
 
-		
-	</script>
 </head>
 <body>
 	<div class="header"> 
@@ -80,31 +82,9 @@
 		<div class="tasksubpart">theorem_name of theorem<input type="text" name="theorem_name" placeholder="theorem_name of theorem"></div>
 		<div class="tasksubpart">theorem_text of theorem<input type="text" name="theorem_text" placeholder="theorem_text of theorem"></div>
 		<div class="tasksubpart">theorem_proof of theorem<input type="text" name="theorem_proof" placeholder="theorem_proof of theorem"></div>
-		<div class="tasksubpart">picture_href of theorem<input type="text" name="picture_href" placeholder="picture_href of theorem"></div>
-		<div class="tasksubpart">vote_for_count of theorem<input type="text" name="vote_for_count" placeholder="vote_for_count of theorem"></div>
-		<div class="tasksubpart">vote_against_count of theorem<input type="text" name="vote_against_count" placeholder="vote_against_count of theorem"></div>    <div class="tasksubpart" id="creatorname2"> 
+		<div class="tasksubpart">picture_href of theorem<input type="text" name="picture_href" placeholder="picture_href of theorem"></div>    <div class="tasksubpart" id="creatorname2"> 
     </div>
 
-    <div class="tasksubpart">
-    	тема1:
-    	<select type="text" id="theme1" name="theme1">
-    		<option value="No theme">No theme</option>
-    		<option value="электричество">электричество</option>
-    		<option value="динамика">динамика</option>
-    		<option value="механика">механика</option>
-    		<option value="конденсаторы">конденсаторы</option>
-    		<option value="рычаги">рычаги</option>
-    		<option value="флуд">флуд</option>
-    		<option value="обсуждение сайта">обсуждение сайта</option>
-    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
-
-    	</select>
-    </div>
-
-    	<div class="tasksubpart">задача приватная(доступна только по ссылке)<input type="checkbox" name="task_type_private" ></div>
-        <textarea id="textarea" placeholder="условие задачи" cols='90' rows='10' name="textarea"></textarea>
-        <div class="tasksubpart">ссылка на картинку<input type="text" value="https://" id="pictureurl" name="pictureurl"></div>
-        <div class="tasksubpart">только для админа и друзей загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="" name="file"></div>
 
 		<center><input type="submit" value="отправить theorem" class="solutionbutton"></center>
         </form>

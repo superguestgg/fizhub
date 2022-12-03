@@ -21,13 +21,11 @@ if ('{{alert}}'){
 	<title>math_book</title>
 	
 
-	
-
 </head>
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><center>создание session</center></div>
+		<div class="taskname"><center>{% if page_name_link %}<a href="{{page_name_link}}">{{page_name_text}}</a>{% else %}{{page_name_text}}{% endif %}</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/math_book/login">login|войти</a></div>
 	</div>
@@ -66,37 +64,56 @@ if ('{{alert}}'){
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
 </div>
+
 	
     <div class="bod">
-    
+    	
         <div class="task">
-        	
-        	
+        	<div class="taskheader">
+        		
+        		<center>приветствуем на нашем сайте, здесь вы можете:</center>
+        	</div>
+        
 
-    <div class="taskheader"><center>новая session</center></div>
-   
-    <form action="{% url 'math_book:send_session' %}" method="post" enctype="multipart/form-data">	
-    	{% csrf_token %}
 
-		<div class="tasksubpart">number of university of session<input type="number" name="university_id" placeholder="1"></div>
-		<div class="tasksubpart">session_name of session<input type="text" name="session_name" placeholder="session_name of session"></div>
-		<div class="tasksubpart">session_text of session<input type="text" name="session_text" placeholder="session_text of session"></div>    <div class="tasksubpart" id="creatorname2"> 
+        
+
+			<div class="tasksubpart">
+				<a href="/math_book/subjects/"><symbol>...</symbol>
+				создавать и просматривать Subject
+			</a></div>
+			<div class="tasksubpart">
+				<a href="/math_book/universitys/"><symbol>...</symbol>
+				создавать и просматривать University
+			</a></div>
+			<div class="tasksubpart">
+				<a href="/math_book/tickets/"><symbol>...</symbol>
+				создавать и просматривать Ticket
+			</a></div>
+			<div class="tasksubpart">
+				<a href="/math_book/sessions/"><symbol>...</symbol>
+				создавать и просматривать Session
+			</a></div>
+			<div class="tasksubpart">
+				<a href="/math_book/theorems/"><symbol>...</symbol>
+				создавать и просматривать Theorem
+			</a></div>
+			<div class="tasksubpart">
+				<a href="/math_book/definitions/"><symbol>...</symbol>
+				создавать и просматривать Definition
+			</a></div>
+        	<div id="creatorname2" class="menusubpart"></div>
+        	
+        
+        
+        </div>
+     
+        </div>
+    
     </div>
-
-
-		<center><input type="submit" value="отправить session" class="solutionbutton"></center>
-        </form>
-    
-    
-
-    
-
-</div>
-
-</div>
 <script type="text/javascript">
-
-	openaccountfromcookie();
+	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
+	openaccountfromcookie("i");
 </script>
 </body>
 </html>
