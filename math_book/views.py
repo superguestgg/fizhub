@@ -112,17 +112,26 @@ def sendaccountpost(request):
         return HttpResponse("server error occurred")
 
 
+def index(request):
+    guest = open_account_guest(request)
+    template = loader.get_template("math_book/indexAll.html")
+    context = {
+        'page_name_text': "math_book",
+        'color_theme': guest.color_theme,
+    }
+    return HttpResponse(template.render(context, request))
+
 def send_subject(request, ):
-    try:
+    if True:
         subject_name = su_cut(request.POST['subject_name'], 50)
         subject_text = su_cut(request.POST['subject_text'], 5000)
         picture_href = su_cut(request.POST['picture_href'], 100)
         subject = Subject(subject_name=subject_name, subject_text=subject_text, picture_href=picture_href)
         subject.save()
         subject_id = subject.id
-        return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + subject_id + '">show you new subject|просмотретьт ваш subject</a>')
-    except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/subject/' + str(subject_id) + '">show you new subject|просмотретьт ваш subject</a>')
+    else:
+        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_subject(request, subject_id):
     try:
         guest = open_account_guest(request)
@@ -160,6 +169,7 @@ def show_subject_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     else:
         return HttpResponse('error')
+
 def show_all_tickets_from_subject(request, subject_id):
     return show_tickets_from_subject(request, subject_id, 'all')
 def show_tickets_from_subject(request, subject_id, sort_type):
@@ -168,23 +178,25 @@ def show_tickets_from_subject_page(request, subject_id, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         subject = Subject.objects.get(pk=subject_id)
-        ticket_set = subject.ticket_set
+        ticket_set = subject.ticket_set.all()
         page_count = len(ticket_set)
         next_page = page_number > page_count
-        tickets_list = subject.ticket_set[:100]
+        tickets_list = subject.ticket_set.all()[:100]
         template = loader.get_template('math_book/listTicket.html')
         context = {
             'tickets_list': tickets_list,
-            'page_name_text': sort_type,
+            'page_name_text': 'Subject tickets',
+            'main_link': '/math_book/subject/'+str(subject_id),
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
             'color_theme': guest.color_theme,
         }
-        return render(request, template, context)
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
 def show_all_theorems_from_subject(request, subject_id):
     return show_theorems_from_subject(request, subject_id, 'all')
 def show_theorems_from_subject(request, subject_id, sort_type):
@@ -193,23 +205,25 @@ def show_theorems_from_subject_page(request, subject_id, sort_type, page_number)
     try:
         guest = open_account_guest(request)
         subject = Subject.objects.get(pk=subject_id)
-        theorem_set = subject.theorem_set
+        theorem_set = subject.theorem_set.all()
         page_count = len(theorem_set)
         next_page = page_number > page_count
-        theorems_list = subject.theorem_set[:100]
+        theorems_list = subject.theorem_set.all()[:100]
         template = loader.get_template('math_book/listTheorem.html')
         context = {
             'theorems_list': theorems_list,
-            'page_name_text': sort_type,
+            'page_name_text': 'Subject theorems',
+            'main_link': '/math_book/subject/'+str(subject_id),
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
             'color_theme': guest.color_theme,
         }
-        return render(request, template, context)
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
 def show_all_definitions_from_subject(request, subject_id):
     return show_definitions_from_subject(request, subject_id, 'all')
 def show_definitions_from_subject(request, subject_id, sort_type):
@@ -218,27 +232,30 @@ def show_definitions_from_subject_page(request, subject_id, sort_type, page_numb
     try:
         guest = open_account_guest(request)
         subject = Subject.objects.get(pk=subject_id)
-        definition_set = subject.definition_set
+        definition_set = subject.definition_set.all()
         page_count = len(definition_set)
         next_page = page_number > page_count
-        definitions_list = subject.definition_set[:100]
+        definitions_list = subject.definition_set.all()[:100]
         template = loader.get_template('math_book/listDefinition.html')
         context = {
             'definitions_list': definitions_list,
-            'page_name_text': sort_type,
+            'page_name_text': 'Subject definitions',
+            'main_link': '/math_book/subject/'+str(subject_id),
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
             'color_theme': guest.color_theme,
         }
-        return render(request, template, context)
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
+
 def create_subject(request):
     try:
         guest = open_account_guest(request)
-        template = loader.get_template('math_book/create_subject.html')
+        template = loader.get_template('math_book/createSubject.html')
         context = {
             'guest': guest,
             'page_name_text': "creating subject",
@@ -257,7 +274,7 @@ def send_university(request, ):
         university = University(university_shortname=university_shortname, university_name=university_name, university_site=university_site, university_text=university_text, picture_href=picture_href)
         university.save()
         university_id = university.id
-        return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + university_id + '">show you new university|просмотретьт ваш university</a>')
+        return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/university/' + str(university_id) + '">show you new university|просмотретьт ваш university</a>')
     except:
         HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_university(request, university_id):
@@ -281,7 +298,7 @@ def show_university_page(request,sort_type,page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        universitys_list = University.objects.all().order_by('-pub_date')[(page_number-1)*50:page_number*50]
+        universitys_list = University.objects.all()[(page_number-1)*50:page_number*50]
         page_count = len(University.objects.all())//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listUniversity.html')
@@ -297,6 +314,7 @@ def show_university_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def show_all_tickets_from_university(request, university_id):
     return show_tickets_from_university(request, university_id, 'all')
 def show_tickets_from_university(request, university_id, sort_type):
@@ -305,23 +323,25 @@ def show_tickets_from_university_page(request, university_id, sort_type, page_nu
     try:
         guest = open_account_guest(request)
         university = University.objects.get(pk=university_id)
-        ticket_set = university.ticket_set
+        ticket_set = university.ticket_set.all()
         page_count = len(ticket_set)
         next_page = page_number > page_count
-        tickets_list = university.ticket_set[:100]
+        tickets_list = university.ticket_set.all()[:100]
         template = loader.get_template('math_book/listTicket.html')
         context = {
             'tickets_list': tickets_list,
-            'page_name_text': sort_type,
+            'page_name_text': 'University tickets',
+            'main_link': '/math_book/university/'+str(university_id),
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
             'color_theme': guest.color_theme,
         }
-        return render(request, template, context)
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
 def show_all_sessions_from_university(request, university_id):
     return show_sessions_from_university(request, university_id, 'all')
 def show_sessions_from_university(request, university_id, sort_type):
@@ -330,27 +350,29 @@ def show_sessions_from_university_page(request, university_id, sort_type, page_n
     try:
         guest = open_account_guest(request)
         university = University.objects.get(pk=university_id)
-        session_set = university.session_set
+        session_set = university.session_set.all()
         page_count = len(session_set)
         next_page = page_number > page_count
-        sessions_list = university.session_set[:100]
+        sessions_list = university.session_set.all()[:100]
         template = loader.get_template('math_book/listSession.html')
         context = {
             'sessions_list': sessions_list,
-            'page_name_text': sort_type,
+            'page_name_text': 'University sessions',
+            'main_link': '/math_book/university/'+str(university_id),
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
             'color_theme': guest.color_theme,
         }
-        return render(request, template, context)
+        return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
 def create_university(request):
     try:
         guest = open_account_guest(request)
-        template = loader.get_template('math_book/create_university.html')
+        template = loader.get_template('math_book/createUniversity.html')
         context = {
             'guest': guest,
             'page_name_text': "creating university",
@@ -359,8 +381,10 @@ def create_university(request):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
-def send_ticket(request, university_id, subject_id):
-    try:
+def send_ticket(request):
+    if True:
+        university_id = su_cut(request.POST['university_id'], 100)
+        subject_id = su_cut(request.POST['subject_id'], 100)
         university = University.objects.get(id=university_id)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
@@ -385,13 +409,17 @@ def send_ticket(request, university_id, subject_id):
         except:
             ticket_type_private = False
         if len(guest.ticket_set.filter(ticket_text=ticket_text)) == 0:
-            guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private, vote_for_count=vote_for_count, vote_against_count=vote_against_count, ticket_name=ticket_name, ticket_text=ticket_text, study_direction=study_direction, picture_href=picture_href)
-            ticket_id = guest.ticket_set.get(ticket_name=ticket_name).id
-            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + ticket_id + '">back to ticket | обратно к ticket</a>')
+            guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private,
+                                    vote_for_count=vote_for_count, vote_against_count=vote_against_count,
+                                    ticket_name=ticket_name, ticket_text=ticket_text,
+                                    study_direction=study_direction, picture_href=picture_href,
+                                    pub_date=timezone.now())
+            ticket_id = guest.ticket_set.get(ticket_text=ticket_text).id
+            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(ticket_id) + '">back to ticket | обратно к ticket</a>')
         else:
-            return HttpResponse('ddos attack identified and reflected <a href="//main">main page|главная страница(go fuck)</a>')
-    except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+            return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
+    else:
+        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_ticket(request, ticket_id):
     try:
         guest = open_account_guest(request)
@@ -534,7 +562,7 @@ def show_session_page(request,sort_type,page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        sessions_list = Session.objects.all().order_by('-pub_date')[(page_number-1)*50:page_number*50]
+        sessions_list = Session.objects.all()[(page_number-1)*50:page_number*50]
         page_count = len(Session.objects.all())//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listSession.html')
@@ -562,30 +590,23 @@ def create_session(request):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
-def send_theorem(request, subject_id):
-    try:
+def send_theorem(request):
+    if True:
+        subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
         theorem_name = su_cut(request.POST['theorem_name'], 50)
         theorem_text = su_cut(request.POST['theorem_text'], 10000)
         theorem_proof = su_cut(request.POST['theorem_proof'], 10000)
         picture_href = su_cut(request.POST['picture_href'], 100)
-        vote_for_count = su_cut(request.POST['vote_for_count'], 10)
-        if vote_for_count.isdigit() == False:
-            vote_for_count = 0
-        vote_for_count = int(vote_for_count)
-        vote_against_count = su_cut(request.POST['vote_against_count'], 10)
-        if vote_against_count.isdigit() == False:
-            vote_against_count = 0
-        vote_against_count = int(vote_against_count)
         if len(guest.theorem_set.filter(theorem_text=theorem_text)) == 0:
-            guest.theorem_set.create(subject=subject, vote_for_count=vote_for_count, vote_against_count=vote_against_count, theorem_name=theorem_name, theorem_text=theorem_text, theorem_proof=theorem_proof, picture_href=picture_href)
+            guest.theorem_set.create(subject=subject, theorem_name=theorem_name, theorem_text=theorem_text, theorem_proof=theorem_proof, picture_href=picture_href, pub_date=timezone.now())
             theorem_id = guest.theorem_set.get(theorem_name=theorem_name).id
-            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + theorem_id + '">back to theorem | обратно к theorem</a>')
+            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/theorem/' + str(theorem_id) + '">back to theorem | обратно к theorem</a>')
         else:
-            return HttpResponse('ddos attack identified and reflected <a href="//main">main page|главная страница(go fuck)</a>')
-    except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+            return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
+    else:
+        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_theorem(request, theorem_id):
     try:
         guest = open_account_guest(request)
@@ -623,13 +644,13 @@ def show_theorem_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def create_theorem(request):
     try:
         guest = open_account_guest(request)
-        template = loader.get_template('math_book/create_theorem.html')
+        template = loader.get_template('math_book/createTheorem.html')
         context = {
             'guest': guest,
-            'page_name_text': "creating theorem",
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
