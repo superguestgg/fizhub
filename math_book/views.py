@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
+#from django.
 from django.utils import timezone
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
@@ -382,24 +383,16 @@ def create_university(request):
     except:
         return HttpResponse('error')
 def send_ticket(request):
-    if True:
-        university_id = su_cut(request.POST['university_id'], 100)
-        subject_id = su_cut(request.POST['subject_id'], 100)
+    try:
+        university_id = su_cut(request.POST['university_id'], 10)
         university = University.objects.get(id=university_id)
+        subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
         ticket_name = su_cut(request.POST['ticket_name'], 100)
         ticket_text = su_cut(request.POST['ticket_text'], 10000)
         study_direction = su_cut(request.POST['study_direction'], 50)
         picture_href = su_cut(request.POST['picture_href'], 100)
-        vote_for_count = su_cut(request.POST['vote_for_count'], 10)
-        if vote_for_count.isdigit() == False:
-            vote_for_count = 0
-        vote_for_count = int(vote_for_count)
-        vote_against_count = su_cut(request.POST['vote_against_count'], 10)
-        if vote_against_count.isdigit() == False:
-            vote_against_count = 0
-        vote_against_count = int(vote_against_count)
         ticket_type_private = False
         try:
             if request.POST['ticket_type_private']:
@@ -409,17 +402,14 @@ def send_ticket(request):
         except:
             ticket_type_private = False
         if len(guest.ticket_set.filter(ticket_text=ticket_text)) == 0:
-            guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private,
-                                    vote_for_count=vote_for_count, vote_against_count=vote_against_count,
-                                    ticket_name=ticket_name, ticket_text=ticket_text,
-                                    study_direction=study_direction, picture_href=picture_href,
-                                    pub_date=timezone.now())
-            ticket_id = guest.ticket_set.get(ticket_text=ticket_text).id
+            guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private, pub_date=timezone.now(), ticket_name=ticket_name, ticket_text=ticket_text, study_direction=study_direction, picture_href=picture_href)
+            ticket_id = guest.ticket_set.get(ticket_name=ticket_name).id
             return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(ticket_id) + '">back to ticket | обратно к ticket</a>')
         else:
             return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
-    else:
+    except:
         return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+
 def get_ticket(request, ticket_id):
     try:
         guest = open_account_guest(request)
@@ -433,6 +423,7 @@ def get_ticket(request, ticket_id):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('sorry, it seems, it a server error')
+
 def show_all_ticket(request):
     return show_ticket(request,'all')
 def show_ticket(request,sort_type):
@@ -527,20 +518,21 @@ def send_vote_ticket(request, ticket_id, vote_type):
             return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
-def send_session(request, university_id):
+def send_session(request):
     try:
+        university_id = su_cut(request.POST['university_id'], 10)
         university = University.objects.get(id=university_id)
         guest = open_account_guest(request)
         session_name = su_cut(request.POST['session_name'], 50)
-        session_text = su_cut(request.POST['session_text'], 5000)
+        session_text = su_cut(request.POST['session_text'], 10000)
         if len(guest.session_set.filter(session_text=session_text)) == 0:
             guest.session_set.create(university=university, session_name=session_name, session_text=session_text)
             session_id = guest.session_set.get(session_name=session_name).id
-            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + session_id + '">back to session | обратно к session</a>')
+            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/session/' + str(session_id) + '">back to session | обратно к session</a>')
         else:
-            return HttpResponse('ddos attack identified and reflected <a href="//main">main page|главная страница(go fuck)</a>')
+            return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_session(request, session_id):
     try:
         guest = open_account_guest(request)
@@ -578,18 +570,20 @@ def show_session_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def create_session(request):
     try:
         guest = open_account_guest(request)
-        template = loader.get_template('math_book/create_session.html')
+        template = loader.get_template('math_book/createSession.html')
         context = {
             'guest': guest,
-            'page_name_text': "creating session",
+            'page_name_text': 'creating session',
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def send_theorem(request):
     if True:
         subject_id = su_cut(request.POST['subject_id'], 10)
@@ -618,6 +612,8 @@ def get_theorem(request, theorem_id):
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
+    except Theorem.DoesNotExist:
+        return HttpResponse('theorem not found')
     except:
         return HttpResponse('sorry, it seems, it a server error')
 def show_all_theorem(request):
@@ -714,29 +710,22 @@ def send_vote_theorem(request, theorem_id, vote_type):
             return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
-def send_definition(request, subject_id):
+def send_definition(request):
     try:
+        subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
         definition_name = su_cut(request.POST['definition_name'], 50)
         definition_text = su_cut(request.POST['definition_text'], 10000)
         picture_href = su_cut(request.POST['picture_href'], 100)
-        vote_for_count = su_cut(request.POST['vote_for_count'], 10)
-        if vote_for_count.isdigit() == False:
-            vote_for_count = 0
-        vote_for_count = int(vote_for_count)
-        vote_against_count = su_cut(request.POST['vote_against_count'], 10)
-        if vote_against_count.isdigit() == False:
-            vote_against_count = 0
-        vote_against_count = int(vote_against_count)
         if len(guest.definition_set.filter(definition_text=definition_text)) == 0:
-            guest.definition_set.create(subject=subject, vote_for_count=vote_for_count, vote_against_count=vote_against_count, definition_name=definition_name, definition_text=definition_text, picture_href=picture_href)
+            guest.definition_set.create(subject=subject, pub_date=timezone.now(), definition_name=definition_name, definition_text=definition_text, picture_href=picture_href)
             definition_id = guest.definition_set.get(definition_name=definition_name).id
-            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/' + definition_id + '">back to definition | обратно к definition</a>')
+            return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/definition/' + str(definition_id) + '">back to definition | обратно к definition</a>')
         else:
-            return HttpResponse('ddos attack identified and reflected <a href="//main">main page|главная страница(go fuck)</a>')
+            return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
 def get_definition(request, definition_id):
     try:
         guest = open_account_guest(request)
@@ -751,10 +740,10 @@ def get_definition(request, definition_id):
     except:
         return HttpResponse('sorry, it seems, it a server error')
 def show_all_definition(request):
-    return show_definition(request, 'all')
+    return show_definition(request,'all')
 def show_definition(request,sort_type):
     return show_definition_page(request,sort_type,1)
-def show_definition_page(request,sort_type,page_number):
+def show_definition_page(request, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
@@ -765,6 +754,7 @@ def show_definition_page(request,sort_type,page_number):
         context = {
             'definitions_list': definitions_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/definitions/'+sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -774,18 +764,20 @@ def show_definition_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def create_definition(request):
     try:
         guest = open_account_guest(request)
-        template = loader.get_template('math_book/create_definition.html')
+        template = loader.get_template('math_book/createDefinition.html')
         context = {
             'guest': guest,
-            'page_name_text': "creating definition",
+            'page_name_text': 'creating definition',
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 def send_vote_definition(request, definition_id, vote_type):
     try:
         definition = Definition.objects.get(id=definition_id)
