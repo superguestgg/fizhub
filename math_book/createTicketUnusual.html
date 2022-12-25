@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>math_book 	makingticket</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
+
+	<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
+	<script type="text/javascript">
+	if ('{{alert}}'){
+		alert('{{alert}}')
+	}
+	</script>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://superguestgg.github.io/session/forsession.css" media="all">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/session/forMakingTicket.css">
+
+
+	<!-- KaTeX -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+    <!-- The loading of KaTeX is deferred to speed up page rendering -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.js" integrity="sha384-97gW6UIJxnlKemYavrqDHSX3SiygeOwIZhwyOKRfSaf0JWKRVj9hLASHgFTzT+0O" crossorigin="anonymous"></script>
+
+	<!-- <link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css"> -->
+
+	<script>
+    	function loadLatex(id_from, id_for){
+    		resultText="";
+    		text=document.getElementById(id_from).innerHTML;
+    		typeElementNow=0;
+    		formula="";
+    		for (let i=0;i<=text.length;i++){
+    			if (text[i]=="$"){
+    				typeElementNow++;
+    				typeElementNow %= 2;
+    				resultText+=katex.renderToString(formula,{throwOnError: true});
+    				formula="";
+    			} else if (typeElementNow==1){
+    				formula+=text[i];
+    			} else {
+    				if (text[i]=="\\"){
+    					
+    					console.log(text[i+1]);
+    					if (text[i+1]=="i" && text[i+2]=="t" && text[i+3]=="e" && text[i+4]=="m"){
+    						resultText+="<br>";
+    						i+=4;
+    					}
+    					if (text[i+1]=="e" && text[i+2]=="n" && text[i+3]=="d"){
+    						resultText+="<br>";
+    						i+=3;
+    					}
+    					if (text[i+1]=="b" && text[i+2]=="e" && text[i+3]=="g" && text[i+4]=="i" && text[i+5]=="n"){
+    						resultText+="<br>";
+    						i+=5;
+    					}
+    				}
+    				else{
+    					resultText+=text[i];
+    				}
+    			}
+    		}
+    		document.getElementById(id_for).innerHTML=resultText;
+    	}
+    </script>
+</head>
+<body>
+	<div class="menuadd"><h2>меню создания элементов</h2><p><br>
+		<label for="v0"><input type="radio" id="v0" value="def" name="input">определение<br></label>
+		<label for="v1"><input type="radio" id="v1" value="the" name="input" checked>теорема<br></label>
+		<label for="v2"><input type="radio" id="v2" value="img" name="input">картинка<br></label>
+		<div class="makerbutton" onclick="makeelement()">создать элемент</div>
+		<div id="preview" class="previewwhennotshow" onclick="getpreview()">предпросмотр</div>
+		<div class="end" id="end"></div>
+		<div id="closepreview" onclick='document.getElementById("preview").className="previewwhennotshow";document.getElementById("closepreview").className=null;document.getElementById("preview").innerHTML="предпросмотр";'></div>
+	</p></div>
+
+
+
+	<div class="all"><a href="https://superguestgg.github.io/me/" target="_blank">other projects</a>
+		<a href="https://phs3.na4u.ru/math_book/" target="_blank">главная страница</a>
+		<a href="https://phs3.na4u.ru/math_book/tickets/new/" target="_blank">новые билеты</a>
+		<h2> название билета</h2><input type="text" id="name"></div>
+
+
+	<form action="{% url 'math_book:send_ticket' %}" method="post" enctype="multipart/form-data">	
+	<div class="all" id="all">
+		
+		<center><input type="submit" value="отправить ticket" class="solutionbutton"></center>
+        
+    	{% csrf_token %}
+	</div>
+	</form>
+
+	<div class="getticket" onclick="generateticket()" id="generate">сгенерировать сайт</div>
+
+
+	<script type="text/javascript">
+		let all = "";
+		let selectedvariant = 1;
+		let newelement = "";
+		let n = 1;
+		function makeelement() {
+
+			for (let j = 0; j <= 2; j++) {
+				if (document.getElementById(`v${j}`).checked) {
+					selectedvariant = j;
+					break;
+				}
+			}
+			newelement = document.createElement("p");
+			if (selectedvariant == 0) {
+				newelement.innerHTML = "<div class='definition2' id='"+n+"' name='definition'>определение<textarea class='forbiginput'id='text"+n+"'>определение</textarea></div>"
+			} else if (selectedvariant == 1) {
+				newelement.innerHTML = "<div class='theorema2' id='"+n+"' name='theorema'>теорема<textarea class='forbiginput' id='name"+n+"'>место для названия</textarea> <textarea class='forbiginput' id='text"+n+"'>доказательство:</textarea></div>"
+			} else if (selectedvariant == 2) {
+				newelement.innerHTML = "<div class='image2' id='"+n+"' name='image'>картинка||ссылка на картинку<textarea class='forbiginput' id='text"+n+"'>https://</textarea></div>"
+			}
+			document.getElementById("all").append(newelement);
+			n++;
+		}
+		let thiss="";
+		/* sheet started
+		function improveticket() {
+			let lengthofthiss = 0
+			for (let i = 1; i<n; i++) {
+				thiss = document.getElementById(i);
+				if (thiss.className == "definition") {
+					thiss = document.getElementById(`text${i}`).value;
+					thiss = thiss + "^_#_";
+					lengthofthiss = thiss.match("^").length;
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("^", "<<i></i>sup>");
+						thiss = thiss.replace("_", "<<i></i>/sup>");
+					}
+					lengthofthiss = thiss.match("#").length;
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("#", "<<i></i>sub>");
+						thiss = thiss.replace("_", "<<i></i>/sub>");
+					}
+					document.getElementById(`text${i}`).value = thiss;
+				} else if (thiss.className == "theorema") {
+					thiss = document.getElementById(`name${i}`).value;
+					thiss = thiss + "^_#_";
+					lengthofthiss = thiss.match("^").length;
+
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("^", "<<i></i>sup>");
+						thiss = thiss.replace("_", "<<i></i>/sup>");
+					}
+					lengthofthiss = thiss.match("#").length;
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("#", "<<i></i>sub>");
+						thiss = thiss.replace("_", "<<i></i>/sub>");
+					}
+					document.getElementById(`name${i}`).value = thiss;
+					thiss = document.getElementById(`text${i}`).value;
+					thiss = thiss + "^_#_";
+					lengthofthiss = thiss.match("^").length;
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("^", "<<i></i>sup>");
+						thiss = thiss.replace("_", "<<i></i>/sup>");
+					}
+					lengthofthiss = thiss.match("#").length;
+					for (let nm = 0; nm < lengthofthiss; nm++) {
+						thiss = thiss.replace("#", "<<i></i>sub>");
+						thiss = thiss.replace("_", "<<i></i>/sub>");
+					}
+					document.getElementById(`text${i}`).value = thiss;
+				}
+			}	
+		} sheet ended*/
+		function upgradesome(ticket){
+			ticket+="^#__";
+			let k = 0
+			len=ticket.match("#").length+999;
+			for (k = 0; k<=len; k++){
+				ticket = ticket.replace("#", "&lt;sub&gt;");
+
+			}
+			len=ticket.match("_").length+999;
+			for (k = 0; k<=len; k++){
+				ticket = ticket.replace("_", "&lt;/sub&gt;&lt;/sup&gt;");
+
+			}
+			fuckthis=ticket.match("^");
+			len=fuckthis.length+999;
+
+			for (k = 0; k<=len; k++){
+				ticket = ticket.replace("^", "&lt;sup&gt;");
+
+
+			}
+			for (k = 0; k<=999; k++){
+				ticket = ticket.replace("<", "&lt;");
+				ticket = ticket.replace(">", "&gt;");
+			}
+			return ticket;
+		}
+
+		let ticket = "";
+		function generateticket() {
+			ticket = "";
+			ticket=ticket+document.getElementById("name").value
+			document.getElementById("generate").className = "getticketafter";
+			let thiss="";
+			for (let i = 1; i<n; i++) {
+				thiss = document.getElementById(i);
+				if (thiss.className == "definition2") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";
+			
+				} if (thiss.className == "theorema2") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+document.getElementById(`name${i}`).value + "&lt;/b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/div&gt;";
+			
+				} else if (thiss.className == "image2") {
+					ticket = ticket + "<<i></i>img class='big' src='"+ document.getElementById(`text${i}`).value+"'>";
+			
+				}
+			}
+			document.getElementById("end").innerHTML = upgradesome(ticket);
+		}
+	</script>
+	<script type="text/javascript">
+		function upgradeticket(){}
+		function getpreview(){
+			generateticket();
+			for (let i = 0; i<=999; i++){
+				ticket=ticket.replace("&lt;", "<");
+				ticket=ticket.replace("&gt;", ">");
+			}
+			document.getElementById("preview").className="previewwhenshow";
+			document.getElementById("closepreview").className="closepreviewwhenshow";
+
+			document.getElementById("preview").innerHTML=ticket;
+			loadLatex("preview","preview");
+		}
+	</script>
+</body>
+</html>
