@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<title>math_book 	makingticket</title>
-
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
 
@@ -15,8 +15,6 @@
 	}
 	</script>
 
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="https://superguestgg.github.io/session/forsession.css" media="all">
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/session/forMakingTicket.css">
 
@@ -53,11 +51,11 @@
     						resultText+="<br>";
     						i+=4;
     					}
-    					if (text[i+1]=="e" && text[i+2]=="n" && text[i+3]=="d"){
+    					if (text[i+1]=="e" && text[i+2]=="itemsCount" && text[i+3]=="d"){
     						resultText+="<br>";
     						i+=3;
     					}
-    					if (text[i+1]=="b" && text[i+2]=="e" && text[i+3]=="g" && text[i+4]=="i" && text[i+5]=="n"){
+    					if (text[i+1]=="b" && text[i+2]=="e" && text[i+3]=="g" && text[i+4]=="i" && text[i+5]=="itemsCount"){
     						resultText+="<br>";
     						i+=5;
     					}
@@ -74,8 +72,10 @@
 <body>
 	<div class="menuadd"><h2>меню создания элементов</h2><p><br>
 		<label for="v0"><input type="radio" id="v0" value="def" name="input">определение<br></label>
-		<label for="v1"><input type="radio" id="v1" value="the" name="input" checked>теорема<br></label>
-		<label for="v2"><input type="radio" id="v2" value="img" name="input">картинка<br></label>
+		<label for="v1"><input type="radio" id="v1" value="def" name="input">ссылка на определение<br></label>
+		<label for="v2"><input type="radio" id="v2" value="the" name="input" checked>теорема<br></label>
+		<label for="v3"><input type="radio" id="v3" value="the" name="input">ссылка на теорему<br></label>
+		<label for="v4"><input type="radio" id="v4" value="txt" name="input">текст<br></label>
 		<div class="makerbutton" onclick="makeelement()">создать элемент</div>
 		<div id="preview" class="previewwhennotshow" onclick="getpreview()">предпросмотр</div>
 		<div class="end" id="end"></div>
@@ -84,32 +84,41 @@
 
 
 
-	<div class="all"><a href="https://superguestgg.github.io/me/" target="_blank">other projects</a>
+	<div class="all">
+		<h2>навигация</h2>
+		<a href="https://superguestgg.github.io/me/" target="_blank">other projects</a>
 		<a href="https://phs3.na4u.ru/math_book/" target="_blank">главная страница</a>
 		<a href="https://phs3.na4u.ru/math_book/tickets/new/" target="_blank">новые билеты</a>
-		<h2> название билета</h2><input type="text" id="name"></div>
+	</div>
 
 
 	<form action="{% url 'math_book:send_ticket' %}" method="post" enctype="multipart/form-data">	
 	<div class="all" id="all">
-		
-		<center><input type="submit" value="отправить ticket" class="solutionbutton"></center>
-        
-    	{% csrf_token %}
+		{% csrf_token %}
+        <input type="hidden" name="items_count" id="items_count" value="0">
+    	<div class="tasksubpart">number of university of ticket<input type="number" name="university_id" placeholder="1"></div>
+		<div class="tasksubpart">number of subject of ticket<input type="number" name="subject_id" placeholder="1"></div>
+		<div class="tasksubpart">ticket_name of ticket<input type="text" name="ticket_name" id="ticket_name" placeholder="ticket_name of ticket"></div>
+		<div class="tasksubpart">ticket_text of ticket<input type="text" name="ticket_text" placeholder="ticket_text of ticket"></div>
+		<div class="tasksubpart">study_direction of ticket<input type="text" name="study_direction" placeholder="study_direction of ticket"></div>
+		<div class="tasksubpart">picture_href of ticket<input type="text" name="picture_href" placeholder="picture_href of ticket"></div>    
+		<div class="tasksubpart" id="creatorname2"> </div>
 	</div>
-	</form>
+	
 
-	<div class="getticket" onclick="generateticket()" id="generate">сгенерировать сайт</div>
 
+	<div class="getticket" onclick="generateticket()" id="generate"><center>сгенерировать билет</center></div>
+	<input type="submit" name="submit" value="отправить билет" class="getticket">
+</form>
 
 	<script type="text/javascript">
 		let all = "";
-		let selectedvariant = 1;
-		let newelement = "";
-		let n = 1;
-		function makeelement() {
+		let itemsCount = 0;
 
-			for (let j = 0; j <= 2; j++) {
+		function makeelement() {
+			let selectedvariant = 1;
+			let newelement = "";
+			for (let j = 0; j <= 4; j++) {
 				if (document.getElementById(`v${j}`).checked) {
 					selectedvariant = j;
 					break;
@@ -117,66 +126,43 @@
 			}
 			newelement = document.createElement("p");
 			if (selectedvariant == 0) {
-				newelement.innerHTML = "<div class='definition2' id='"+n+"' name='definition'>определение<textarea class='forbiginput'id='text"+n+"'>определение</textarea></div>"
+				newelement.innerHTML = `<div class='definition2' id='${itemsCount}' name='definition'>определение
+				<input type='hidden' name='item${itemsCount}' value='definition'>
+				<textarea class='forbiginput' id='name${itemsCount}' name='name${itemsCount}'>место для названия</textarea>
+				<textarea class='forbiginput' id='text${itemsCount}' name='text${itemsCount}'>определение</textarea>
+				<textarea class='forbiginput' id='image${itemsCount}' name='image${itemsCount}'>ссылка на картинку</textarea>
+				</div>`
 			} else if (selectedvariant == 1) {
-				newelement.innerHTML = "<div class='theorema2' id='"+n+"' name='theorema'>теорема<textarea class='forbiginput' id='name"+n+"'>место для названия</textarea> <textarea class='forbiginput' id='text"+n+"'>доказательство:</textarea></div>"
+				newelement.innerHTML = `<div class='definition2' id='${itemsCount}' name='definition_link'>номер определения
+				<input type='hidden' name='item${itemsCount}' value='definition_link'>
+				<div class="tasksubpart"> <input type="number" id='text${itemsCount}' name='text${itemsCount}' placeholder="место для номера"></div>
+				</div>`
 			} else if (selectedvariant == 2) {
-				newelement.innerHTML = "<div class='image2' id='"+n+"' name='image'>картинка||ссылка на картинку<textarea class='forbiginput' id='text"+n+"'>https://</textarea></div>"
+				newelement.innerHTML = `<div class='theorema2' id='${itemsCount}' name='theorema'>теорема
+				<input type='hidden' name='item${itemsCount}' value='theorema'>
+				<textarea class='forbiginput' id='name${itemsCount}' name='name${itemsCount}'>место для названия</textarea>
+				<textarea class='forbiginput' id='text${itemsCount}' name='text${itemsCount}'>условие:</textarea>
+				<textarea class='forbiginput' id='proof${itemsCount}' name='proof${itemsCount}'>доказательство:</textarea>
+				<textarea class='forbiginput' id='image${itemsCount}' name='image${itemsCount}'>ссылка на картинку</textarea>
+				</div>`
+			} else if (selectedvariant == 3) {
+				newelement.innerHTML = `<div class='theorema2' id='${itemsCount}' name='theorem_link'>номер теоремы
+				<input type='hidden' type="number" name='item${itemsCount}' value='theorem_link'>
+				<div class="tasksubpart"> <input id='text${itemsCount}' name='text${itemsCount}' placeholder="место для номера"></div>
+				</div>`
+			} else if (selectedvariant == 4) {
+				newelement.innerHTML = `<div class='image2' id='${itemsCount}' name='text'>текст
+				<input type='hidden' name='item${itemsCount}' value='text'>
+				<textarea class='forbiginput' id='text${itemsCount}' name='text${itemsCount}'>текст</textarea>
+				</div>`
 			}
+			itemsCount++;
+			document.getElementById("items_count").value=itemsCount;
 			document.getElementById("all").append(newelement);
-			n++;
 		}
-		let thiss="";
-		/* sheet started
-		function improveticket() {
-			let lengthofthiss = 0
-			for (let i = 1; i<n; i++) {
-				thiss = document.getElementById(i);
-				if (thiss.className == "definition") {
-					thiss = document.getElementById(`text${i}`).value;
-					thiss = thiss + "^_#_";
-					lengthofthiss = thiss.match("^").length;
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("^", "<<i></i>sup>");
-						thiss = thiss.replace("_", "<<i></i>/sup>");
-					}
-					lengthofthiss = thiss.match("#").length;
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("#", "<<i></i>sub>");
-						thiss = thiss.replace("_", "<<i></i>/sub>");
-					}
-					document.getElementById(`text${i}`).value = thiss;
-				} else if (thiss.className == "theorema") {
-					thiss = document.getElementById(`name${i}`).value;
-					thiss = thiss + "^_#_";
-					lengthofthiss = thiss.match("^").length;
 
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("^", "<<i></i>sup>");
-						thiss = thiss.replace("_", "<<i></i>/sup>");
-					}
-					lengthofthiss = thiss.match("#").length;
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("#", "<<i></i>sub>");
-						thiss = thiss.replace("_", "<<i></i>/sub>");
-					}
-					document.getElementById(`name${i}`).value = thiss;
-					thiss = document.getElementById(`text${i}`).value;
-					thiss = thiss + "^_#_";
-					lengthofthiss = thiss.match("^").length;
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("^", "<<i></i>sup>");
-						thiss = thiss.replace("_", "<<i></i>/sup>");
-					}
-					lengthofthiss = thiss.match("#").length;
-					for (let nm = 0; nm < lengthofthiss; nm++) {
-						thiss = thiss.replace("#", "<<i></i>sub>");
-						thiss = thiss.replace("_", "<<i></i>/sub>");
-					}
-					document.getElementById(`text${i}`).value = thiss;
-				}
-			}	
-		} sheet ended*/
+		let thiss="";
+
 		function upgradesome(ticket){
 			ticket+="^#__";
 			let k = 0
@@ -208,10 +194,10 @@
 		let ticket = "";
 		function generateticket() {
 			ticket = "";
-			ticket=ticket+document.getElementById("name").value
+			ticket=ticket+document.getElementById("ticket_name").value;
 			document.getElementById("generate").className = "getticketafter";
 			let thiss="";
-			for (let i = 1; i<n; i++) {
+			for (let i = 1; i<itemsCount; i++) {
 				thiss = document.getElementById(i);
 				if (thiss.className == "definition2") {
 					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";
@@ -242,5 +228,9 @@
 			loadLatex("preview","preview");
 		}
 	</script>
+
+<script type="text/javascript">
+	openaccountfromcookie();
+</script>
 </body>
 </html>

@@ -382,8 +382,10 @@ def create_university(request):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
+
 def send_ticket(request):
-    try:
+    if True:
         university_id = su_cut(request.POST['university_id'], 10)
         university = University.objects.get(id=university_id)
         subject_id = su_cut(request.POST['subject_id'], 10)
@@ -401,14 +403,51 @@ def send_ticket(request):
                 ticket_type_private = False
         except:
             ticket_type_private = False
+
+        items_count = int(su_cut(str(request.POST['items_count']), 2))
+        for item_number in range (items_count):
+            item_number_str = str(item_number)
+            item_type = su_cut(request.POST['item'+item_number_str], 20)
+            if item_type=="definition":
+                item_name = su_cut(request.POST['name'+item_number_str], 50)
+                item_text = su_cut(request.POST['text' + item_number_str], 10000)
+                item_image = su_cut(request.POST['image' + item_number_str], 100)
+                definition = Definition(definition_name=item_name, by_guest=guest, definition_text=item_text,
+                pub_date=timezone.now(), subject=subject, picture_href=item_image)
+                definition.save()
+                definition_id = definition.id
+                ticket_text += "/definition_link id='" + str(definition_id) + "'/"
+            elif item_type=="definition_link":
+                item_text = su_cut(request.POST['text' + item_number_str], 10)
+                definition_id = int(item_text)
+                ticket_text += "/definition_link id='"+str(definition_id)+"'/"
+            elif item_type=="theorema":
+                item_name = su_cut(request.POST['name'+item_number_str], 50)
+                item_text = su_cut(request.POST['text' + item_number_str], 10000)
+                item_proof = su_cut(request.POST['proof' + item_number_str], 1000)
+                item_image = su_cut(request.POST['image' + item_number_str], 100)
+                theorem = Theorem(theorem_name=item_name, by_guest=guest, theorem_text=item_text, theorem_proof=item_proof,
+                pub_date=timezone.now(), subject=subject, picture_href=item_image)
+                theorem.save()
+                theorem_id = theorem.id
+                ticket_text += "/theorem_link id='" + str(theorem_id) + "'/"
+            elif item_type=="theorem_link":
+                item_text = su_cut(request.POST['text' + item_number_str], 10)
+                theorem_id = int(item_text)
+                ticket_text += "/theorem_link id='" + str(theorem_id) + "'/"
+            elif item_type=="text":
+                item_text = su_cut(request.POST['text' + item_number_str], 10000)
+                ticket_text+= "<br>"+item_text
+        ticket_text = su_cut(ticket_text, 10000)
         if len(guest.ticket_set.filter(ticket_text=ticket_text)) == 0:
-            guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private, pub_date=timezone.now(), ticket_name=ticket_name, ticket_text=ticket_text, study_direction=study_direction, picture_href=picture_href)
-            ticket_id = guest.ticket_set.get(ticket_name=ticket_name).id
+            ticket = guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private, pub_date=timezone.now(), ticket_name=ticket_name, ticket_text=ticket_text, study_direction=study_direction, picture_href=picture_href)
+            ticket_id = ticket.id
             return HttpResponse('успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(ticket_id) + '">back to ticket | обратно к ticket</a>')
         else:
             return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
-    except:
+    else:
         return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+
 
 def get_ticket(request, ticket_id):
     try:
@@ -448,18 +487,22 @@ def show_ticket_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
+
 def create_ticket(request):
-    if True:
+    try:
         guest = open_account_guest(request)
         template = loader.get_template('math_book/createTicket.html')
         context = {
             'guest': guest,
-            'page_name_text': "creating ticket",
+            'page_name_text': 'creating ticket',
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    else:
+    except:
         return HttpResponse('error')
+
+
 def send_vote_ticket(request, ticket_id, vote_type):
     try:
         ticket = Ticket.objects.get(id=ticket_id)
