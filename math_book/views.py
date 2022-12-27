@@ -18,11 +18,59 @@ def su_cut(string, len_string):
         string = string[0:len_string]
     return string
 
+def generate_definitions_and_theorems(text):
+    text_len = len(text)
+    verbnumber = 0
+    while verbnumber < text_len:
+        verbnumber_before_slesh = verbnumber
+        verb = text[verbnumber]
+        if verb=="/":
+            if text[verbnumber+1:verbnumber+16] == "definition_link":
+                verbnumber += 16
+                definition_number = ""
+                while verbnumber < text_len and text[verbnumber] != "'":
+                    verbnumber += 1
+                verbnumber += 1
+                while verbnumber < text_len and text[verbnumber] != "'":
+                    definition_number += text[verbnumber]
+                    verbnumber += 1
+                while verbnumber < text_len and text[verbnumber] != "/":
+                    verbnumber += 1
+                verbnumber += 1
+                definition_number=int(definition_number)
+                definition = Definition.objects.get(id=definition_number)
+                new_text = "(enter) определение " + definition.definition_name+":(enter) "+ definition.definition_text +"(enter) конец определения (enter)"
+                length_of_new = len(new_text)
+                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
+                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
+                verbnumber = verbnumber_before_slesh + length_of_new
+            if text[verbnumber+1:verbnumber+13]=="theorem_link":
+                verbnumber += 12
+                theorem_number=""
+                while verbnumber < text_len and text[verbnumber]!="'":
+                    verbnumber+=1
+                verbnumber+=1
+                while verbnumber < text_len and text[verbnumber]!="'":
+                    theorem_number += text[verbnumber]
+                    verbnumber+=1
+                while verbnumber < text_len and text[verbnumber]!="/":
+                    verbnumber+=1
+                verbnumber += 1
+                theorem_number = int(theorem_number)
+                theorem = Theorem.objects.get(id=theorem_number)
+                new_text = "(enter) теорема " + theorem.theorem_name+":(enter) "+ theorem.theorem_text + " доказательство:(enter) " + theorem.theorem_proof + "(enter) конец теоремы (enter)"
+                length_of_new = len(new_text)
+                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
+                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
+                verbnumber = verbnumber_before_slesh + length_of_new
+        verbnumber+=1
+    return text
+
 def open_account_guest(request):
     try:
         print(request.COOKIES)
-        user_name = su_cut(request.COOKIES['user_name'], 40)
-        session_key = su_cut(request.COOKIES['session_key'], 100)
+        user_name = su_cut(request.COOKIES['math_book_user_name'], 40)
+        session_key = su_cut(request.COOKIES['math_book_session_key'], 100)
         user = Guest.objects.get(guest_name=user_name)
         if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
             # return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
@@ -147,10 +195,10 @@ def get_subject(request, subject_id):
     except:
         return HttpResponse('sorry, it seems, it a server error')
 def show_all_subject(request):
-    return show_subject(request,'all')
-def show_subject(request,sort_type):
-    return show_subject_page(request,sort_type,1)
-def show_subject_page(request,sort_type,page_number):
+    return show_subject(request, 'all')
+def show_subject(request, sort_type):
+    return show_subject_page(request, sort_type, 1)
+def show_subject_page(request, sort_type, page_number):
     if True:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
@@ -291,21 +339,27 @@ def get_university(request, university_id):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('sorry, it seems, it a server error')
+
 def show_all_university(request):
     return show_university(request,'all')
 def show_university(request,sort_type):
     return show_university_page(request,sort_type,1)
-def show_university_page(request,sort_type,page_number):
+def show_university_page(request, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        universitys_list = University.objects.all()[(page_number-1)*50:page_number*50]
+        if sort_type == "main":
+            universitys_list = University.objects.all()[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            universitys_list = University.objects.all()[(page_number - 1) * 50:page_number * 50]
         page_count = len(University.objects.all())//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listUniversity.html')
         context = {
             'universitys_list': universitys_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/universitys/'+sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -315,6 +369,7 @@ def show_university_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 
 def show_all_tickets_from_university(request, university_id):
     return show_tickets_from_university(request, university_id, 'all')
@@ -450,9 +505,12 @@ def send_ticket(request):
 
 
 def get_ticket(request, ticket_id):
-    try:
+    if True:
         guest = open_account_guest(request)
         ticket = Ticket.objects.get(id=ticket_id)
+        ticket_text = generate_definitions_and_theorems(ticket.ticket_text)
+        ticket.ticket_text = ticket_text
+
         template = loader.get_template('math_book/thisTicket.html')
         context = {
             'ticket': ticket,
@@ -460,24 +518,35 @@ def get_ticket(request, ticket_id):
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    except:
+    else:
         return HttpResponse('sorry, it seems, it a server error')
 
 def show_all_ticket(request):
     return show_ticket(request,'all')
 def show_ticket(request,sort_type):
     return show_ticket_page(request,sort_type,1)
-def show_ticket_page(request,sort_type,page_number):
-    try:
+def show_ticket_page(request, sort_type, page_number):
+    if True:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        tickets_list = Ticket.objects.all().order_by('-pub_date')[(page_number-1)*50:page_number*50]
-        page_count = len(Ticket.objects.all())//50+1
+        if sort_type == "main":
+            tickets_list = Ticket.objects.filter(ticket_type_private=False)[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "new":
+            tickets_list = Ticket.objects.filter(ticket_type_private=False).order_by('-pub_date')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "best":
+            tickets_list = Ticket.objects.filter(ticket_type_private=False).order_by('-vote_for_count', 'vote_against_count')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "my":
+            tickets_list = Ticket.objects.filter(ticket_type_private=False).filter(by_guest=guest)[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            tickets_list = Ticket.objects.all()[(page_number - 1) * 50:page_number * 50]
+        page_count = len(Ticket.objects.filter(ticket_type_private=False))//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listTicket.html')
         context = {
             'tickets_list': tickets_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/tickets/'+sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -485,7 +554,7 @@ def show_ticket_page(request,sort_type,page_number):
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    except:
+    else:
         return HttpResponse('error')
 
 
@@ -644,6 +713,7 @@ def send_theorem(request):
             return HttpResponse('ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     else:
         return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+
 def get_theorem(request, theorem_id):
     try:
         guest = open_account_guest(request)
@@ -660,20 +730,31 @@ def get_theorem(request, theorem_id):
     except:
         return HttpResponse('sorry, it seems, it a server error')
 def show_all_theorem(request):
-    return show_theorem(request,'all')
+    return show_theorem(request, 'all')
 def show_theorem(request,sort_type):
-    return show_theorem_page(request,sort_type,1)
-def show_theorem_page(request,sort_type,page_number):
+    return show_theorem_page(request, sort_type, 1)
+def show_theorem_page(request, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        theorems_list = Theorem.objects.all().order_by('-pub_date')[(page_number-1)*50:page_number*50]
+        if sort_type == "main":
+            theorems_list = Theorem.objects.all()[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "new":
+            theorems_list = Theorem.objects.all().order_by('-pub_date')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "best":
+            theorems_list = Theorem.objects.all().order_by('-vote_for_count', 'vote_against_count')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "my":
+            theorems_list = Theorem.objects.filter(by_guest=guest)[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            theorems_list = Theorem.objects.all()[(page_number - 1) * 50:page_number * 50]
         page_count = len(Theorem.objects.all())//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listTheorem.html')
         context = {
             'theorems_list': theorems_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/theorems/'+sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -683,6 +764,7 @@ def show_theorem_page(request,sort_type,page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 
 def create_theorem(request):
     try:
@@ -790,7 +872,17 @@ def show_definition_page(request, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        definitions_list = Definition.objects.all().order_by('-pub_date')[(page_number-1)*50:page_number*50]
+        if sort_type == "main":
+            definitions_list = Definition.objects.all()[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "new":
+            definitions_list = Definition.objects.all().order_by('-pub_date')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "best":
+            definitions_list = Definition.objects.all().order_by('-vote_for_count', 'vote_against_count')[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "my":
+            definitions_list = Definition.objects.filter(by_guest=guest)[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            definitions_list = Definition.objects.all()[(page_number - 1) * 50:page_number * 50]
         page_count = len(Definition.objects.all())//50+1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listDefinition.html')
@@ -807,6 +899,7 @@ def show_definition_page(request, sort_type, page_number):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
 
 def create_definition(request):
     try:
