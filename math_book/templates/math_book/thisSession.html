@@ -74,10 +74,10 @@ if ('{{alert}}'){
     <div class="bod">
     	
         <div class="task">
-        	<div class="taskheader"><center><a href="/math_book/session/{{session.id}}/">{{session.session_name}}</a></center>
+        	<div class="taskheader" id="taskheader"><center><a href="/math_book/session/{{session.id}}/">{{session.session_name}}</a></center>
 
 		<i> <a href = "/math_book/university/{{session.university.id}}/">university: {{session.university.university_name}} </a> </i>
-		<b> by <a href = "/math_book/guest/{{session.by_guest.guest.id}}/"> {{session.by_guest.guest_name}} </a> </b>        	{% if is_me %}<b>это ваше</b>{% endif %}
+		<b> by <a href = "/math_book/guest/{{session.by_guest.id}}/"> {{session.by_guest.guest_name}} </a> </b>        	{% if is_me %}<b>это ваше</b>{% endif %}
         	<br>
         	text:<br>{{ session.session_text }}
         	
@@ -104,6 +104,7 @@ if ('{{alert}}'){
 {% endif %}
 <script type="text/javascript">
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
+	loadLatex("taskheader","taskheader");
 	openaccountfromcookie("i");
 </script>
 </body>
