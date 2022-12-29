@@ -1,0 +1,124 @@
+.lfmenuopened{
+	position: fixed;
+	width: 400px;
+	max-width: 100%;
+	border-radius: 20px 20px 0 0;
+	overflow: scroll;
+	background-color: #123;
+	color: #def;
+	border: 2px solid #abc;
+	height: 90%;
+	right: 0px;
+	bottom: 0px;
+	transition: 0.3s ease-in-out;
+}
+.lfmenuclosed{
+	position: fixed;
+	width: 400px;
+	max-width: 100%;
+	border-radius: 20px 20px 0 0;
+	background-color: #123;
+	color: #def;
+	border: 2px solid #abc;
+	height: 90%;
+	right: 0px;
+	bottom: calc(-90% + 50px);
+	transition: 0.3s ease-in-out;
+}
+.lfmenubutton{
+	margin-top: 15px;
+	margin-left: 25px;
+	width: calc(100% - 50px);
+	height: 30px;
+	font-size: 25px;
+	padding: 5px;
+	background-color: #345;
+	border-radius: 5px;
+	text-align: center;
+	transition: 0.3s ease-in-out;
+}
+.lfmenubutton:hover{
+	margin-top: 15px;
+	margin-left: 25px;
+	width: calc(100% - 50px);
+	height: 30px;
+	font-size: 25px;
+	padding: 5px;
+	background-color: #567;
+	color: #fff;
+	border-radius: 5px;
+	text-align: center;
+	transition: 0.3s ease-in-out;
+}
+.lfmenusubpart{
+
+	margin-top: 15px;
+	margin-left: 25px;
+	width: calc(100% - 50px);
+	font-size: 25px;
+	padding: 5px;
+	background-color: #345;
+	border-radius: 5px;
+	text-align: center;
+	transition: 0.3s ease-in-out;
+}
+.lfmenusubpart:hover{
+	margin-top: 15px;
+	margin-left: 25px;
+	width: calc(100% - 50px);
+	font-size: 25px;
+	padding: 5px;
+	background-color: #567;
+	color: #fff;
+	border-radius: 5px;
+	text-align: center;
+	transition: 0.3s ease-in-out;
+}
+.lfmenusubpartsubpart{
+
+	margin-top: 5px;
+	
+	width: calc(100% - 10px);
+	height: 30px;
+	font-size: 25px;
+	padding: 5px;
+	background-color: #345;
+	border-top: 1px solid #789;
+	text-align: left;
+	transition: 0.3s ease-in-out;
+}
+.lfmenusubpartsubpart:hover{
+
+	margin-top: 5px;
+	
+	width: calc(100% - 10px);
+	height: 30px;
+	font-size: 25px;
+	padding: 5px;
+	background-color: #234;
+	border-top: 1px solid #789;
+	text-align: left;
+	transition: 0.3s ease-in-out;
+}
+
+.field{
+	background-color: #000;
+	box-shadow: 0 0 20px #fff;
+	transition: 0.2s ease-in-out;
+}
+.a{
+	text-decoration: none;
+	font-size: 23px;
+	color: #eee;
+	margin-bottom: 50px;
+}
+.a:hover{
+	text-decoration: underline;
+	font-size: 23px;
+	color: #eee;
+	margin-bottom: 50px;
+
+}
+.aselected{
+	background-color: #123;
+}
