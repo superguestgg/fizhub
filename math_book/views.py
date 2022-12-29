@@ -37,9 +37,10 @@ def generate_definitions_and_theorems(text):
                 while verbnumber < text_len and text[verbnumber] != "/":
                     verbnumber += 1
                 verbnumber += 1
-                definition_number=int(definition_number)
+                definition_number = int(definition_number)
                 definition = Definition.objects.get(id=definition_number)
-                new_text = "(enter) определение " + definition.definition_name+":(enter) "+ definition.definition_text +"(enter) конец определения (enter)"
+                #new_text = "(enter) определение " + definition.definition_name+":(enter) "+ definition.definition_text +"(enter) конец определения (enter)"
+                new_text = "<div class='definition'> <center><div class='definition_header'>определение</div></center> <div class='definition_header'>" + definition.definition_name+"</div>"+ definition.definition_text +"</div>"
                 length_of_new = len(new_text)
                 text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
                 text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
@@ -58,7 +59,26 @@ def generate_definitions_and_theorems(text):
                 verbnumber += 1
                 theorem_number = int(theorem_number)
                 theorem = Theorem.objects.get(id=theorem_number)
-                new_text = "(enter) теорема " + theorem.theorem_name+":(enter) "+ theorem.theorem_text + " доказательство:(enter) " + theorem.theorem_proof + "(enter) конец теоремы (enter)"
+                #new_text = "(enter) теорема " + theorem.theorem_name+":(enter) "+ theorem.theorem_text + " доказательство:(enter) " + theorem.theorem_proof + "(enter) конец теоремы (enter)"
+                new_text = "<div class='theorem'> <center><div class='theorem_header'>теорема</div></center> <div class='theorem_header'>" + theorem.theorem_name+"</div>"+ theorem.theorem_text +"<div class='theorem_header'>доказательство:</div>" + theorem.theorem_proof +"</div>"
+                length_of_new = len(new_text)
+                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
+                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
+                verbnumber = verbnumber_before_slesh + length_of_new
+            if text[verbnumber+1:verbnumber+11] == "image_link":
+                verbnumber += 10
+                image_href = ""
+                while verbnumber < text_len and text[verbnumber]!="'":
+                    verbnumber+=1
+                verbnumber+=1
+                while verbnumber < text_len and text[verbnumber]!="'":
+                    image_href += text[verbnumber]
+                    verbnumber+=1
+                while verbnumber < text_len and text[verbnumber]!="/":
+                    verbnumber+=1
+                verbnumber += 1
+                image_href = str(image_href)
+                new_text = "(enter) картинка по адресу (enter)" + image_href + "(enter)"
                 length_of_new = len(new_text)
                 text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
                 text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
@@ -486,14 +506,17 @@ def send_ticket(request):
                 theorem.save()
                 theorem_id = theorem.id
                 ticket_text += "/theorem_link id='" + str(theorem_id) + "'/"
-            elif item_type=="theorem_link":
+            elif item_type == "theorem_link":
                 item_text = su_cut(request.POST['text' + item_number_str], 10)
                 theorem_id = int(item_text)
                 ticket_text += "/theorem_link id='" + str(theorem_id) + "'/"
-            elif item_type=="text":
+            elif item_type == "text":
                 item_text = su_cut(request.POST['text' + item_number_str], 10000)
-                ticket_text+= "<br>"+item_text
-        ticket_text = su_cut(ticket_text, 10000)
+                ticket_text += "(enter)"+item_text
+            elif item_type == "image":
+                item_text = su_cut(request.POST['text' + item_number_str], 100)
+                ticket_text += "/image_link href='" + str(item_text) + "'/"
+        ticket_text = su_cut(ticket_text, 20000)
         if len(guest.ticket_set.filter(ticket_text=ticket_text)) == 0:
             ticket = guest.ticket_set.create(university=university, subject=subject, ticket_type_private=ticket_type_private, pub_date=timezone.now(), ticket_name=ticket_name, ticket_text=ticket_text, study_direction=study_direction, picture_href=picture_href)
             ticket_id = ticket.id
@@ -526,7 +549,7 @@ def show_all_ticket(request):
 def show_ticket(request,sort_type):
     return show_ticket_page(request,sort_type,1)
 def show_ticket_page(request, sort_type, page_number):
-    if True:
+    try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
         if sort_type == "main":
@@ -554,7 +577,7 @@ def show_ticket_page(request, sort_type, page_number):
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    else:
+    except:
         return HttpResponse('error')
 
 
@@ -573,7 +596,7 @@ def create_ticket(request):
 
 
 def send_vote_ticket(request, ticket_id, vote_type):
-    try:
+    if True:
         ticket = Ticket.objects.get(id=ticket_id)
         guest = open_account_guest(request)
         if vote_type == "vote_for":
@@ -583,14 +606,14 @@ def send_vote_ticket(request, ticket_id, vote_type):
         else:
             vote_type = True
             return HttpResponse("нет такого варианта голоса")
-        if len(ticket.vote_ticket_set.filter(guest = guest)) <= 0:
+        if len(ticket.vote_ticket_set.filter(by_guest=guest)) <= 0:
             if vote_type == True:
                 ticket.vote_for_count = ticket.vote_for_count + 1
                 ticket.save()
             elif vote_type == False:
                 ticket.vote_against_count = ticket.vote_against_count + 1
                 ticket.save()
-            vote_ticket = Vote_ticket(ticket=ticket, vote_type=vote_type, guest=guest)
+            vote_ticket = Vote_ticket(ticket=ticket, vote_type=vote_type, by_guest=guest)
             vote_ticket.save()
             template = loader.get_template('math_book/thisTicket.html')
             context = {
@@ -600,7 +623,7 @@ def send_vote_ticket(request, ticket_id, vote_type):
             }
             return HttpResponse(template.render(context, request))
         else:
-            if ticket.vote_ticket_set.get(guest=guest).vote_type == vote_type:
+            if ticket.vote_ticket_set.get(by_guest=guest).vote_type == vote_type:
                 template = loader.get_template('math_book/thisTicket.html')
                 context = {
                     'ticket': ticket,
@@ -618,7 +641,7 @@ def send_vote_ticket(request, ticket_id, vote_type):
                     ticket.vote_for_count = ticket.vote_for_count - 1
                     ticket.vote_against_count = ticket.vote_against_count + 1
                     ticket.save()
-            vote_ticket = ticket.vote_ticket_set.get(guest=guest)
+            vote_ticket = ticket.vote_ticket_set.get(by_guest=guest)
             vote_ticket.vote_type = vote_type
             vote_ticket.save()
             template = loader.get_template('math_book/thisTicket.html')
@@ -628,7 +651,7 @@ def send_vote_ticket(request, ticket_id, vote_type):
                 'color_theme': open_account_guest(request).color_theme,
             }
             return HttpResponse(template.render(context, request))
-    except:
+    else:
         return HttpResponse('server error occurred')
 def send_session(request):
     try:
@@ -777,6 +800,8 @@ def create_theorem(request):
         return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('error')
+
+
 def send_vote_theorem(request, theorem_id, vote_type):
     try:
         theorem = Theorem.objects.get(id=theorem_id)
@@ -788,28 +813,26 @@ def send_vote_theorem(request, theorem_id, vote_type):
         else:
             vote_type = True
             return HttpResponse("нет такого варианта голоса")
-        if len(theorem.vote_theorem_set.filter(guest = guest)) <= 0:
+        if len(theorem.vote_theorem_set.filter(by_guest=guest)) <= 0:
             if vote_type == True:
                 theorem.vote_for_count = theorem.vote_for_count + 1
                 theorem.save()
             elif vote_type == False:
                 theorem.vote_against_count = theorem.vote_against_count + 1
                 theorem.save()
-            vote_theorem = Vote_theorem(theorem=theorem, vote_type=vote_type, guest=guest)
+            vote_theorem = Vote_theorem(theorem=theorem, vote_type=vote_type, by_guest=guest)
             vote_theorem.save()
             template = loader.get_template('math_book/thisTheorem.html')
             context = {
                 'theorem': theorem,
-                'page_name_text': theorem.id,
                 'color_theme': open_account_guest(request).color_theme,
             }
             return HttpResponse(template.render(context, request))
         else:
-            if theorem.vote_theorem_set.get(guest=guest).vote_type == vote_type:
+            if theorem.vote_theorem_set.get(by_guest=guest).vote_type == vote_type:
                 template = loader.get_template('math_book/thisTheorem.html')
                 context = {
                     'theorem': theorem,
-                    'page_name_text': theorem.id,
                     'color_theme': open_account_guest(request).color_theme,
                     'alert': 'вы уже поставили такую оценку'
                 }
@@ -823,18 +846,19 @@ def send_vote_theorem(request, theorem_id, vote_type):
                     theorem.vote_for_count = theorem.vote_for_count - 1
                     theorem.vote_against_count = theorem.vote_against_count + 1
                     theorem.save()
-            vote_theorem = theorem.vote_theorem_set.get(guest=guest)
+            vote_theorem = theorem.vote_theorem_set.get(by_guest=guest)
             vote_theorem.vote_type = vote_type
             vote_theorem.save()
             template = loader.get_template('math_book/thisTheorem.html')
             context = {
                 'theorem': theorem,
-                'page_name_text': theorem.id,
                 'color_theme': open_account_guest(request).color_theme,
             }
             return HttpResponse(template.render(context, request))
     except:
         return HttpResponse('server error occurred')
+
+
 def send_definition(request):
     try:
         subject_id = su_cut(request.POST['subject_id'], 10)
@@ -925,28 +949,26 @@ def send_vote_definition(request, definition_id, vote_type):
         else:
             vote_type = True
             return HttpResponse("нет такого варианта голоса")
-        if len(definition.vote_definition_set.filter(guest = guest)) <= 0:
+        if len(definition.vote_definition_set.filter(by_guest=guest)) <= 0:
             if vote_type == True:
                 definition.vote_for_count = definition.vote_for_count + 1
                 definition.save()
             elif vote_type == False:
                 definition.vote_against_count = definition.vote_against_count + 1
                 definition.save()
-            vote_definition = Vote_definition(definition=definition, vote_type=vote_type, guest=guest)
+            vote_definition = Vote_definition(definition=definition, vote_type=vote_type, by_guest=guest)
             vote_definition.save()
             template = loader.get_template('math_book/thisDefinition.html')
             context = {
                 'definition': definition,
-                'page_name_text': definition.id,
                 'color_theme': open_account_guest(request).color_theme,
             }
             return HttpResponse(template.render(context, request))
         else:
-            if definition.vote_definition_set.get(guest=guest).vote_type == vote_type:
+            if definition.vote_definition_set.get(by_guest=guest).vote_type == vote_type:
                 template = loader.get_template('math_book/thisDefinition.html')
                 context = {
                     'definition': definition,
-                    'page_name_text': definition.id,
                     'color_theme': open_account_guest(request).color_theme,
                     'alert': 'вы уже поставили такую оценку'
                 }
@@ -960,13 +982,12 @@ def send_vote_definition(request, definition_id, vote_type):
                     definition.vote_for_count = definition.vote_for_count - 1
                     definition.vote_against_count = definition.vote_against_count + 1
                     definition.save()
-            vote_definition = definition.vote_definition_set.get(guest=guest)
+            vote_definition = definition.vote_definition_set.get(by_guest=guest)
             vote_definition.vote_type = vote_type
             vote_definition.save()
             template = loader.get_template('math_book/thisDefinition.html')
             context = {
                 'definition': definition,
-                'page_name_text': definition.id,
                 'color_theme': open_account_guest(request).color_theme,
             }
             return HttpResponse(template.render(context, request))

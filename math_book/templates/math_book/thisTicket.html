@@ -4,10 +4,25 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'math_book/forSessionMathBook.css' %}">
+
+	<!-- KaTeX -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+
 
 <script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
 
 <script type="text/javascript">
+	function open_session_ticket(){
+		if (document.getElementById("session_ticket_open_close_button").innerHTML=="открыть"){
+			document.getElementById("session_ticket_open_close_button").innerHTML="закрыть";
+			document.getElementById("session_ticket").className="session_ticket_opened";
+		} else if (document.getElementById("session_ticket_open_close_button").innerHTML=="закрыть"){
+			document.getElementById("session_ticket_open_close_button").innerHTML="открыть";
+			document.getElementById("session_ticket").className="session_ticket";
+		}
+	}
 if ('{{alert}}'){
 	alert('{{alert}}')
 }
@@ -65,13 +80,7 @@ if ('{{alert}}'){
     <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
-</div>	<div class="menuclosed" id="menu">
-
-		<div class="menusubpart"><a href="/fizhub/"><symbol>&#10144;</symbol>fizhub</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
-		<p>&#946; version</p>
-	</div>
-
+</div>
 	{% if ticket %}
     <div class="bod">
     	
@@ -80,15 +89,23 @@ if ('{{alert}}'){
 
 		<i> <a href = "/math_book/university/{{ticket.university.id}}/">university: {{ticket.university.university_name}} </a> </i>
 		<i> <a href = "/math_book/subject/{{ticket.subject.id}}/">subject: {{ticket.subject.subject_name}} </a> </i>
-		<b> by <a href = "/math_book/guest/{{ticket.by_guest.id}}/"> {{ticket.by_guest.guest_name}} </a> </b>        	{% if is_me %}<b>это ваше</b>{% endif %}
+		<b> by <a href = "/math_book/guest/{{ticket.by_guest.id}}/"> {{ticket.by_guest.guest_name}} </a> </b>
+		{% if is_me %}<b>это ваше</b>{% endif %}
         	<br>
-        	text:<br>{{ ticket.ticket_text }}
+
+        	text:<br>
+        	<div class="session_ticket" id="session_ticket">
+
+        		<center><div class="session_ticket_open_close_button" id="session_ticket_open_close_button" onclick="open_session_ticket()">открыть</div></center>
+
+        	{{ ticket.ticket_text }}
         	
         	{% if task.picture_href %}
         	<br><img class="medium" src="{{ticket.picture_href}}" alt="no image">
-
+        	
         {% endif %}
-<div class ="reactions_menu">
+			</div>
+		<div class ="reactions_menu">
 		<like> <a href = "/math_book/ticket/{{ticket.id}}/vote_for/"> &#128077; {{ticket.vote_for_count}} </a> </like>
 		<report> <a href = "/math_book/ticket/{{ticket.id}}/vote_against/"> &#128078; {{ticket.vote_against_count}} </a> </report></div>
 
@@ -109,7 +126,7 @@ if ('{{alert}}'){
 {% endif %}
 <script type="text/javascript">
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
-	loadLatex("taskheader","taskheader");
+	processingTicket("taskheader","taskheader");
 	openaccountfromcookie("i");
 </script>
 </body>
