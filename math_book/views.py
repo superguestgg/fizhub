@@ -92,7 +92,7 @@ def open_account_guest(request):
         user_name = su_cut(request.COOKIES['math_book_user_name'], 40)
         session_key = su_cut(request.COOKIES['math_book_session_key'], 100)
         user = Guest.objects.get(guest_name=user_name)
-        if len(Guest_session.objects.filter(session_key=session_key, guest_id=user)) == 0:
+        if len(Guest_session.objects.filter(session_key=session_key, guest=user)) == 0:
             # return HttpResponse('session inactive | user not found <br> сессия неактивна|пользователь не найден')
             user_name = 'undefined guest'
             user = Guest.objects.get(guest_name=user_name)
@@ -102,12 +102,11 @@ def open_account_guest(request):
     return user
 
 def sendaccountpost(request):
-    try:
-        type = su_cut(request.POST['registration_type'], 40)
-        guest_name = su_cut(request.POST['username'], 40)
-        guest_password = su_cut(request.POST['userpassword'], 40)
+    if True:
+        type = su_cut(request.POST['registration_type'], 50)
+        guest_name = su_cut(request.POST['guest_name'], 50)
+        guest_password = su_cut(request.POST['guest_password'], 50)
         if type == "new":
-
             if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
                 try:
                     os = su_cut(request.META['OS'], 100)
@@ -133,9 +132,9 @@ def sendaccountpost(request):
                 session_key = ""
                 for j in range(50):
                     session_key += s[random.randint(0, 125)]
-                new_session_for_user = Guest_session(guest_id=new_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
+                new_session_for_user = Guest_session(guest=new_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
                 new_session_for_user.save()
-                template = loader.get_template('physicsesc/succesfullogin.html')
+                template = loader.get_template('math_book/successfullyLogin.html')
                 context = {
                     'user_id': new_user.id,
                     'session_key': session_key,
@@ -149,7 +148,7 @@ def sendaccountpost(request):
                 return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
             else:
                 this_user = Guest.objects.get(guest_name=guest_name)
-                if this_user.guest_password==guest_password:
+                if this_user.guest_password == guest_password:
                     try:
                         os = su_cut(request.META['OS'], 100)
                     except:
@@ -166,9 +165,9 @@ def sendaccountpost(request):
                     session_key = ""
                     for j in range(50):
                         session_key += s[random.randint(0, 125)]
-                    new_session_for_user = Guest_session(guest_id=this_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
+                    new_session_for_user = Guest_session(guest=this_user, session_key=session_key, os=os, computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
                     new_session_for_user.save()
-                    template = loader.get_template('physicsesc/succesfullogin.html')
+                    template = loader.get_template('math_book/successfullyLogin.html')
                     context = {
                         'user_id': this_user.id,
                         'session_key': session_key,
@@ -177,14 +176,328 @@ def sendaccountpost(request):
                     return HttpResponse(template.render(context, request))
                 else:
                     return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
-    except:
+    else:
         return HttpResponse("server error occurred")
 
+def myaccount(request):
+    if True:
+        view_guest = open_account_guest(request)
+        guest = view_guest
+
+        template = loader.get_template('math_book/thisGuest.html')
+
+        context = {
+            'guest': guest,
+            'page_name_text': guest.id,
+            'color_theme': view_guest.color_theme,
+            'is_me': True,
+        }
+        return HttpResponse(template.render(context, request))
+    else:
+        return HttpResponse('сессия недействительна')
+
+#auto
+def get_guest(request, guest_id):
+    try:
+        view_guest = open_account_guest(request)
+        guest = Guest.objects.get(id=guest_id)
+        template = loader.get_template('math_book/thisGuest.html')
+        context = {
+            'guest': guest,
+            'page_name_text': guest.id,
+            'color_theme': view_guest.color_theme,
+            'is_me': guest.id == view_guest.id,
+        }
+        return HttpResponse(template.render(context, request))
+    except Guest.DoesNotExist:
+        return HttpResponse('guest does not exist')
+    except:
+        return HttpResponse('sorry, it seems, it a server error')
+
+def settings(request):
+    try:
+        guest = open_account_guest(request)
+        if guest.guest_name == 'undefined guest':
+            return HttpResponse('войдите сначала в свой аккаунт')
+        template = loader.get_template('math_book/settings.html')
+        sessions = guest.guest_session_set.all()
+        session_key = su_cut(request.COOKIES['session_key'], 100)
+
+        context = {
+        'session_key': session_key,
+        'page_name_text': 'настройки',
+        'sessions': sessions,
+        'guest': guest,
+        'is_me': True,
+        'color_theme': guest.color_theme,
+        }
+
+        return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
+
+def changecolortheme(request):
+    try:
+        user = open_account_guest(request)
+        if user=="undefined guest":
+            return HttpResponse('сессия недействительна')
+        color_theme = su_cut(request.POST['color_theme'], 2000)
+        if user.color_theme != color_theme:
+            user.color_theme = color_theme
+            user.save()
+        return settings(request)
+    except:
+        return HttpResponse('сессия недействительна')
+def closesession(request, session_key):
+    try:
+        user = open_account_guest(request)
+        if len(user.guest_session_set.all().filter(session_key=session_key))>0:
+            session = user.guest_session_set.all().get(session_key=session_key)
+            session.delete()
+
+        user = open_account_guest(request)
+        template = loader.get_template('physicsesc/settings.html')
+        sessions = user.guest_session_set.all()
+        session_key = su_cut(request.COOKIES['session_key'], 100)
+        context = {
+        'session_key': session_key,
+        'sessions': sessions,
+        'user': user,
+        'its_me': True,
+        'color_theme': user.color_theme,
+
+        }
+        return HttpResponse(template.render(context,request))
+    except:
+        return HttpResponse('сессия недействительна')
+def changeaccountinformation(request):
+    try:
+        user = open_account_guest(request)
+        if user=="undefined guest":
+            return HttpResponse('сессия недействительна')
+        guest_information = su_cut(request.POST['guest_information'], 2000)
+        if user.guest_information != guest_information:
+            user.guest_information = guest_information
+            user.save()
+        return settings(request)
+    except:
+        return HttpResponse('сессия недействительна')
+def changepassword(request):
+    try:
+        user = open_account_guest(request)
+        if user == "undefined guest":
+            return HttpResponse('сессия недействительна')
+        old_password = su_cut(request.POST['old_password'], 40)
+        new_password = su_cut(request.POST['new_password'], 40)
+        if user.guest_password == old_password:
+            user.guest_password = new_password
+            user.save()
+        return settings(request)
+    except:
+        return HttpResponse('сессия недействительна')
+
+
+def show_all_guest(request):
+    return show_guest(request, 'all')
+
+def show_guest(request, sort_type):
+    return show_guest_page(request, sort_type, 1)
+
+def show_guest_page(request, sort_type, page_number):
+    try:
+        guest = open_account_guest(request)
+        page_number = max(1, page_number)
+        if sort_type == "main":
+            guests_list = Guest.objects.all()[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            guests_list = Guest.objects.all()[(page_number - 1) * 50:page_number * 50]
+        page_count = len(Guest.objects.all())//50+1
+        next_page = page_number < page_count
+        template = loader.get_template('math_book/listGuest.html')
+        context = {
+            'guests_list': guests_list,
+            'page_name_text': sort_type,
+            'main_link': '/math_book/guests/'+sort_type,
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('error')
+
+
+def show_all_guest_sessions_from_guest(request, guest_id):
+    return show_guest_sessions_from_guest(request, guest_id, 'all')
+
+def show_guest_sessions_from_guest(request, guest_id, sort_type):
+    return show_guest_sessions_from_guest_page(request, guest_id, sort_type, 1)
+
+def show_guest_sessions_from_guest_page(request, guest_id, sort_type, page_number):
+    try:
+        view_guest = open_account_guest(request)
+        guest = Guest.objects.get(pk=guest_id)
+        guest_session_set = guest.guest_session_set.all()
+        page_count = len(guest_session_set)
+        next_page = page_number > page_count
+        guest_sessions_list = guest.guest_session_set.all()[:100]
+        template = loader.get_template('math_book/listGuest_session.html')
+        context = {
+            'guest_sessions_list': guest_sessions_list,
+            'page_name_text': 'Guest guest_sessions',
+            'main_link': '/math_book/guest/'+str(guest_id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': view_guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error occurred')
+
+
+def show_all_tickets_from_guest(request, guest_id):
+    return show_tickets_from_guest(request, guest_id, 'all')
+
+def show_tickets_from_guest(request, guest_id, sort_type):
+    return show_tickets_from_guest_page(request, guest_id, sort_type, 1)
+
+def show_tickets_from_guest_page(request, guest_id, sort_type, page_number):
+    try:
+        view_guest = open_account_guest(request)
+        guest = Guest.objects.get(pk=guest_id)
+        ticket_set = guest.ticket_set.all()
+        page_count = len(ticket_set)
+        next_page = page_number > page_count
+        tickets_list = guest.ticket_set.all()[:100]
+        template = loader.get_template('math_book/listTicket.html')
+        context = {
+            'tickets_list': tickets_list,
+            'page_name_text': 'Guest tickets',
+            'main_link': '/math_book/guest/'+str(guest_id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': view_guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error occurred')
+
+
+def show_all_sessions_from_guest(request, guest_id):
+    return show_sessions_from_guest(request, guest_id, 'all')
+
+def show_sessions_from_guest(request, guest_id, sort_type):
+    return show_sessions_from_guest_page(request, guest_id, sort_type, 1)
+
+def show_sessions_from_guest_page(request, guest_id, sort_type, page_number):
+    try:
+        view_guest = open_account_guest(request)
+        guest = Guest.objects.get(pk=guest_id)
+        session_set = guest.session_set.all()
+        page_count = len(session_set)
+        next_page = page_number > page_count
+        sessions_list = guest.session_set.all()[:100]
+        template = loader.get_template('math_book/listSession.html')
+        context = {
+            'sessions_list': sessions_list,
+            'page_name_text': 'Guest sessions',
+            'main_link': '/math_book/guest/'+str(guest_id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': view_guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error occurred')
+
+
+def show_all_theorems_from_guest(request, guest_id):
+    return show_theorems_from_guest(request, guest_id, 'all')
+
+def show_theorems_from_guest(request, guest_id, sort_type):
+    return show_theorems_from_guest_page(request, guest_id, sort_type, 1)
+
+def show_theorems_from_guest_page(request, guest_id, sort_type, page_number):
+    try:
+        guest = open_account_guest(request)
+        guest = Guest.objects.get(pk=guest_id)
+        theorem_set = guest.theorem_set.all()
+        page_count = len(theorem_set)
+        next_page = page_number > page_count
+        theorems_list = guest.theorem_set.all()[:100]
+        template = loader.get_template('math_book/listTheorem.html')
+        context = {
+            'theorems_list': theorems_list,
+            'page_name_text': 'Guest theorems',
+            'main_link': '/math_book/guest/'+str(guest_id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error occurred')
+
+
+def show_all_definitions_from_guest(request, guest_id):
+    return show_definitions_from_guest(request, guest_id, 'all')
+
+def show_definitions_from_guest(request, guest_id, sort_type):
+    return show_definitions_from_guest_page(request, guest_id, sort_type, 1)
+
+def show_definitions_from_guest_page(request, guest_id, sort_type, page_number):
+    try:
+        guest = open_account_guest(request)
+        guest = Guest.objects.get(pk=guest_id)
+        definition_set = guest.definition_set.all()
+        page_count = len(definition_set)
+        next_page = page_number > page_count
+        definitions_list = guest.definition_set.all()[:100]
+        template = loader.get_template('math_book/listDefinition.html')
+        context = {
+            'definitions_list': definitions_list,
+            'page_name_text': 'Guest definitions',
+            'main_link': '/math_book/guest/'+str(guest_id),
+            'pages': page_number,
+            'pagescount': page_count,
+            'next_page': next_page,
+            'pagemenu': True,
+            'color_theme': guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('server error occurred')
+
+
+def login(request):
+    try:
+        guest = open_account_guest(request)
+        template = loader.get_template('math_book/login.html')
+        context = {
+            'guest': guest,
+            'page_name_text': 'login',
+            'color_theme': guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse('error')
 
 def index(request):
     guest = open_account_guest(request)
     template = loader.get_template("math_book/indexAll.html")
     context = {
+        'guest': guest,
         'page_name_text': "math_book",
         'color_theme': guest.color_theme,
     }

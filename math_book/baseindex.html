@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+
+	+++script_start
+
+	+++style
+
+	<title>+++app_href</title>
+	
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>{% if page_name_link %}<a href="{{page_name_link}}">{{page_name_text}}</a>{% else %}{{page_name_text}}{% endif %}</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/+++app_href/login/">login|войти</a></div>
+	</div>
+
+	+++leftmenu
+
+	---leftmenu
+
+	
+    <div class="bod">
+    	
+        <div class="task">
+        	<div class="taskheader">
+        		
+        		<center>приветствуем на нашем сайте, здесь вы можете:</center>
+        	</div>
+        
+
+
+        
+        	+++classes
+
+        	<div id="creatorname2" class="menusubpart"></div>
+        	
+        
+        
+        </div>
+     
+        </div>
+    
+    </div>
+<script type="text/javascript">
+	//<a href="/+++app_href/picture/{{task.picture_href}}">////.replace('/','^')
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+
+    +++script_start
+
+    +++style
+
+	<title>+++app_href</title>
+	
+
+	
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>создание +++object_name</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/+++app_href/login/">login|войти</a></div>
+	</div>
+
+	+++leftmenu
+
+	---leftmenu
+	
+    <div class="bod">
+    
+        <div class="task">
+        	
+        	
+
+    <div class="taskheader"><center>новая +++object_name</center></div>
+   
+    <form action="{% url '+++app_href:send_+++object_name' %}" method="post" enctype="multipart/form-data">	
+    	{% csrf_token %}
+    	    +++parents
+            +++chars
+            +++integers
+    <div class="tasksubpart" id="creatorname2"> 
+    </div>
+
+
+		<center><input type="submit" value="отправить +++object_name" class="solutionbutton"></center>
+        </form>
+    
+    
+
+    
+
+</div>
+
+</div>
+<script type="text/javascript">
+
+	openaccountfromcookie();
+</script>
+</body>
+</html>
