@@ -4,29 +4,30 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
+	<!-- KaTeX -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
 
-	<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
-
-	<script type="text/javascript">
-		if ('{{alert}}'){
-			alert('{{alert}}')
-		}
-	</script>    
+<script type="text/javascript">
+if ('{{alert}}'){
+	alert('{{alert}}')
+}
+</script>
 	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
 
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
 
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
-
+	
 	<title>math_book</title>
 	
+
 </head>
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname">
-            <center>{% if main_link %}<a href="{{main_link}}">{{page_name_text}}</a>{% else %}{{page_name_text}}{% endif %}</center>
-        </div>
+		<div class="taskname"><center>{% if page_name_link %}<a href="{{page_name_link}}">{{page_name_text}}</a>{% else %}{{page_name_text}}{% endif %}</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton" id="loginbutton" ><a href="/math_book/login/">login|войти</a></div>
 	</div>
@@ -68,93 +69,56 @@
     <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
-</div>    <div class="menuclosed" id="menu">
-        
-
-        <div class="menusubpart"><a href="/fizhub/"><symbol>&#10144;</symbol>fizhub</a></div>
-        <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
-        <p>&#946; version</p>
-    </div>
-
-	
-	
+</div>
+	{% if guest %}
     <div class="bod">
-    	{% if pagemenu %}
-    	<div class="pagemenu">
-    		
-
-    		<a href="/math_book/tickets/main/"><symbol>⌂</symbol>главная</a>&nbsp;&nbsp;&nbsp;
-
-    		<a href="/math_book/tickets/new/"><symbol>⇧</symbol>новые</a>&nbsp;&nbsp;&nbsp;
-
-            <a href="/math_book/tickets/best/"><symbol>☆</symbol>лучшие</a>&nbsp;&nbsp;&nbsp;
-
-    		<a href="/math_book/tickets/my"><symbol><svg fill="none" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M5.84 15.63a6.97 6.97 0 0 0 8.32 0 8.2 8.2 0 0 0-8.32 0zM4.7 14.57a7 7 0 1 1 10.6 0 9.7 9.7 0 0 0-10.6 0zM10 1.5a8.5 8.5 0 1 0 0 17 8.5 8.5 0 0 0 0-17zm-1.5 7a1.5 1.5 0 1 0 3 0 1.5 1.5 0 0 0-3 0zm1.5-3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" fill="currentColor" fill-rule="evenodd"></path></svg></symbol>мои</a>&nbsp;&nbsp;&nbsp;
-
-            
-            <a href="/math_book/tickets/search/"><symbol><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.75 3.5a7.25 7.25 0 1 0 4.45 12.97l4.26 4.27a.9.9 0 1 0 1.28-1.28l-4.27-4.26a7.25 7.25 0 0 0-5.72-11.7Zm0 1.8a5.45 5.45 0 1 0 0 10.9 5.45 5.45 0 0 0 0-10.9Z" fill="currentColor"></path></svg></symbol>поиск</a>&nbsp;&nbsp;&nbsp;
-
-    		<a href="/math_book/ticket/create/"><symbol>&#10010;</symbol>создать</a>&nbsp;&nbsp;&nbsp;
-
-    		
-    		
-
-    	</div>
-    	{% endif %}
-    	{% if tickets_list %}
-    {% for ticket in tickets_list %}
+    	
         <div class="task">
-            <a href="/math_book/ticket/{{ticket.id}}">
-        	{{ticket.ticket_name}}
-            </a>
-
-		<i> <a href = "/math_book/university/{{ticket.university.id}}/">university: {{ticket.university.university_name}} </a> </i>
-		<i> <a href = "/math_book/subject/{{ticket.subject.id}}/">subject: {{ticket.subject.subject_name}} </a> </i>
-		<b> by <a href = "/math_book/guest/{{ticket.by_guest.id}}/"> {{ticket.by_guest.guest_name}} </a> </b>        	
-        	<div id="{{ticket.id}}_text" class="textplace" onclick='showtext(id)'>{{ticket.ticket_text}}</div>
-        	<script type="text/javascript"> hiddentext("{{ticket.id}}_text");showtext("{{ticket.id}}_text");hiddentext("{{ticket.id}}_text")</script>
-<div class ="reactions_menu">
-		<like> <a href = "/math_book/ticket/{{ticket.id}}/vote_for/"> &#128077; {{ticket.vote_for_count}} </a> </like>
-		<report> <a href = "/math_book/ticket/{{ticket.id}}/vote_against/"> &#128078; {{ticket.vote_against_count}} </a> </report></div>        
-        
-        </div>
-    {% endfor %}
-
-    <div class="message">
-        	{% if pages|add:'-1' %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{ticket.id}}"> предыдущая страница </a>
-     
-     {% endif %}
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
-
-     {% if next_page %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{ticket.id}}"> следующая страница </a>
-     {% else %}
-
-     {% endif %}
-
-
-
+        	<div class="taskheader" id="taskheader"><center><a href="/math_book/guest/{{guest.id}}/">{{guest.guest_name}}{% if is_me %} (это вы){% endif %}</a></center>
+        	
         	<br>
-        		
-     
-        </div>
-    </div>
-{% else %}
-		<div class="task">
-        	<div class="taskheader">
-        	No tickets are available.
-        </div>
-        {% if page_name %}
-        	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{ticket.id}}"> предыдущая страница </a></center></div>{% endif %}
-        	<div class="solutionbutton" ><a href="/fizhub/new/">last tasks</a></div>
-        	<div class="solutionbutton" ><a href="/fizhub/main/">main</a></div>
+        	about guest:<br>{{ guest.guest_information }}
+        	
+        	{% if task.picture_href %}
+        	<br><img class="medium" src="{{guest.picture_href}}" alt="no image">
+
+        {% endif %}
+
+
+        	{% if is_me %}
+
+        	{% endif %}
+
+        	</div>
+        	<center>привязанные объекты</center><br>
+
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/tickets/" name="open Ticket">открыть Tickets</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/sessions/" name="open Session">открыть Sessions</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/theorems/" name="open Theorem">открыть Theorems</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/definitions/" name="open Definition">открыть Definitions</a></div>
         </div>
     
+    </div>
+     {% if is_me %}
+    <div class="task">
+    	<div class="taskheader"> <center>это видите только вы</center>
+    	</div>
+    	<a href="/math_book/settings/">настройки &#9881;</a>
+    </div>
+    
+    {% endif %}
+
+
+{% else %}
+    <p>No guest are available.<br>упс, такого guest нет, но вы можете создать новое<a href="/math_book/guest/create_guest">здесь</a></p>
 {% endif %}
-<style type="text/css" id="style"></style>
 <script type="text/javascript">
-    ismobileversion();
+	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
+	loadLatex("taskheader","taskheader");
 	openaccountfromcookie("i");
 </script>
 </body>
