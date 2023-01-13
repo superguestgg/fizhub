@@ -4,33 +4,33 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'math_book/forSessionMathBook.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'math_book/forSessionMathBook.css' %}">
 
-	<!-- KaTeX -->
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
-	<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+		<!-- KaTeX -->
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
+		<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
 
 
-<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
+	<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
 
-<script type="text/javascript">
-	function open_session_ticket(){
-		if (document.getElementById("session_ticket_open_close_button").innerHTML=="открыть"){
-			document.getElementById("session_ticket_open_close_button").innerHTML="закрыть";
-			document.getElementById("session_ticket").className="session_ticket_opened";
-		} else if (document.getElementById("session_ticket_open_close_button").innerHTML=="закрыть"){
-			document.getElementById("session_ticket_open_close_button").innerHTML="открыть";
-			document.getElementById("session_ticket").className="session_ticket";
+	<script type="text/javascript">
+		function open_session_ticket(){
+			if (document.getElementById("session_ticket_open_close_button").innerHTML=="открыть"){
+				document.getElementById("session_ticket_open_close_button").innerHTML="закрыть";
+				document.getElementById("session_ticket").className="session_ticket_opened";
+			} else if (document.getElementById("session_ticket_open_close_button").innerHTML=="закрыть"){
+				document.getElementById("session_ticket_open_close_button").innerHTML="открыть";
+				document.getElementById("session_ticket").className="session_ticket";
+			}
 		}
+	if ('{{alert}}'){
+		alert('{{alert}}')
 	}
-if ('{{alert}}'){
-	alert('{{alert}}')
-}
-</script>
+	</script>
 
-<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/session/forsession.css">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/math_book/forSessionMathBook.css">
 
-<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
 
 	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
 
@@ -129,9 +129,11 @@ if ('{{alert}}'){
 {% else %}
     <p>No ticket are available.<br>упс, такого ticket нет, но вы можете создать новое<a href="/math_book/ticket/create_ticket">здесь</a></p>
 {% endif %}
+<style type="text/css" id="style"></style>
 <script type="text/javascript">
+	ismobileversion();
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
-	processingTicket("taskheader","taskheader");
+	processingTicket("session_ticket","session_ticket");
 	openaccountfromcookie("i");
 </script>
 </body>

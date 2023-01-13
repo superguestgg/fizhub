@@ -39,7 +39,7 @@
 		<label for="v4"><input type="radio" id="v4" value="txt" name="input">текст<br></label>
 		<label for="v5"><input type="radio" id="v5" value="img" name="input">ссылка на картинку<br></label>
 		<div class="makerbutton" onclick="makeelement()">создать элемент</div>
-		<div id="preview" class="previewwhennotshow" onclick="getpreview()">предпросмотр</div>
+		<div id="preview" class="previewwhennotshow" onclick="getpreview()">предпросмотр(работает некорректно)</div>
 		<div class="end" id="end"></div>
 		<div id="closepreview" onclick='document.getElementById("preview").className="previewwhennotshow";document.getElementById("closepreview").className=null;document.getElementById("preview").innerHTML="предпросмотр";'></div>
 	</p></div>
@@ -58,11 +58,10 @@
 	<div class="all" id="all">
 		{% csrf_token %}
         <input type="hidden" name="items_count" id="items_count" value="0">
-    	<div class="tasksubpart">number of university of ticket<input type="number" name="university_id" placeholder="1"></div>
-		<div class="tasksubpart">number of subject of ticket<input type="number" name="subject_id" placeholder="1"></div>
+    	<div class="tasksubpart">number of university of ticket<input type="number" name="university_id" placeholder="1" value="1"></div>
+		<div class="tasksubpart">number of subject of ticket<input type="number" name="subject_id" placeholder="1" value="1"></div>
 		<div class="tasksubpart">ticket_name of ticket<input type="text" name="ticket_name" id="ticket_name" placeholder="ticket_name of ticket"></div>
-		<div class="tasksubpart">ticket_text of ticket<input type="text" name="ticket_text" placeholder="ticket_text of ticket"></div>
-		<div class="tasksubpart">study_direction of ticket<input type="text" name="study_direction" placeholder="study_direction of ticket"></div>
+		<div class="tasksubpart">study_direction of ticket<input type="text" name="study_direction" placeholder="study_direction of ticket" value="fiit"></div>
 		<div class="tasksubpart">picture_href of ticket<input type="text" name="picture_href" placeholder="picture_href of ticket"></div>    
 		<div class="tasksubpart" id="creatorname2"> </div>
 	</div>
@@ -161,20 +160,23 @@
 		let ticket = "";
 		function generateticket() {
 			ticket = "";
-			ticket=ticket+document.getElementById("ticket_name").value;
+			ticket="<center>"+document.getElementById("ticket_name").value+"</center>";
 			document.getElementById("generate").className = "getticketafter";
-			let thiss="";
-			for (let i = 1; i<itemsCount; i++) {
+			for (let i = 0; i<itemsCount; i++) {
 				thiss = document.getElementById(i);
-				if (thiss.className == "definition2") {
-					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";
-			
-				} if (thiss.className == "theorema2") {
-					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+document.getElementById(`name${i}`).value + "&lt;/b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/div&gt;";
-			
-				} else if (thiss.className == "image2") {
-					ticket = ticket + "<<i></i>img class='big' src='"+ document.getElementById(`text${i}`).value+"'>";
-			
+				let thissName = thiss.getAttribute("name")
+				if (thissName == "definition") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";			
+				} else if (thissName == "definition_link") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";			
+				} else if (thissName == "theorema") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+document.getElementById(`name${i}`).value + "&lt;/b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/div&gt;";			
+				} else if (thissName == "theorema_link") {
+					ticket = ticket + "&lt;div class='definition'&gt;&lt;b&gt;"+ document.getElementById(`text${i}`).value+"&lt;/b&gt;&lt;/div&gt;";			
+				} else if (thissName == "imagelink") {
+					ticket = ticket + "<<i></i>img class='big' src='"+ document.getElementById(`text${i}`).value+"'>";			
+				} else if (thissName == "text") {
+					ticket = ticket + document.getElementById(`text${i}`).value;
 				}
 			}
 			document.getElementById("end").innerHTML = upgradesome(ticket);

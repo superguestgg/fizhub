@@ -110,9 +110,11 @@
 {% else %}
     <p>No theorem are available.<br>упс, такого theorem нет, но вы можете создать новое<a href="/math_book/theorem/create_theorem">здесь</a></p>
 {% endif %}
+<style type="text/css" id="style"></style>
 <script type="text/javascript">
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
-	loadLatex("taskheader","taskheader");
+	ismobileversion();
+	processingPage("taskheader","taskheader");
 	openaccountfromcookie("i");
 </script>
 </body>

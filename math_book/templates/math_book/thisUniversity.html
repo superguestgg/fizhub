@@ -110,9 +110,11 @@
 {% else %}
     <p>No university are available.<br>упс, такого university нет, но вы можете создать новое<a href="/math_book/university/create_university">здесь</a></p>
 {% endif %}
+<style type="text/css" id="style"></style>
 <script type="text/javascript">
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
-	loadLatex("taskheader","taskheader");
+	ismobileversion();
+	processingPage("taskheader","taskheader");
 	openaccountfromcookie("i");
 </script>
 </body>
