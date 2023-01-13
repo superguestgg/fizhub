@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	{% load static %}
+	<!-- KaTeX -->
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
+	<script src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"></script>
+<script type="text/javascript" src="https://superguestgg.github.io/me/math_book/math_book.js"></script>
+
+<script type="text/javascript">
+if ('{{alert}}'){
+	alert('{{alert}}')
+}
+</script>
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1pjjmmNP3U9JjmLBWfnmMzUkFRHKXluAc=w1920-h865-iv1">
+
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/fizhub.css">
+
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub/{{color_theme}}theme.css">
+	
+	<title>math_book</title>
+	
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>{% if page_name_link %}<a href="{{page_name_link}}">{{page_name_text}}</a>{% else %}{{page_name_text}}{% endif %}</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/math_book/login/">login|войти</a></div>
+	</div>
+
++++leftmenu
+
+	{% if guest %}
+    <div class="bod">
+    	
+        <div class="task">
+        	<div class="taskheader" id="taskheader"><center><a href="/math_book/guest/{{guest.id}}/">{{guest.guest_name}}{% if is_me %} (это вы){% endif %}</a></center>
+        	
+        	<br>
+        	about guest:<br>{{ guest.guest_information }}
+        	
+        	{% if task.picture_href %}
+        	<br><img class="medium" src="{{guest.picture_href}}" alt="no image">
+
+        {% endif %}
+
+
+        	{% if is_me %}
+
+        	{% endif %}
+
+        	</div>
+        	<center>привязанные объекты</center><br>
+
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/tickets/" name="open Ticket">открыть Tickets</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/sessions/" name="open Session">открыть Sessions</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/theorems/" name="open Theorem">открыть Theorems</a></div>
+		<div class="solutionbutton" >
+		<a href="/math_book/guest/{{ guest.id }}/definitions/" name="open Definition">открыть Definitions</a></div>
+        </div>
+    
+    </div>
+     {% if is_me %}
+    <div class="task">
+    	<div class="taskheader"> <center>это видите только вы</center>
+    	</div>
+    	<a href="/math_book/settings/">настройки &#9881;</a>
+    </div>
+    
+    {% endif %}
+
+
+{% else %}
+    <p>No guest are available.<br>упс, такого guest нет, но вы можете создать новое<a href="/math_book/guest/create_guest">здесь</a></p>
+{% endif %}
+<script type="text/javascript">
+	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
+	loadLatex("taskheader","taskheader");
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>
