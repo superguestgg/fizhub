@@ -14,7 +14,29 @@ from django.urls import reverse
 import random
 
 
-def return_information_for_user(request, information_text, page_name_text="information", page_name_link=False):
+def get_bool_value_from_user(request, value_name):
+    value_type_private = False
+    try:
+        if request.POST[value_name]:
+            value_type_private = True
+        else:
+            value_type_private = False
+    except:
+        value_type_private = False
+    return value_type_private
+
+
+def return_error(request, error_link=False):
+    error_text_list = ["server error", "sorry, it seems, it a server error",
+                       "server error occured"]
+    error_text = "<center>"+error_text_list[random.randint(0, 2)]+"</center>"
+    error_text += "<br><a href='/math_book/'>main page</a>"
+    if error_link:
+        error_text += "<br><a href='"+error_link+"'>back</a>"
+    return return_information(request, error_text, "exception", error_link)
+
+
+def return_information(request, information_text, page_name_text="information", page_name_link=False):
     try:
         guest = open_account_guest(request)
         template = loader.get_template('math_book/information.html')
@@ -72,13 +94,14 @@ def generate_text_without_classes(text, replaces=[["replace_word"], [str]]):
     text_len = len(text)
     verbnumber = 0
     while verbnumber < text_len:
-        verbnumber = read_before_symbol("'", text, text_len, verbnumber)[0]
+        verbnumber = read_before_symbol("/", text, text_len, verbnumber)[0]
         if verbnumber >= text_len:
             break
-
         verbnumber_before_slesh = verbnumber
         verb = text[verbnumber]
+        print(1)
         if verb == "/":
+            print(2)
             replaces_index = -1
             # нахождение нужного для перезаписи элемента в replaces
             for i in range(len(replaces[0])):
@@ -137,7 +160,6 @@ def generate_text_with_classes(text, replaces=[["theorem_link"], [Theorem]], rep
             this_word_len = len(this_word)
             this_class = replaces[1][replaces_index]
             verbnumber += this_word_len
-            in_class_number = ""
             verbnumber = read_before_symbol("'", text, text_len, verbnumber)[0]
             verbnumber += 1
             [verbnumber, in_class_number] = read_before_symbol("'", text, text_len, verbnumber)
@@ -261,7 +283,8 @@ def myaccount(request):
         }
         return HttpResponse(template.render(context, request))
     else:
-        return HttpResponse('сессия недействительна')
+        information_return = 'сессия недействительна'
+        return return_information(request, information_return)
 
 
 # auto
@@ -280,8 +303,7 @@ def get_guest(request, guest_id):
     except Guest.DoesNotExist:
         return HttpResponse('guest does not exist')
     except:
-        return HttpResponse('sorry, it seems, it a server error')
-
+        return return_error(request)
 
 def settings(request):
     try:
@@ -303,7 +325,8 @@ def settings(request):
 
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('сессия недействительна')
+        information_return = 'сессия недействительна'
+        return return_information(request, information_return)
 
 
 def changecolortheme(request):
@@ -341,28 +364,32 @@ def closesession(request, session_key):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('сессия недействительна')
+        information_return = 'сессия недействительна'
+        return return_information(request, information_return)
 
 
 def changeaccountinformation(request):
     try:
         user = open_account_guest(request)
         if user == "undefined guest":
-            return HttpResponse('сессия недействительна')
+            information_return = 'сессия недействительна'
+            return return_information(request, information_return)
         guest_information = su_cut(request.POST['guest_information'], 2000)
         if user.guest_information != guest_information:
             user.guest_information = guest_information
             user.save()
         return settings(request)
     except:
-        return HttpResponse('сессия недействительна')
+        information_return = 'сессия недействительна'
+        return return_information(request, information_return)
 
 
 def changepassword(request):
     try:
         user = open_account_guest(request)
         if user == "undefined guest":
-            return HttpResponse('сессия недействительна')
+            information_return = 'сессия недействительна'
+            return return_information(request, information_return)
         old_password = su_cut(request.POST['old_password'], 40)
         new_password = su_cut(request.POST['new_password'], 40)
         if user.guest_password == old_password:
@@ -370,7 +397,8 @@ def changepassword(request):
             user.save()
         return settings(request)
     except:
-        return HttpResponse('сессия недействительна')
+        information_return = 'сессия недействительна'
+        return return_information(request, information_return)
 
 
 def show_all_guest(request):
@@ -437,7 +465,7 @@ def show_guest_sessions_from_guest_page(request, guest_id, sort_type, page_numbe
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
 
 
 def show_all_tickets_from_guest(request, guest_id):
@@ -450,7 +478,7 @@ def show_tickets_from_guest(request, guest_id, sort_type):
 
 def show_tickets_from_guest_page(request, guest_id, sort_type, page_number):
     try:
-        view_guest = open_account_guest(request)
+        guest = open_account_guest(request)
         guest = Guest.objects.get(pk=guest_id)
         ticket_set = guest.ticket_set.all()
         page_count = len(ticket_set)
@@ -465,11 +493,12 @@ def show_tickets_from_guest_page(request, guest_id, sort_type, page_number):
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
-            'color_theme': view_guest.color_theme,
+            'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_sessions_from_guest(request, guest_id):
@@ -482,7 +511,7 @@ def show_sessions_from_guest(request, guest_id, sort_type):
 
 def show_sessions_from_guest_page(request, guest_id, sort_type, page_number):
     try:
-        view_guest = open_account_guest(request)
+        guest = open_account_guest(request)
         guest = Guest.objects.get(pk=guest_id)
         session_set = guest.session_set.all()
         page_count = len(session_set)
@@ -497,11 +526,12 @@ def show_sessions_from_guest_page(request, guest_id, sort_type, page_number):
             'pagescount': page_count,
             'next_page': next_page,
             'pagemenu': True,
-            'color_theme': view_guest.color_theme,
+            'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_theorems_from_guest(request, guest_id):
@@ -533,7 +563,8 @@ def show_theorems_from_guest_page(request, guest_id, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_definitions_from_guest(request, guest_id):
@@ -565,7 +596,8 @@ def show_definitions_from_guest_page(request, guest_id, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def login(request):
@@ -605,7 +637,7 @@ def send_subject(request, ):
             'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/subject/' + str(
                 subject_id) + '">show you new subject|просмотретьт ваш subject</a>')
     else:
-        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
 
 
 def get_subject(request, subject_id):
@@ -620,7 +652,7 @@ def get_subject(request, subject_id):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
 
 
 def show_all_subject(request):
@@ -632,16 +664,21 @@ def show_subject(request, sort_type):
 
 
 def show_subject_page(request, sort_type, page_number):
-    if True:
+    try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        subjects_list = Subject.objects.all()[(page_number - 1) * 50:page_number * 50]
+        if sort_type == "main":
+            subjects_list = Subject.objects.all()[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            subjects_list = Subject.objects.all()[(page_number - 1) * 50:page_number * 50]
         page_count = len(Subject.objects.all()) // 50 + 1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listSubject.html')
         context = {
             'subjects_list': subjects_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/subjects/' + sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -649,8 +686,9 @@ def show_subject_page(request, sort_type, page_number):
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    else:
-        return HttpResponse('error')
+    except:
+        return return_error(request)
+
 
 
 def show_all_tickets_from_subject(request, subject_id):
@@ -682,7 +720,8 @@ def show_tickets_from_subject_page(request, subject_id, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_theorems_from_subject(request, subject_id):
@@ -714,7 +753,8 @@ def show_theorems_from_subject_page(request, subject_id, sort_type, page_number)
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_definitions_from_subject(request, subject_id):
@@ -746,7 +786,8 @@ def show_definitions_from_subject_page(request, subject_id, sort_type, page_numb
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def create_subject(request):
@@ -779,7 +820,7 @@ def send_university(request, ):
             'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/university/' + str(
                 university_id) + '">show you new university|просмотретьт ваш university</a>')
     except:
-        HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
 
 
 def get_university(request, university_id):
@@ -794,7 +835,7 @@ def get_university(request, university_id):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
 
 
 def show_all_university(request):
@@ -829,7 +870,8 @@ def show_university_page(request, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def show_all_tickets_from_university(request, university_id):
@@ -861,7 +903,8 @@ def show_tickets_from_university_page(request, university_id, sort_type, page_nu
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def show_all_sessions_from_university(request, university_id):
@@ -893,7 +936,8 @@ def show_sessions_from_university_page(request, university_id, sort_type, page_n
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def create_university(request):
@@ -918,17 +962,11 @@ def send_ticket(request):
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
         ticket_name = su_cut(request.POST['ticket_name'], 100)
-        ticket_text = su_cut(request.POST['ticket_text'], 10000)
+        #ticket_text = su_cut(request.POST['ticket_text'], 10000)
+        ticket_text = ""
         study_direction = su_cut(request.POST['study_direction'], 50)
         picture_href = su_cut(request.POST['picture_href'], 100)
-        ticket_type_private = False
-        try:
-            if request.POST['ticket_type_private']:
-                ticket_type_private = True
-            else:
-                ticket_type_private = False
-        except:
-            ticket_type_private = False
+        ticket_type_private = get_bool_value_from_user(request, "ticket_type_private")
 
         items_count = int(su_cut(str(request.POST['items_count']), 2))
         for item_number in range(items_count):
@@ -982,7 +1020,7 @@ def send_ticket(request):
             return HttpResponse(
                 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     else:
-        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
 
 
 def get_ticket(request, ticket_id):
@@ -990,6 +1028,7 @@ def get_ticket(request, ticket_id):
         guest = open_account_guest(request)
         ticket = Ticket.objects.get(id=ticket_id)
         ticket_text = generate_definitions_and_theorems(ticket.ticket_text)
+        print(ticket_text)
         ticket_text = generate_images(ticket_text)
         ticket.ticket_text = ticket_text
 
@@ -1001,7 +1040,7 @@ def get_ticket(request, ticket_id):
         }
         return HttpResponse(template.render(context, request))
     else:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
 
 
 def show_all_ticket(request):
@@ -1046,7 +1085,8 @@ def show_ticket_page(request, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def create_ticket(request):
@@ -1120,7 +1160,7 @@ def send_vote_ticket(request, ticket_id, vote_type):
             }
             return HttpResponse(template.render(context, request))
     else:
-        return HttpResponse('server error occurred')
+        return return_error(request)
 
 
 def send_session(request):
@@ -1140,7 +1180,7 @@ def send_session(request):
             return HttpResponse(
                 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     except:
-        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
 
 
 def get_session(request, session_id):
@@ -1155,7 +1195,8 @@ def get_session(request, session_id):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
+
 
 
 def show_all_session(request):
@@ -1170,13 +1211,20 @@ def show_session_page(request, sort_type, page_number):
     try:
         guest = open_account_guest(request)
         page_number = max(1, page_number)
-        sessions_list = Session.objects.all()[(page_number - 1) * 50:page_number * 50]
+        if sort_type == "main":
+            sessions_list = Session.objects.all()[(page_number - 1) * 50:page_number * 50]
+        elif sort_type == "my":
+            sessions_list = Session.objects.filter(by_guest=guest)[(page_number - 1) * 50:page_number * 50]
+        else:
+            sort_type = 'main'
+            sessions_list = Session.objects.all()[(page_number - 1) * 50:page_number * 50]
         page_count = len(Session.objects.all()) // 50 + 1
         next_page = page_number < page_count
         template = loader.get_template('math_book/listSession.html')
         context = {
             'sessions_list': sessions_list,
             'page_name_text': sort_type,
+            'main_link': '/math_book/sessions/' + sort_type,
             'pages': page_number,
             'pagescount': page_count,
             'next_page': next_page,
@@ -1185,7 +1233,8 @@ def show_session_page(request, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def create_session(request):
@@ -1199,7 +1248,8 @@ def create_session(request):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def send_theorem(request):
@@ -1216,16 +1266,16 @@ def send_theorem(request):
                                      theorem_proof=theorem_proof, picture_href=picture_href, pub_date=timezone.now())
             theorem_id = guest.theorem_set.get(theorem_name=theorem_name).id
 
-            information_return = 'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/theorem/' + str(
-                    theorem_id) + '">back to theorem | обратно к theorem</a>'
-
-            return return_information_for_user(request, information_return)
+            information_return = 'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/theorem/' \
+                                 + str(theorem_id) + '">back to theorem | обратно к theorem</a>'
+            return return_information(request, information_return)
         else:
-            return HttpResponse(
+            information_return = 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>'
+            return return_information(request, information_return)
 
-                'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     else:
-        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
+
 
 
 def get_theorem(request, theorem_id):
@@ -1242,7 +1292,8 @@ def get_theorem(request, theorem_id):
     except Theorem.DoesNotExist:
         return HttpResponse('theorem not found')
     except:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
+
 
 
 def show_all_theorem(request):
@@ -1284,7 +1335,8 @@ def show_theorem_page(request, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def create_theorem(request):
@@ -1297,7 +1349,8 @@ def create_theorem(request):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
+
 
 
 def send_vote_theorem(request, theorem_id, vote_type):
@@ -1354,7 +1407,8 @@ def send_vote_theorem(request, theorem_id, vote_type):
             }
             return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
+
 
 
 def send_definition(request):
@@ -1376,7 +1430,7 @@ def send_definition(request):
             return HttpResponse(
                 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
     except:
-        return HttpResponse('server error<br><a href="/math_book/main">main page</a>')
+        return return_error(request)
 
 
 def get_definition(request, definition_id):
@@ -1391,7 +1445,7 @@ def get_definition(request, definition_id):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('sorry, it seems, it a server error')
+        return return_error(request)
 
 
 def show_all_definition(request):
@@ -1433,7 +1487,7 @@ def show_definition_page(request, sort_type, page_number):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
 
 
 def create_definition(request):
@@ -1447,7 +1501,7 @@ def create_definition(request):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('error')
+        return return_error(request)
 
 
 def send_vote_definition(request, definition_id, vote_type):
@@ -1504,4 +1558,4 @@ def send_vote_definition(request, definition_id, vote_type):
             }
             return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse('server error occurred')
+        return return_error(request)
