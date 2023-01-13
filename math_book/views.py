@@ -11,80 +11,116 @@ from django.template import loader
 from django.db.models import Q
 from django.urls import reverse
 import random
-# Create your views here.
 
 def su_cut(string, len_string):
     if len(string) > len_string:
         string = string[0:len_string]
     return string
 
+
 def generate_definitions_and_theorems(text):
+    replaces = [["definition_link", "theorem_link"], [Definition, Theorem]]
+    return generate_text_with_classes(text, replaces, "get_html")
+
+
+def get_image_str(image_href):
+    return "(enter) картинка по адресу (enter)<a href='" + image_href + "'>" \
+           + image_href + "</a>(enter)" + \
+           "<img scr='" + image_href + \
+           "' alt='эй, тупо лох, пососи дуло(извини у меня такое было в наушниках)'>"
+
+
+def generate_images(text):
+    replaces = [["image_link"], [get_image_str]]
+    return generate_text_without_classes(text, replaces)
+
+
+def generate_text_without_classes(text, replaces=[["replace_word"], [str]]):
+    text_len = len(text)
+    verbnumber = 0
+    while verbnumber < text_len:
+        verbnumber_before_slesh = verbnumber
+        verb = text[verbnumber]
+        if verb == "/":
+            replaces_index = -1
+            #нахождение нужного для перезаписи элемента в replaces
+            for i in range (len(replaces[0])):
+                this_word_replace=replaces[0][i]
+                this_word_replace_len=len(this_word_replace)
+                if text[verbnumber+1:verbnumber+1+this_word_replace_len]==this_word_replace:
+                    replaces_index = i
+                    break
+            if replaces_index==-1:
+                verbnumber+=1
+                continue
+            this_word = replaces[0][replaces_index]
+            this_word_len = len(this_word)
+            this_word_function = replaces[1][replaces_index]
+            verbnumber += this_word_len
+
+            i_cant_come_up_with_name = ""
+            while verbnumber < text_len and text[verbnumber]!="'":
+                verbnumber+=1
+            verbnumber+=1
+            while verbnumber < text_len and text[verbnumber]!="'":
+                i_cant_come_up_with_name += text[verbnumber]
+                verbnumber+=1
+            while verbnumber < text_len and text[verbnumber]!="/":
+                verbnumber+=1
+            verbnumber += 1
+            i_cant_come_up_with_name = str(i_cant_come_up_with_name)
+            new_text = this_word_function(i_cant_come_up_with_name)
+            length_of_new = len(new_text)
+            text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
+            text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
+            verbnumber = verbnumber_before_slesh + length_of_new
+        verbnumber+=1
+    return text
+
+
+def generate_text_with_classes(text, replaces=[["theorem_link"],[Theorem]], replace_function="get_html"):
     text_len = len(text)
     verbnumber = 0
     while verbnumber < text_len:
         verbnumber_before_slesh = verbnumber
         verb = text[verbnumber]
         if verb=="/":
-            if text[verbnumber+1:verbnumber+16] == "definition_link":
-                verbnumber += 16
-                definition_number = ""
-                while verbnumber < text_len and text[verbnumber] != "'":
-                    verbnumber += 1
-                verbnumber += 1
-                while verbnumber < text_len and text[verbnumber] != "'":
-                    definition_number += text[verbnumber]
-                    verbnumber += 1
-                while verbnumber < text_len and text[verbnumber] != "/":
-                    verbnumber += 1
-                verbnumber += 1
-                definition_number = int(definition_number)
-                definition = Definition.objects.get(id=definition_number)
-                #new_text = "(enter) определение " + definition.definition_name+":(enter) "+ definition.definition_text +"(enter) конец определения (enter)"
-                new_text = "<div class='definition'> <center><div class='definition_header'>определение</div></center> <div class='definition_header'>" + definition.definition_name+"</div>"+ definition.definition_text +"</div>"
-                length_of_new = len(new_text)
-                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
-                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
-                verbnumber = verbnumber_before_slesh + length_of_new
-            if text[verbnumber+1:verbnumber+13]=="theorem_link":
-                verbnumber += 12
-                theorem_number=""
-                while verbnumber < text_len and text[verbnumber]!="'":
-                    verbnumber+=1
+            replaces_index=-1
+            #нахождение нужного для перезаписи элемента в replaces
+            for i in range (len(replaces[0])):
+                this_word_replace=replaces[0][i]
+                this_word_replace_len=len(this_word_replace)
+                if text[verbnumber+1:verbnumber+1+this_word_replace_len]==this_word_replace:
+                    replaces_index = i
+                    break
+            if replaces_index==-1:
                 verbnumber+=1
-                while verbnumber < text_len and text[verbnumber]!="'":
-                    theorem_number += text[verbnumber]
-                    verbnumber+=1
-                while verbnumber < text_len and text[verbnumber]!="/":
-                    verbnumber+=1
+                continue
+            this_word = replaces[0][replaces_index]
+            this_word_len = len(this_word)
+            this_class = replaces[1][replaces_index]
+            verbnumber += this_word_len
+            in_class_number = ""
+            while verbnumber < text_len and text[verbnumber] != "'":
                 verbnumber += 1
-                theorem_number = int(theorem_number)
-                theorem = Theorem.objects.get(id=theorem_number)
-                #new_text = "(enter) теорема " + theorem.theorem_name+":(enter) "+ theorem.theorem_text + " доказательство:(enter) " + theorem.theorem_proof + "(enter) конец теоремы (enter)"
-                new_text = "<div class='theorem'> <center><div class='theorem_header'>теорема</div></center> <div class='theorem_header'>" + theorem.theorem_name+"</div>"+ theorem.theorem_text +"<div class='theorem_header'>доказательство:</div>" + theorem.theorem_proof +"</div>"
-                length_of_new = len(new_text)
-                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
-                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
-                verbnumber = verbnumber_before_slesh + length_of_new
-            if text[verbnumber+1:verbnumber+11] == "image_link":
-                verbnumber += 10
-                image_href = ""
-                while verbnumber < text_len and text[verbnumber]!="'":
-                    verbnumber+=1
-                verbnumber+=1
-                while verbnumber < text_len and text[verbnumber]!="'":
-                    image_href += text[verbnumber]
-                    verbnumber+=1
-                while verbnumber < text_len and text[verbnumber]!="/":
-                    verbnumber+=1
+            verbnumber += 1
+            while verbnumber < text_len and text[verbnumber] != "'":
+                in_class_number += text[verbnumber]
                 verbnumber += 1
-                image_href = str(image_href)
-                new_text = "(enter) картинка по адресу (enter)" + image_href + "(enter)"
-                length_of_new = len(new_text)
-                text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
-                text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
-                verbnumber = verbnumber_before_slesh + length_of_new
-        verbnumber+=1
+            while verbnumber < text_len and text[verbnumber] != "/":
+                verbnumber += 1
+            verbnumber += 1
+            in_class_number = int(in_class_number)
+            in_class = this_class.objects.get(id=in_class_number)
+            function = getattr(this_class, replace_function)
+            new_text = function(in_class)
+            length_of_new = len(new_text)
+            text = text[:verbnumber_before_slesh] + new_text + text[verbnumber:]
+            text_len = text_len - verbnumber + verbnumber_before_slesh + length_of_new
+            verbnumber = verbnumber_before_slesh + length_of_new
+        verbnumber += 1
     return text
+
 
 def open_account_guest(request):
     try:
@@ -845,6 +881,7 @@ def get_ticket(request, ticket_id):
         guest = open_account_guest(request)
         ticket = Ticket.objects.get(id=ticket_id)
         ticket_text = generate_definitions_and_theorems(ticket.ticket_text)
+        ticket_text = generate_images(ticket_text)
         ticket.ticket_text = ticket_text
 
         template = loader.get_template('math_book/thisTicket.html')
