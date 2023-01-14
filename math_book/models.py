@@ -132,7 +132,7 @@ class Definition(models.Model):
         return (self.definition_name + " text: " + self.definition_text)
 
     def get_html(self):
-        return "<div class='definition'> <center><div class='definition_header'>определение</div></center> <div class='definition_header'>" + self.definition_name + "</div>" + self.definition_text + "</div>"
+        return "<div class='definition'> <center><div class='definition_header'>определение</div></center> <div class='definition_header'>" + self.definition_name + "</div>" + self.definition_text + " </div>"
 
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)

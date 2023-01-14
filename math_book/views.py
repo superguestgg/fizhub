@@ -980,11 +980,11 @@ def send_ticket(request):
                                         pub_date=timezone.now(), subject=subject, picture_href=item_image)
                 definition.save()
                 definition_id = definition.id
-                ticket_text += "/definition_link id='" + str(definition_id) + "'/"
+                ticket_text += " /definition_link id='" + str(definition_id) + "'/ (enter)"
             elif item_type == "definition_link":
                 item_text = su_cut(request.POST['text' + item_number_str], 10)
                 definition_id = int(item_text)
-                ticket_text += "/definition_link id='" + str(definition_id) + "'/"
+                ticket_text += " /definition_link id='" + str(definition_id) + "'/ (enter)"
             elif item_type == "theorema":
                 item_name = su_cut(request.POST['name' + item_number_str], 50)
                 item_text = su_cut(request.POST['text' + item_number_str], 10000)
