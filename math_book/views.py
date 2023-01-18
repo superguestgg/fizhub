@@ -1188,19 +1188,49 @@ def send_session(request):
 
 
 def get_session(request, session_id):
-    try:
+    if True:
         guest = open_account_guest(request)
         session = Session.objects.get(id=session_id)
         template = loader.get_template('math_book/thisSession.html')
         context = {
+            'is_me': guest==session.by_guest,
             'session': session,
             'page_name_text': session.id,
             'color_theme': guest.color_theme,
         }
         return HttpResponse(template.render(context, request))
-    except:
+    else:
         return return_error(request)
 
+
+def remove_ticket_from_session(request, session_id, ticket_id):
+    if True:
+        guest = open_account_guest(request)
+        session = Session.objects.get(id=session_id)
+        ticket = session.tickets.get(id=ticket_id)
+        if guest == session.by_guest:
+            session.tickets.remove(ticket)
+        else:
+            return_error(request)
+        return get_session(request, session_id)
+    else:
+        return return_error(request)
+
+
+def add_ticket_to_session(request):
+    if True:
+        guest = open_account_guest(request)
+        session_id = int(su_cut(request.POST['session_id'], 10))
+        ticket_id = int(su_cut(request.POST['ticket_id'], 10))
+        ticket=Ticket.objects.get(id=ticket_id)
+        session = Session.objects.get(id=session_id)
+        if guest == session.by_guest:
+            session.tickets.add(ticket)
+        else:
+            return_error(request)
+        return get_session(request, session_id)
+    else:
+        return return_error(request)
 
 
 def show_all_session(request):
