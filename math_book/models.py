@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+import datetime
 
 
 def su_cut(string, len_string):
@@ -55,6 +56,7 @@ class University(models.Model):
     def __str__(self):
         return str(self.university_name)+"__"+su_cut(str(self.university_text), 50)
 
+
 class Ticket(models.Model):
     ticket_name = models.CharField(max_length=100, default='no name')
     by_guest = models.ForeignKey(Guest, on_delete=models.SET_DEFAULT, default=1)
@@ -74,10 +76,12 @@ class Ticket(models.Model):
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
 
+
 class Vote_ticket(models.Model):
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
     by_guest = models.ForeignKey(Guest, on_delete=models.CASCADE)
     vote_type = models.BooleanField(default=True)
+
 
 class Session(models.Model):
     session_name = models.CharField(max_length=50, default="no name")
@@ -107,10 +111,9 @@ class Theorem(models.Model):
     def get_html(self):
         return "<div class='theorem'> <center><div class='theorem_header'>теорема</div></center> <div class='theorem_header'>" + self.theorem_name+"</div>"+ self.theorem_text +"<div class='theorem_header'>доказательство:</div>" + self.theorem_proof +"</div>"
 
-
-
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
 
 class Vote_theorem(models.Model):
     theorem = models.ForeignKey(Theorem, on_delete=models.CASCADE)
@@ -136,6 +139,7 @@ class Definition(models.Model):
 
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
+
 
 class Vote_definition(models.Model):
     definition = models.ForeignKey(Definition, on_delete=models.CASCADE)

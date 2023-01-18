@@ -13,6 +13,13 @@ from django.db.models import Q
 from django.urls import reverse
 import random
 
+def generate_item_enters(item_str):
+    item_str = item_str.split("\n")
+    generated_item_str = ""
+    for item_str_1 in item_str:
+        generated_item_str += item_str_1+" (enter) "
+    return generated_item_str
+
 
 def get_bool_value_from_user(request, value_name):
     value_type_private = False
@@ -99,9 +106,7 @@ def generate_text_without_classes(text, replaces=[["replace_word"], [str]]):
             break
         verbnumber_before_slesh = verbnumber
         verb = text[verbnumber]
-        print(1)
         if verb == "/":
-            print(2)
             replaces_index = -1
             # нахождение нужного для перезаписи элемента в replaces
             for i in range(len(replaces[0])):
@@ -179,7 +184,6 @@ def generate_text_with_classes(text, replaces=[["theorem_link"], [Theorem]], rep
 
 def open_account_guest(request):
     try:
-        print(request.COOKIES)
         user_name = su_cut(request.COOKIES['math_book_user_name'], 40)
         session_key = su_cut(request.COOKIES['math_book_session_key'], 100)
         user = Guest.objects.get(guest_name=user_name)
@@ -961,8 +965,7 @@ def send_ticket(request):
         subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
-        ticket_name = su_cut(request.POST['ticket_name'], 100)
-        #ticket_text = su_cut(request.POST['ticket_text'], 10000)
+        ticket_name = su_cut(request.POST['ticket_name'], 200)
         ticket_text = ""
         study_direction = su_cut(request.POST['study_direction'], 50)
         picture_href = su_cut(request.POST['picture_href'], 100)
@@ -973,9 +976,13 @@ def send_ticket(request):
             item_number_str = str(item_number)
             item_type = su_cut(request.POST['item' + item_number_str], 20)
             if item_type == "definition":
-                item_name = su_cut(request.POST['name' + item_number_str], 50)
-                item_text = su_cut(request.POST['text' + item_number_str], 10000)
-                item_image = su_cut(request.POST['image' + item_number_str], 100)
+                item_name = str(su_cut(request.POST['name' + item_number_str], 100))
+                item_text = str(su_cut(request.POST['text' + item_number_str], 10000))
+                item_image = str(su_cut(request.POST['image' + item_number_str], 100))
+                item_name = generate_item_enters(item_name)
+                item_text = generate_item_enters(item_text)
+                item_image = generate_item_enters(item_image)
+
                 definition = Definition(definition_name=item_name, by_guest=guest, definition_text=item_text,
                                         pub_date=timezone.now(), subject=subject, picture_href=item_image)
                 definition.save()
@@ -986,10 +993,14 @@ def send_ticket(request):
                 definition_id = int(item_text)
                 ticket_text += " /definition_link id='" + str(definition_id) + "'/ (enter)"
             elif item_type == "theorema":
-                item_name = su_cut(request.POST['name' + item_number_str], 50)
+                item_name = su_cut(request.POST['name' + item_number_str], 100)
                 item_text = su_cut(request.POST['text' + item_number_str], 10000)
                 item_proof = su_cut(request.POST['proof' + item_number_str], 1000)
                 item_image = su_cut(request.POST['image' + item_number_str], 100)
+                item_name = generate_item_enters(item_name)
+                item_text = generate_item_enters(item_text)
+                item_image = generate_item_enters(item_image)
+                item_proof = generate_item_enters(item_proof)
                 theorem = Theorem(theorem_name=item_name, by_guest=guest, theorem_text=item_text,
                                   theorem_proof=item_proof,
                                   pub_date=timezone.now(), subject=subject, picture_href=item_image)
@@ -1028,7 +1039,6 @@ def get_ticket(request, ticket_id):
         guest = open_account_guest(request)
         ticket = Ticket.objects.get(id=ticket_id)
         ticket_text = generate_definitions_and_theorems(ticket.ticket_text)
-        print(ticket_text)
         ticket_text = generate_images(ticket_text)
         ticket.ticket_text = ticket_text
 
@@ -1123,13 +1133,7 @@ def send_vote_ticket(request, ticket_id, vote_type):
                 ticket.save()
             vote_ticket = Vote_ticket(ticket=ticket, vote_type=vote_type, by_guest=guest)
             vote_ticket.save()
-            template = loader.get_template('math_book/thisTicket.html')
-            context = {
-                'ticket': ticket,
-                'page_name_text': ticket.id,
-                'color_theme': open_account_guest(request).color_theme,
-            }
-            return HttpResponse(template.render(context, request))
+            return get_ticket(request, ticket_id)
         else:
             if ticket.vote_ticket_set.get(by_guest=guest).vote_type == vote_type:
                 template = loader.get_template('math_book/thisTicket.html')
