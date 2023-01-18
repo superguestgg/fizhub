@@ -69,13 +69,7 @@
     <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
-</div>	<div class="menuclosed" id="menu">
-
-		<div class="menusubpart"><a href="/fizhub/"><symbol>&#10144;</symbol>fizhub</a></div>
-		<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
-		<p>&#946; version</p>
-	</div>
-
+</div>
 	{% if session %}
     <div class="bod">
     	
@@ -87,16 +81,35 @@
         	<br>
         	text:<br>{{ session.session_text }}
         	
-        	{% if task.picture_href %}
+        	{% if session.picture_href %}
         	<br><img class="medium" src="{{session.picture_href}}" alt="no image">
 
         {% endif %}
+        <div class="message">
+	        <center>Билеты</center>
+	    </div>
+        {% for ticket in session.tickets.all %}
+	        <div class="message">
+	        <a href="/math_book/ticket/{{ticket.id}}/">
+	        	{{ticket.ticket_name}}
+	        	{% if is_me %}
+	        		&nbsp;<a href="/math_book/session/{{ session.id }}/untie_ticket/{{ticket.id}}/"><symbol><svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.7 6.5a.75.75 0 0 0-.7.8l.5 7a.75.75 0 0 0 1.5-.1l-.5-7a.75.75 0 0 0-.8-.7zm4.6 0a.75.75 0 0 1 .7.8l-.5 7a.75.75 0 0 1-1.5-.1l.5-7a.75.75 0 0 1 .8-.7z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 3a.75.75 0 0 0 0 1.5h1.07l.95 10.44c.05.49.09.9.14 1.23.06.35.15.68.33.98.28.47.7.85 1.19 1.08.32.16.65.22 1 .24.34.03.76.03 1.25.03h3.64c.5 0 .9 0 1.24-.03a2.8 2.8 0 0 0 1.01-.24 2.75 2.75 0 0 0 1.19-1.08c.18-.3.27-.63.33-.98.05-.33.1-.74.14-1.23l.96-10.44h1.06a.75.75 0 0 0 0-1.5h-4.59a3.25 3.25 0 0 0-6.32 0H2.25zm3.52 11.77c.04.53.08.88.12 1.15.05.26.1.38.15.47.12.21.3.38.53.49.1.04.22.08.48.1.28.02.63.02 1.16.02h3.58c.53 0 .88 0 1.16-.02.26-.02.39-.06.48-.1a1.25 1.25 0 0 0 .53-.5c.05-.08.1-.2.15-.46.04-.27.08-.62.12-1.15l.95-10.27H4.82l.95 10.27zM10 2c-.7 0-1.3.4-1.58 1h3.16A1.75 1.75 0 0 0 10 2z" fill="currentColor"></path></svg></symbol>отвязать</a>&nbsp;
+		        {% endif %}
+	        </a>
+	        </div>
+        {% endfor %}
 
 
         	{% if is_me %}
-        	<div class="reactions_menu">
-        		&nbsp;<a href="/math_book/session/{{ session.id }}/delete"><symbol><svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M7.7 6.5a.75.75 0 0 0-.7.8l.5 7a.75.75 0 0 0 1.5-.1l-.5-7a.75.75 0 0 0-.8-.7zm4.6 0a.75.75 0 0 1 .7.8l-.5 7a.75.75 0 0 1-1.5-.1l.5-7a.75.75 0 0 1 .8-.7z" fill="currentColor"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M2.25 3a.75.75 0 0 0 0 1.5h1.07l.95 10.44c.05.49.09.9.14 1.23.06.35.15.68.33.98.28.47.7.85 1.19 1.08.32.16.65.22 1 .24.34.03.76.03 1.25.03h3.64c.5 0 .9 0 1.24-.03a2.8 2.8 0 0 0 1.01-.24 2.75 2.75 0 0 0 1.19-1.08c.18-.3.27-.63.33-.98.05-.33.1-.74.14-1.23l.96-10.44h1.06a.75.75 0 0 0 0-1.5h-4.59a3.25 3.25 0 0 0-6.32 0H2.25zm3.52 11.77c.04.53.08.88.12 1.15.05.26.1.38.15.47.12.21.3.38.53.49.1.04.22.08.48.1.28.02.63.02 1.16.02h3.58c.53 0 .88 0 1.16-.02.26-.02.39-.06.48-.1a1.25 1.25 0 0 0 .53-.5c.05-.08.1-.2.15-.46.04-.27.08-.62.12-1.15l.95-10.27H4.82l.95 10.27zM10 2c-.7 0-1.3.4-1.58 1h3.16A1.75 1.75 0 0 0 10 2z" fill="currentColor"></path></svg></symbol>удалить</a>&nbsp;
-        	</div>
+        	<div class="task">
+	        <form action="{% url 'math_book:add_ticket_to_session' %}" method="post" enctype="multipart/form-data">
+	        	{% csrf_token %}
+	        	<div class="tasksubpart">добавить билет</div>
+	        	<input class="tasksubpart" type="hidden" name="session_id" value="{{session.id}}">
+	        	<div class="tasksubpart">номер билета: <input type="number" name="ticket_id" placeholder="номер билета"></div>
+	        	<center><input class="solutionbutton" type="submit" name="submit" placeholder="добавить"></center>
+	        </form>
+	        </div>
         	{% endif %}
 
         	</div>

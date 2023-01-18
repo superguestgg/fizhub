@@ -159,7 +159,6 @@
 
 		let ticket = "";
 		function generateticket() {
-			ticket = "";
 			ticket="<center>"+document.getElementById("ticket_name").value+"</center>";
 			document.getElementById("generate").className = "getticketafter";
 			for (let i = 0; i<itemsCount; i++) {
@@ -176,7 +175,7 @@
 				} else if (thissName == "imagelink") {
 					ticket = ticket + "<<i></i>img class='big' src='"+ document.getElementById(`text${i}`).value+"'>";			
 				} else if (thissName == "text") {
-					ticket = ticket + document.getElementById(`text${i}`).value;
+					ticket = ticket +"<br>"+ document.getElementById(`text${i}`).value;
 				}
 			}
 			document.getElementById("end").innerHTML = upgradesome(ticket);

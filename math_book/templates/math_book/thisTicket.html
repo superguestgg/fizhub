@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	{% load static %}
 	<link rel="stylesheet" type="text/css" href="{% static 'math_book/forSessionMathBook.css' %}">
+	<sscript type="text/javascript" src="{% static 'math_book/math_book.js' %}"></sscript>
 
 		<!-- KaTeX -->
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css" integrity="sha384-Juol1FqnotbkyZUT5Z7gUPjQ9gzlwCENvUZTpQBAPxtusdwFLRy382PSDx5UUJ4/" crossorigin="anonymous">
@@ -133,6 +134,7 @@
 <script type="text/javascript">
 	ismobileversion();
 	//<a href="/math_book/picture/{{task.picture_href}}">////.replace('/','^')
+	//processingPage("session_ticket","session_ticket");
 	processingTicket("session_ticket","session_ticket");
 	openaccountfromcookie("i");
 </script>
