@@ -112,37 +112,55 @@ function saveaccount(){
 }
 
 
+function checkSubstringOnIndex(text, index, substring){
+	let t = true;
+	let substringLength = substring.length;
+	for (let substringIndex=0; substringIndex<substringLength; substringIndex++){
+		if (text[index+substringIndex]!=substring[substringIndex]){
+			t=false
+		}
+	}
+	return t;
+}
+
+
 function loadLatex(id_from, id_for){
 	resultText="";
 	text=document.getElementById(id_from).innerHTML;
-	//console.log(text);
 	// 0=normal ; 1=formula
 	typeElementNow=0;
 	formula="";
 	for (let i=0;i<=text.length;i++){
-		//console.log(text[i]);
 		if (text[i]=="$"){
 			typeElementNow++;
 			typeElementNow %= 2;
-			//console.log(formula);
 			resultText+=katex.renderToString(formula,{throwOnError: true});
 			formula="";
 		} else if (typeElementNow==1){
+			if (text[i]=="&"){
+				if (checkSubstringOnIndex(text, i, "&gt;")){
+					i+=3;
+					formula+=">";
+					continue;
+				} if (checkSubstringOnIndex(text, i, "&lt;")){
+					i+=3;
+					formula+="<";
+					continue;
+				}
+			}
 			formula+=text[i];
 		} else {
-			//console.log(resultText);
 			if (text[i]=="\\"){
-				
 				console.log(text[i+1]);
-				if (text[i+1]=="i" && text[i+2]=="t" && text[i+3]=="e" && text[i+4]=="m"){
+				if (checkSubstringOnIndex(text, i,"\\item")){
 					resultText+="<br>";
 					i+=4;
 				}
-				if (text[i+1]=="e" && text[i+2]=="n" && text[i+3]=="d"){
+				if (checkSubstringOnIndex(text, i,"\\end")){
 					resultText+="<br>";
 					i+=3;
 				}
-				if (text[i+1]=="b" && text[i+2]=="e" && text[i+3]=="g" && text[i+4]=="i" && text[i+5]=="n"){
+				if (checkSubstringOnIndex(text, i,"\\begin")){
 					resultText+="<br>";
 					i+=5;
 				}
@@ -156,23 +174,50 @@ function loadLatex(id_from, id_for){
 		resultText=resultText.replace("(enter)", "<br>");
 	}
 	resultText=resultText.replace("undefined","");
-	
-	//console.log(resultText);
 	document.getElementById(id_for).innerHTML=resultText;
 }
 
 
 function processingTicket(id_from, id_for){
+	processingPage(id_from, id_for);
 	loadLatex(id_from, id_for);
+}
+
+
+function processingPage(id_from, id_for){
 	text=document.getElementById(id_from).innerHTML;
-	for (let i=0;i<=1000;i++){
-		text=text.replace("&gt;",">").replace("&lt;","<");
+	resultText="";
+	textLen=text.length;
+	for (let i=0;i<textLen;i++){
+		if (text[i]=="$"){
+			resultText+=text[i];
+			i++;
+			if (i==textLen){
+				break;
+			}
+			while (text[i]!="$"){
+				resultText+=text[i];
+				i++;
+				if (i==textLen){
+					break;
+				} 
+			}
+		} if (text[i]=="&"){
+			if (checkSubstringOnIndex(text, i, "&gt;")){
+				i+=3;
+				resultText+=">";
+				continue;
+			} if (checkSubstringOnIndex(text, i, "&lt;")){
+				i+=3;
+				resultText+="<";
+				continue;
+			}
+		}
+		resultText+=text[i];
 	}
-	resultText=text.replace("undefined","");
-	
-	//console.log(resultText);
+	console.log(text);
+	console.log(resultText);
 	document.getElementById(id_for).innerHTML=resultText;
-	//later
 }
 
 
