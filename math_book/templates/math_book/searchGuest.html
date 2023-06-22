@@ -68,7 +68,7 @@
     <div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>AnonNetwork</a></div>
     <p>&#946; version</p> <br>
     <p>made by <a href="https://github.com/superguestgg">superguestgg</a></p>
-</div>
+</div>   
 
 	
 	
@@ -93,6 +93,21 @@
 
     	</div>
     	{% endif %}
+
+
+        <div class="task">
+            <div class="taskheader">введите запрос</div>
+            <form action="{% url 'math_book:search_guest' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="tasksubpart">
+                    <input type="text" name="string_search" placeholder="ваш запрос" value="{{last_question}}">
+                </div>
+                <center><input type="submit" name="" class="solutionbutton" value="найти"></center>
+
+            </form>
+        </div>
+
+
     	{% if guests_list %}
     {% for guest in guests_list %}
         <div class="task">
@@ -107,30 +122,11 @@
         </div>
     {% endfor %}
 
-    <div class="message">
-        	{% if pages|add:'-1' %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{guest.id}}"> предыдущая страница </a>
-     
-     {% endif %}
-     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
-
-     {% if next_page %}
-     <a href="/fizhub/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{guest.id}}"> следующая страница </a>
-     {% else %}
-
-     {% endif %}
-
-
-
-        	<br>
-        		
-     
-        </div>
     </div>
 {% else %}
 		<div class="task">
         	<div class="taskheader">
-        	No guests are available.
+        	Упс, ничего не найдено, поробуйте скорректировать запрос.
         </div>
         {% if page_name %}
         	<div class="solutionbutton" ><center><a href="/fizhub/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{guest.id}}"> предыдущая страница </a></center></div>{% endif %}

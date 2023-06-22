@@ -60,6 +60,7 @@
         <input type="hidden" name="items_count" id="items_count" value="0">
     	<div class="tasksubpart">number of university of ticket<input type="number" name="university_id" placeholder="1" value="1"></div>
 		<div class="tasksubpart">number of subject of ticket<input type="number" name="subject_id" placeholder="1" value="1"></div>
+		<div class="tasksubpart">номер билета<input type="number" name="ticket_number" id="ticket_number" value="0"></div>
 		<div class="tasksubpart">ticket_name of ticket<input type="text" name="ticket_name" id="ticket_name" placeholder="ticket_name of ticket"></div>
 		<div class="tasksubpart">study_direction of ticket<input type="text" name="study_direction" placeholder="study_direction of ticket" value="fiit"></div>
 		<div class="tasksubpart">picture_href of ticket<input type="text" name="picture_href" placeholder="picture_href of ticket"></div>    
@@ -92,6 +93,8 @@
 				<textarea class='forbiginput' id='name${itemsCount}' name='name${itemsCount}'>место для названия</textarea>
 				<textarea class='forbiginput' id='text${itemsCount}' name='text${itemsCount}'>определение</textarea>
 				<textarea class='forbiginput' id='image${itemsCount}' name='image${itemsCount}'>ссылка на картинку</textarea>
+
+				<div class="tasksubpart">загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="image_file${itemsCount}" name="image_file${itemsCount}"></div>
 				</div>`
 			} else if (selectedvariant == 1) {
 				newelement.innerHTML = `<div class='definition2' id='${itemsCount}' name='definition_link'>номер определения
@@ -104,7 +107,9 @@
 				<textarea class='forbiginput' id='name${itemsCount}' name='name${itemsCount}'>место для названия</textarea>
 				<textarea class='forbiginput' id='text${itemsCount}' name='text${itemsCount}'>условие:</textarea>
 				<textarea class='forbiginput' id='proof${itemsCount}' name='proof${itemsCount}'>доказательство:</textarea>
+
 				<textarea class='forbiginput' id='image${itemsCount}' name='image${itemsCount}'>ссылка на картинку</textarea>
+				<div class="tasksubpart">загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="image_file${itemsCount}" name="image_file${itemsCount}"></div>
 				</div>`
 			} else if (selectedvariant == 3) {
 				newelement.innerHTML = `<div class='theorema2' id='${itemsCount}' name='theorem_link'>номер теоремы
