@@ -8,319 +8,104 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from django.urls import reverse
 
-branch = []
-def create(class_search, sort_argument_name, name_argument_name):
-    sort_argument = getattr(class_search, sort_argument_name)
-    name_argument = getattr(class_search, name_argument_name)
-    global branch
-    print("creating a tree....")
-    branch = [["","",[],[],[],[]]]
-    #last letter, all letters, massive of next letters,massive of links for next letters,
-    #this room, top room
-    branch_length = 1
-    objects = class_search.objects.filter(room_type_private=False)
 
-    for object in objects:
-        object_name = (object.name_argument)
-        object_name_length = len(object_name)
-        object_name_list = list(object_name)
-        object_sort_argument = int(object.sort_argument)
-        place=0
-        for letter in object_name_list:
+class NameTree:
+    def __init__(self, class_search, sort_argument_name, name_argument_name):
+        # filter_arg, func_filter_arg_should):
+        self.class_search = class_search
+        self.sort_argument_name = sort_argument_name
+        self.name_argument_name = name_argument_name
+        # self.filter_arg = filter_arg
+        # self.func_filter_arg_should = func_filter_arg_should
+        self.branch = [NameTreeNode("")]
 
-            if object_name_length == len(branch[place][1]):
-                #print(room_name)
-                branch[place][4] = [object.id, object.object_name, object.object_messages_count]
-            else:
-                if branch[place][5]==[]:
-                    branch[place][5] = [object.id, object.object_name, object.object_messages_count]
-                elif branch[place][5][2] < object_sort_argument:
-                    branch[place][5] = [object.id, object.object_name, object.object_messages_count]
+    def create(self, new_objects):
+        print("creating a tree....")
+        for new_object in new_objects:
+            self.add(new_object)
 
-            if branch[place][2].count(letter) == 0:
-
-                branch[place][2].append(letter)
-                branch[place][3].append(branch_length)
-                if object_name_length==len(str(branch[place][1])+str(letter)):
-                    branch.append([letter, str(branch[place][1])+str(letter), [], [], [room.id, room.room_name, room.room_messages_count], []])
-                else:
-                    branch.append([letter, str(branch[place][1])+str(letter), [], [], [], [room.id, room.room_name, room.room_messages_count]])
-
-                place = branch_length
-                branch_length += 1
-
-            else:
-                place = branch[place][3][branch[place][2].index(letter)]
-                if object_name==str(branch[place][1]):
-                    #print(room_name)
-                    branch[place][4] = [object.id, object.room_name, object.room_messages_count]
-
-    #print(branch)
-
-    file=open("tree.txt","w")
-    for i in range (len(branch)):
-        file.write(str(branch[i]))
-    print("tree created succesful")
-
-def create_room(room_id):
-
-
-    global branch
-
-    #last letter, all letters, massive of next letters,massive of links for next letters,
-    #this room, top room
-    branch_length=len(branch)
-    try:
-        room = Class_search.objects.get(id=room_id)
-
-
-        room_name=(room.room_name)
-        room_name_length = len(room_name)
-        room_name_list=list(room_name)
-        room_messages_count = int(room.room_messages_count)
-        place=0
-        for letter in room_name_list:
-            if room_name_length == len(branch[place][1]):
-                branch[place][4] = [room.id, room.room_name, room.room_messages_count]
-            else:
-                if branch[place][5]==[]:
-                    branch[place][5] = [room.id, room.room_name, room.room_messages_count]
-                elif branch[place][5][2] < room_messages_count:
-                    branch[place][5] = [room.id, room.room_name, room.room_messages_count]
-
-            if branch[place][2].count(letter) == 0:
-
-                branch[place][2].append(letter)
-                branch[place][3].append(branch_length)
-                if room_name_length==len(str(branch[place][1])+str(letter)):
-                    branch.append([letter, str(branch[place][1])+str(letter), [], [], [room.id, room.room_name, room.room_messages_count], []])
-                else:
-                    branch.append([letter, str(branch[place][1])+str(letter), [], [], [], [room.id, room.room_name, room.room_messages_count]])
-
-                place = branch_length
-                branch_length += 1
-
-            else:
-                place = branch[place][3][branch[place][2].index(letter)]
-                if room_name==str(branch[place][1]):
-                    print(room_name)
-                    branch[place][4] = [room.id, room.room_name, room.room_messages_count]
-
-        return "s"
-    except:
-        return "e"
-    #print(branch)
-    #file=open("tree.txt","w")
-    #for i in range (len(branch)):
-    #    file.write(str(branch[i]))
-def searchwitherrors_recursion(string, string_list, place, mistake, indexnow):
-    if mistake>=0:
-        if branch[place][0].count("u")>0:
-            print(string, string_list, place, mistake, indexnow)
-            print(branch[place])
-        let=indexnow
-        #letter = string_list[let]
-        #print(letter)
-        rooms_list=[]
-        if let < len(string_list):
-            letter = string_list[let]
-            if letter in branch[place][2]:
-                #print(letter)
-                for i in range(len(branch[place][3])):
-                    if branch[place][2][i] != letter:
-                        place2 = branch[place][3][i]
-                        rooms_list_append=(searchwitherrors_recursion(string, string_list, place2, mistake-1, indexnow+1))
-                        if rooms_list_append != None and rooms_list_append != []:
-                            #print(rooms_list_append)
-                            rooms_list+=(rooms_list_append)
-                i=branch[place][2].index(letter)
-                place2 = branch[place][3][i]
-                rooms_list_append = (searchwitherrors_recursion(string, string_list, place2, mistake, indexnow + 1))
-                if rooms_list_append != None and rooms_list_append != []:
-                    #print(rooms_list_append)
-                    rooms_list += (rooms_list_append)
-            else:
-                for i in range(len(branch[place][3])):
-                    place2 = branch[place][3][i]
-                    rooms_list_append=(searchwitherrors_recursion(string, string_list, place2, mistake - 1, indexnow + 1))
-                    if rooms_list_append != None and rooms_list_append != []:
-                        #print(rooms_list_append)
-                        rooms_list+=(rooms_list_append)
-        else:
-            print("efve",mistake)
-            place2 = place
-            if branch[place2][4]:
-                rooms_list.append(branch[place2][4])
-            for i in range(len(branch[place2][3])):
-                # print(branch[place][3][i])
-                if branch[int(branch[place2][3][i])][5]:
-                    rooms_list.append(branch[branch[place2][3][i]][5])
-                if branch[branch[place2][3][i]][4]:
-                    rooms_list.append(branch[int(branch[place2][3][i])][4])
-            """
-            print(branch[place],mistake)
-            if letter in branch[place][2]:
-                place2 = branch[place][3][branch[place][2].index(letter)]
-                if branch[place2][4]:
-                    rooms_list.append(branch[place2][4])
-                for i in range(len(branch[place2][3])):
-                    # print(branch[place][3][i])
-                    if branch[int(branch[place2][3][i])][5]:
-                        rooms_list.append(branch[branch[place2][3][i]][5])
-                    if branch[branch[place2][3][i]][4]:
-                        rooms_list.append(branch[int(branch[place2][3][i])][4])
-            if mistake > 0:
-                print(mistake*100000)
-                for letter in branch[place][2]:
-                    place2 = branch[place][3][branch[place][2].index(letter)]
-                    if branch[place2][4]:
-                        rooms_list.append(branch[place2][4])
-                    for i in range(len(branch[place2][3])):
-                        # print(branch[place][3][i])
-                        if branch[int(branch[place2][3][i])][5]:
-                            rooms_list.append(branch[branch[place2][3][i]][5])
-                        if branch[branch[place2][3][i]][4]:
-                            rooms_list.append(branch[int(branch[place2][3][i])][4])
-                #break"""
-        return rooms_list
-
-def searchwitherrors2(string):
-    print("searchwitherrors2")
-    global branch
-    branch_length = len(branch)
-    room = string
-    string_list = list(string)
-    string_length = len(string)
-    print(string_length)
-    #print(string_length)
-    rooms_list = []
-    mistake=0
-    while len(rooms_list)==0 and mistake<10:
-        mistake+=1
-        print(str(mistake)+"...........")
+    def add(self, new_object):
+        branch = self.branch
+        obj_name = getattr(new_object, self.name_argument_name)
+        obj_name_list = list(obj_name)
+        obj_sort_argument = int(getattr(new_object, self.sort_argument_name))
+        obj = [new_object.id, obj_sort_argument]
         place = 0
+        for letter in obj_name_list:
+            if branch[place].top_child_obj is None:
+                branch[place].top_child_obj = obj
+            elif branch[place].top_child_obj[1] < obj_sort_argument:
+                branch[place].top_child_obj = obj
 
-        rooms_list = searchwitherrors_recursion(string,string_list,place,mistake,0)
+            if letter not in branch[place].next_letters:
+                branch[place].next_letters[letter] = len(branch)
+                branch.append(NameTreeNode(branch[place].all_path + letter))
+            place = branch[place].next_letters[letter]
+        if branch[place].curr_obj is None:
+            branch[place].curr_obj = obj
+        elif branch[place].curr_obj[1] < obj_sort_argument:
+            branch[place].curr_obj = obj
+        return
 
-    print(rooms_list)
+    def search(self, string_search):
+        branch = self.branch
+        place = 0
+        obj_list = []
+        for letter in string_search:
+            if letter in branch[place].next_letters:
+                place = branch[place].next_letters[letter]
+        if not branch[place].curr_obj is None:
+            obj_list.append(branch[place].curr_obj)
+        if not branch[place].top_child_obj is None:
+            obj_list.append(branch[place].top_child_obj)
+        for key_val_pair in branch[place].next_letters.items():
+            child = branch[key_val_pair[1]]
+            if not child.top_child_obj is None:
+                obj_list.append(child.top_child_obj)
+            if not child.curr_obj is None:
+                obj_list.append(child.curr_obj)
+        return obj_list
 
-    return rooms_list
-def searchwitherrors(string):
-    #print(1)
-    global branch
-    branch_length = len(branch)
-    room = string
-    string_list = list(string)
-    string_length = len(string)
-    print(string_length)
-    #print(string_length)
-    place=0
-    t=1
-    rooms_list = []
-    for let in range (string_length):
-        #print(branch[place][1])
-        letter=string_list[let]
-        #print(letter)
-        if letter in branch[place][2]:
-            #print(letter)
-            for i in range (len(branch[place][3])):
-                if branch[place][2][i]!=letter:
-                    t2=1
-                    place2 = branch[place][3][i]
-                    for let2 in range (let+1,len(string_list)):
-                        letter2 = string_list[let2]
-                        if letter2 in branch[place2][2]:
-                            place2 = branch[place2][3][branch[place2][2].index(letter2)]
-                        else:
-                            t2=0
-                            break
-                    if t2==1:
-                        if branch[place2][4]:
-                            rooms_list.append(branch[place2][4])
-                        for i in range(len(branch[place2][3])):
-                            # print(branch[place][3][i])
-                            if branch[int(branch[place2][3][i])][5]:
-                                rooms_list.append(branch[branch[place2][3][i]][5])
-                            if branch[branch[place2][3][i]][4]:
-                                rooms_list.append(branch[int(branch[place2][3][i])][4])
-            place = branch[place][3][branch[place][2].index(letter)]
+    def search_with_mistakes(self, string_search, return_only_id=False):
+        obj_list = []
+        self.search_recursion(string_search, len(string_search) // 2,
+                              0, string_search, 0, obj_list)
+        if return_only_id:
+            return [obj[0] for obj in obj_list]
+        return obj_list
+
+    def search_recursion(self, string_search, delta_max,
+                         place, all_path, verb_number, obj_list):
+        branch = self.branch
+        if delta_max < 0:
+            return
+        if verb_number >= len(all_path):
+            if not branch[place].top_child_obj is None:
+                obj_list.append(branch[place].top_child_obj)
+            if not branch[place].curr_obj is None:
+                obj_list.append(branch[place].curr_obj)
         else:
-            #print(999)
-            t=0
-            for i in range (len(branch[place][3])):
-                #print(branch[place][2][i])
-                t2=1
-                place2 = branch[place][3][i]
-                for let2 in range (let+1,len(string_list)):
-                    #print(22)
-                    letter2 = string_list[let2]
-                    if letter2 in branch[place2][2]:
-                        place2 = branch[place2][3][branch[place2][2].index(letter2)]
-                    else:
-                        t2=0
-                        break
-                if t2==1:
-                    if branch[place2][4]:
-                        rooms_list.append(branch[place2][4])
-                    for i in range(len(branch[place2][3])):
-                        # print(branch[place][3][i])
-                        if branch[int(branch[place2][3][i])][5]:
-                            rooms_list.append(branch[branch[place2][3][i]][5])
-                        if branch[branch[place2][3][i]][4]:
-                            rooms_list.append(branch[int(branch[place2][3][i])][4])
-            break
+            for next_letter in branch[place].next_letters:
+                if next_letter == string_search[verb_number]:
+                    self.search_recursion(string_search, delta_max,
+                                          branch[place].next_letters[next_letter],
+                                          all_path, verb_number + 1, obj_list)
+                else:
+                    self.search_recursion(string_search, delta_max - 1,
+                                          branch[place].next_letters[next_letter],
+                                          all_path, verb_number + 1, obj_list)
 
-    if t==1:
-        if branch[place][4]:
-            rooms_list.append(branch[place][4])
-        for i in range (len(branch[place][3])):
-            #print(branch[place][3][i])
-            if branch[int(branch[place][3][i])][5]:
-                rooms_list.append(branch[branch[place][3][i]][5])
-            if branch[branch[place][3][i]][4]:
-                rooms_list.append(branch[int(branch[place][3][i])][4])
-    """if len(rooms_list)==0 or t==0:
-        if branch[place][4]:
-            rooms_list.append(branch[place][4])
-        for i in range (len(branch[place][3])):
-            #print(branch[place][3][i])
-            if branch[int(branch[place][3][i])][5]:
-                rooms_list.append(branch[branch[place][3][i]][5])
-            if branch[branch[place][3][i]][4]:
-                rooms_list.append(branch[int(branch[place][3][i])][4])"""
-    if len(rooms_list)==0:
-        return searchwitherrors2(string)
-    return rooms_list
-def get(string):
-    #print(1)
-    global branch
-    branch_length = len(branch)
-    room = string
-    string_list = list(string)
-    string_length = len(string)
-    #print(string_length)
-    place=0
-    t=1
-    for letter in string_list:
-        #print(branch[place][1])
+    def save(self, file_name):
+        file = open(file_name+".json", "w")
+        for obj in self.branch:
+            file.write("")
+        print("tree created succesful")
 
-        if letter in branch[place][2]:
-            place = branch[place][3][branch[place][2].index(letter)]
-        else:
-            t=0
-            break
-    rooms_list = []
-    if t==1:
-        if branch[place][4]:
-            rooms_list.append(branch[place][4])
-        for i in range (len(branch[place][3])):
-            #print(branch[place][3][i])
-            if branch[int(branch[place][3][i])][5]:
-                rooms_list.append(branch[branch[place][3][i]][5])
-            if branch[branch[place][3][i]][4]:
-                rooms_list.append(branch[int(branch[place][3][i])][4])
-    if len(rooms_list)==0 or t==0:
-        print("searchwitherrors")
-        return searchwitherrors(string)
-    return rooms_list
+
+class NameTreeNode:
+    def __init__(self, all_path):
+        self.all_path = all_path
+        self.next_letters = dict()
+        self.top_child_obj = None
+        self.curr_obj = None
 

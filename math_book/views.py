@@ -1,17 +1,27 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import Http404
+# from django.http import Http404
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 # from django.
 from django.utils import timezone
-from django.urls import reverse
+# from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
-from .models import Subject, University, Ticket, Guest, Session, Guest_session, Vote_ticket, Theorem, Vote_theorem, \
-    Definition, Vote_definition
+from .models import Subject, University, Ticket, Guest,\
+    Session, Guest_session, Vote_ticket, Theorem, Vote_theorem, \
+    Definition, Vote_definition, SessionTicket
 from django.template import loader
 from django.db.models import Q
 from django.urls import reverse
 import random
+
+from .search_tree import NameTree
+
+
+def set_default_if_empty(variable, default):
+    if variable in [[], "", " ", "  "]:
+        return default
+    return variable
+
 
 def generate_item_enters(item_str):
     item_str = item_str.split("\n")
@@ -199,10 +209,10 @@ def open_account_guest(request):
 
 def sendaccountpost(request):
     if True:
-        type = su_cut(request.POST['registration_type'], 50)
-        guest_name = su_cut(request.POST['guest_name'], 50)
+        login_type = su_cut(request.POST['registration_type'], 50)
+        guest_name = set_default_if_empty(su_cut(request.POST['guest_name'], 50), "no name")
         guest_password = su_cut(request.POST['guest_password'], 50)
-        if type == "new":
+        if login_type == "new":
             if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
                 try:
                     os = su_cut(request.META['OS'], 100)
@@ -440,6 +450,44 @@ def show_guest_page(request, sort_type, page_number):
         return HttpResponse('error')
 
 
+guest_search_tree = None
+
+
+def first_search_guest():
+    global guest_search_tree
+    if guest_search_tree is None:
+        guest_search_tree = NameTree(Guest, "ticket_count", "guest_name")
+        guest_search_tree.create(Guest.objects.all())
+
+def search_guest(request):
+    # print(set(dir(Guest)) - set(dir(Guest_session)))
+    global guest_search_tree
+    first_search_guest()
+    guest = open_account_guest(request)
+    sort_type = 'search'
+
+    if request.method == 'POST':
+        string_search = request.POST['string_search']
+        guests_list_id = guest_search_tree.search_with_mistakes(
+            string_search, return_only_id=True)
+
+        guests_list = Guest.objects.filter(id__in=guests_list_id)
+        last_question = string_search
+    else:
+        guests_list = ""
+        last_question = ""
+    template = loader.get_template('math_book/searchGuest.html')
+    context = {
+        'last_question': last_question,
+        'guests_list': guests_list,
+        'page_name_text': 'поиск',
+        'main_link': '/math_book/guests/' + sort_type,
+        'pagemenu': True,
+        'color_theme': guest.color_theme,
+    }
+    return HttpResponse(template.render(context, request))
+
+
 def show_all_guest_sessions_from_guest(request, guest_id):
     return show_guest_sessions_from_guest(request, guest_id, 'all')
 
@@ -603,7 +651,6 @@ def show_definitions_from_guest_page(request, guest_id, sort_type, page_number):
         return return_error(request)
 
 
-
 def login(request):
     try:
         guest = open_account_guest(request)
@@ -694,7 +741,6 @@ def show_subject_page(request, sort_type, page_number):
         return return_error(request)
 
 
-
 def show_all_tickets_from_subject(request, subject_id):
     return show_tickets_from_subject(request, subject_id, 'all')
 
@@ -760,7 +806,6 @@ def show_theorems_from_subject_page(request, subject_id, sort_type, page_number)
         return return_error(request)
 
 
-
 def show_all_definitions_from_subject(request, subject_id):
     return show_definitions_from_subject(request, subject_id, 'all')
 
@@ -791,7 +836,6 @@ def show_definitions_from_subject_page(request, subject_id, sort_type, page_numb
         return HttpResponse(template.render(context, request))
     except:
         return return_error(request)
-
 
 
 def create_subject(request):
@@ -965,7 +1009,8 @@ def send_ticket(request):
         subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
-        ticket_name = su_cut(request.POST['ticket_name'], 200)
+        ticket_name = set_default_if_empty(su_cut(
+            request.POST['ticket_name'], 200), "no name")
         ticket_text = ""
         study_direction = su_cut(request.POST['study_direction'], 50)
         picture_href = su_cut(request.POST['picture_href'], 100)
@@ -979,9 +1024,26 @@ def send_ticket(request):
                 item_name = str(su_cut(request.POST['name' + item_number_str], 100))
                 item_text = str(su_cut(request.POST['text' + item_number_str], 10000))
                 item_image = str(su_cut(request.POST['image' + item_number_str], 100))
-                item_name = generate_item_enters(item_name)
+                try:
+                    item_image_file = request.FILES['image_file' + item_number_str]
+                    file_size = item_image_file.size
+                    if 100 < file_size < 3000000:
+                        fs = FileSystemStorage()
+                        filename = fs.save(guest.guest_name+"_"+item_image_file.name, item_image_file)
+                        uploaded_file_url = fs.url(filename)
+                        item_image = uploaded_file_url
+                    elif file_size >= 3000000:
+                        return HttpResponse('picture size too big<a href="/math/main">main page</a>')
+                    elif file_size > 0:
+                        return HttpResponse('picture size not enough big<a href="/math/main">main page</a>')
+                    else:
+                        pass
+                except:
+                    pass
+
+                #item_name = generate_item_enters(item_name)
                 item_text = generate_item_enters(item_text)
-                item_image = generate_item_enters(item_image)
+                #item_image = generate_item_enters(item_image)
 
                 definition = Definition(definition_name=item_name, by_guest=guest, definition_text=item_text,
                                         pub_date=timezone.now(), subject=subject, picture_href=item_image)
@@ -997,9 +1059,26 @@ def send_ticket(request):
                 item_text = su_cut(request.POST['text' + item_number_str], 10000)
                 item_proof = su_cut(request.POST['proof' + item_number_str], 1000)
                 item_image = su_cut(request.POST['image' + item_number_str], 100)
-                item_name = generate_item_enters(item_name)
+                try:
+                    item_image_file = request.FILES['image_file' + item_number_str]
+                    file_size = item_image_file.size
+                    if 100 < file_size < 3000000:
+                        fs = FileSystemStorage()
+                        filename = fs.save(guest.guest_name+"_"+item_image_file.name, item_image_file)
+                        uploaded_file_url = fs.url(filename)
+                        item_image = uploaded_file_url
+                    elif file_size >= 3000000:
+                        return HttpResponse('picture size too big<a href="/math/main">main page</a>')
+                    elif file_size > 0:
+                        return HttpResponse('picture size not enough big<a href="/math/main">main page</a>')
+                    else:
+                        pass
+                except:
+                    pass
+
+                #item_name = generate_item_enters(item_name)
                 item_text = generate_item_enters(item_text)
-                item_image = generate_item_enters(item_image)
+                #item_image = generate_item_enters(item_image)
                 item_proof = generate_item_enters(item_proof)
                 theorem = Theorem(theorem_name=item_name, by_guest=guest, theorem_text=item_text,
                                   theorem_proof=item_proof,
@@ -1022,7 +1101,8 @@ def send_ticket(request):
             ticket = guest.ticket_set.create(university=university, subject=subject,
                                              ticket_type_private=ticket_type_private, pub_date=timezone.now(),
                                              ticket_name=ticket_name, ticket_text=ticket_text,
-                                             study_direction=study_direction, picture_href=picture_href)
+                                             study_direction=study_direction, picture_href=picture_href,
+                                             )
             ticket_id = ticket.id
             return HttpResponse(
                 'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(
@@ -1097,6 +1177,42 @@ def show_ticket_page(request, sort_type, page_number):
     except:
         return return_error(request)
 
+
+ticket_search_tree = None
+
+
+def first_search_ticket():
+    global ticket_search_tree
+    if ticket_search_tree is None:
+        ticket_search_tree = NameTree(Ticket, "vote_for_count", "ticket_name")
+        ticket_search_tree.create(Ticket.objects.all())
+
+def search_ticket(request):
+    # print(set(dir(Guest)) - set(dir(Guest_session)))
+    global ticket_search_tree
+    first_search_ticket()
+    guest = open_account_guest(request)
+    sort_type = 'search'
+
+    if request.method == 'POST':
+        string_search = request.POST['string_search']
+        tickets_list_id = ticket_search_tree.search_with_mistakes(
+            string_search, return_only_id=True)
+        tickets_list = Ticket.objects.filter(id__in=tickets_list_id)
+        last_question = string_search
+    else:
+        tickets_list = ""
+        last_question = ""
+    template = loader.get_template('math_book/searchTicket.html')
+    context = {
+        'last_question': last_question,
+        'tickets_list': tickets_list,
+        'page_name_text': 'поиск',
+        'main_link': '/math_book/tickets/' + sort_type,
+        'pagemenu': True,
+        'color_theme': guest.color_theme,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def create_ticket(request):
@@ -1192,11 +1308,13 @@ def get_session(request, session_id):
         guest = open_account_guest(request)
         session = Session.objects.get(id=session_id)
         template = loader.get_template('math_book/thisSession.html')
+        tickets = session.sorted_tickets()
         context = {
             'is_me': guest==session.by_guest,
             'session': session,
             'page_name_text': session.id,
             'color_theme': guest.color_theme,
+            'tickets': tickets
         }
         return HttpResponse(template.render(context, request))
     else:
@@ -1207,9 +1325,9 @@ def remove_ticket_from_session(request, session_id, ticket_id):
     if True:
         guest = open_account_guest(request)
         session = Session.objects.get(id=session_id)
-        ticket = session.tickets.get(id=ticket_id)
+        ticket = session.tickets_with_numbers.get(id=ticket_id)
         if guest == session.by_guest:
-            session.tickets.remove(ticket)
+            session.tickets_with_numbers.remove(ticket)
         else:
             return_error(request)
         return get_session(request, session_id)
@@ -1222,10 +1340,12 @@ def add_ticket_to_session(request):
         guest = open_account_guest(request)
         session_id = int(su_cut(request.POST['session_id'], 10))
         ticket_id = int(su_cut(request.POST['ticket_id'], 10))
-        ticket=Ticket.objects.get(id=ticket_id)
+        ticket_number = int(su_cut(request.POST['ticket_number'], 10))
+        ticket = Ticket.objects.get(id=ticket_id)
         session = Session.objects.get(id=session_id)
         if guest == session.by_guest:
-            session.tickets.add(ticket)
+            session.tickets_with_numbers.add(ticket,
+                through_defaults={'ticket_number': ticket_number})
         else:
             return_error(request)
         return get_session(request, session_id)

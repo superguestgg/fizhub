@@ -88,10 +88,20 @@ class Session(models.Model):
     session_text = models.CharField(max_length=10000, default="no text")
     by_guest = models.ForeignKey(Guest, on_delete=models.SET_DEFAULT, default=1)
     university = models.ForeignKey(University, on_delete=models.SET_DEFAULT, default=1)
-    tickets = models.ManyToManyField(Ticket)
+    subject = models.ForeignKey(Subject, on_delete=models.SET_DEFAULT, default=1)
+    tickets_with_numbers = models.ManyToManyField(Ticket, through='SessionTicket')
 
     def __str__(self):
         return str(self.session_name)+"__"+su_cut(str(self.session_text), 50)
+
+    def sorted_tickets(self):
+        return self.tickets_with_numbers.order_by('sessionticket__ticket_number')
+
+
+class SessionTicket(models.Model):
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    ticket_number = models.IntegerField(default=0)
 
 
 class Theorem(models.Model):
@@ -109,7 +119,12 @@ class Theorem(models.Model):
         return (self.theorem_name + " text: " + self.theorem_text)
 
     def get_html(self):
-        return "<div class='theorem'> <center><div class='theorem_header'>теорема</div></center> <div class='theorem_header'>" + self.theorem_name+"</div>"+ self.theorem_text +"<div class='theorem_header'>доказательство:</div>" + self.theorem_proof +"</div>"
+        return "<div class='theorem'> <center><div class='theorem_header'>" \
+               "теорема</div></center> <div class='theorem_header'>"\
+               + f"{self.theorem_name} </div> {self.theorem_text}" \
+               + f' <img class="medium" src="{self.picture_href}" alt="no image">'\
+               + "<div class='theorem_header'>доказательство:</div>" \
+               + f" {self.theorem_proof} </div>"
 
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
@@ -135,7 +150,10 @@ class Definition(models.Model):
         return (self.definition_name + " text: " + self.definition_text)
 
     def get_html(self):
-        return "<div class='definition'> <center><div class='definition_header'>определение</div></center> <div class='definition_header'>" + self.definition_name + "</div>" + self.definition_text + " </div>"
+        return "<div class='definition'> <center><div class='definition_header'>" \
+               "определение</div></center> <div class='definition_header'>"\
+               f"{self.definition_name}</div> {self.definition_text}" \
+               f' <img class="medium" src="{self.picture_href}" alt="no image"> </div>'
 
     def was_published_recently(self):
         return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
