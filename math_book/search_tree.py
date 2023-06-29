@@ -10,11 +10,13 @@ from django.urls import reverse
 
 
 class NameTree:
-    def __init__(self, class_search, sort_argument_name, name_argument_name):
+    def __init__(self, class_search, sort_argument_name, name_argument_name,
+                 ignore_case=True):
         # filter_arg, func_filter_arg_should):
         self.class_search = class_search
         self.sort_argument_name = sort_argument_name
         self.name_argument_name = name_argument_name
+        self.ignore_case = ignore_case
         # self.filter_arg = filter_arg
         # self.func_filter_arg_should = func_filter_arg_should
         self.branch = [NameTreeNode("")]
@@ -27,6 +29,8 @@ class NameTree:
     def add(self, new_object):
         branch = self.branch
         obj_name = getattr(new_object, self.name_argument_name)
+        if self.ignore_case:
+            obj_name = obj_name.lower()
         obj_name_list = list(obj_name)
         obj_sort_argument = int(getattr(new_object, self.sort_argument_name))
         obj = [new_object.id, obj_sort_argument]
@@ -45,9 +49,11 @@ class NameTree:
             branch[place].curr_obj = obj
         elif branch[place].curr_obj[1] < obj_sort_argument:
             branch[place].curr_obj = obj
-        return
+        return True
 
     def search(self, string_search):
+        if self.ignore_case:
+            string_search = string_search.lower()
         branch = self.branch
         place = 0
         obj_list = []
@@ -67,12 +73,17 @@ class NameTree:
         return obj_list
 
     def search_with_mistakes(self, string_search, return_only_id=False):
+        if self.ignore_case:
+            string_search = string_search.lower()
         obj_list = []
         self.search_recursion(string_search, len(string_search) // 2,
                               0, string_search, 0, obj_list)
+        obj_list.sort(key=lambda obj: obj[1]+obj[0][1]/100, reverse=True)
+        print(obj_list)
         if return_only_id:
+            return [obj[0][0] for obj in obj_list]
+        else:
             return [obj[0] for obj in obj_list]
-        return obj_list
 
     def search_recursion(self, string_search, delta_max,
                          place, all_path, verb_number, obj_list):
@@ -81,9 +92,9 @@ class NameTree:
             return
         if verb_number >= len(all_path):
             if not branch[place].top_child_obj is None:
-                obj_list.append(branch[place].top_child_obj)
+                obj_list.append([branch[place].top_child_obj, delta_max])
             if not branch[place].curr_obj is None:
-                obj_list.append(branch[place].curr_obj)
+                obj_list.append([branch[place].curr_obj, delta_max])
         else:
             for next_letter in branch[place].next_letters:
                 if next_letter == string_search[verb_number]:
@@ -94,6 +105,12 @@ class NameTree:
                     self.search_recursion(string_search, delta_max - 1,
                                           branch[place].next_letters[next_letter],
                                           all_path, verb_number + 1, obj_list)
+                    self.search_recursion(string_search, delta_max - 1,
+                                          branch[place].next_letters[next_letter],
+                                          all_path, verb_number, obj_list)
+            self.search_recursion(string_search, delta_max - 1,
+                                  place,
+                                  all_path, verb_number + 1, obj_list)
 
     def save(self, file_name):
         file = open(file_name+".json", "w")

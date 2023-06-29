@@ -14,6 +14,8 @@ from django.db.models import Q
 from django.urls import reverse
 import random
 
+from .views_helper import su_cut, generate_random_key
+
 from .search_tree import NameTree
 
 
@@ -43,6 +45,24 @@ def get_bool_value_from_user(request, value_name):
     return value_type_private
 
 
+def return_redirect(request, link_to="/math/main"):
+    try:
+        guest = open_account_guest(request)
+        template = loader.get_template('math_book/redirect.html')
+        context = {
+            'information_text': f'мы хотели отправить вас по ссылке {link_to},'
+                            f' но этого не получилось, пожалуйста перейдите сами',
+            'page_name_link': 'перенаправление',
+            'page_name_text': 'перенаправление',
+            'redirect_to': link_to,
+            'color_theme': guest.color_theme,
+        }
+        return HttpResponse(template.render(context, request))
+    except:
+        return HttpResponse(f'мы хотели отправить вас по ссылке {link_to},'
+                            f' но этого не получилось, пожалуйста перейдите сами')
+
+
 def return_error(request, error_link=False):
     error_text_list = ["server error", "sorry, it seems, it a server error",
                        "server error occured"]
@@ -68,18 +88,7 @@ def return_information(request, information_text, page_name_text="information", 
         return HttpResponse('не ну этого не должно было произойти')
 
 
-def su_cut(string, len_string):
-    if len(string) > len_string:
-        string = string[0:len_string]
-    return string
-
-
-def generate_random_key(key_length=50):
-    s = "1234567890abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZабвгдежзийклмнопрстуфхцчшщъыьэюяАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
-    session_key = ""
-    for j in range(key_length):
-        session_key += s[random.randint(0, 125)]
-    return session_key
+# ticket generation below
 
 
 def generate_definitions_and_theorems(text):
@@ -104,7 +113,7 @@ def read_before_symbol(symbol, text, text_len, index_now):
     while index_now < text_len and text[index_now] != symbol:
         result += text[index_now]
         index_now += 1
-    return (index_now, result)
+    return index_now, result
 
 
 def generate_text_without_classes(text, replaces=[["replace_word"], [str]]):
@@ -192,6 +201,9 @@ def generate_text_with_classes(text, replaces=[["theorem_link"], [Theorem]], rep
     return text
 
 
+# help function below
+
+
 def open_account_guest(request):
     try:
         user_name = su_cut(request.COOKIES['math_book_user_name'], 40)
@@ -207,82 +219,81 @@ def open_account_guest(request):
     return user
 
 
-def sendaccountpost(request):
-    if True:
-        login_type = su_cut(request.POST['registration_type'], 50)
-        guest_name = set_default_if_empty(su_cut(request.POST['guest_name'], 50), "no name")
-        guest_password = su_cut(request.POST['guest_password'], 50)
-        if login_type == "new":
-            if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+def send_account_post(request):
+    login_type = su_cut(request.POST['registration_type'], 50)
+    guest_name = set_default_if_empty(su_cut(request.POST['guest_name'], 50), "no name")
+    guest_password = su_cut(request.POST['guest_password'], 50)
+    if login_type == "new":
+        if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+            try:
+                os = su_cut(request.META['OS'], 100)
+            except:
+                os = 'no information'
+            try:
+                computer_name = su_cut(request.META['COMPUTERNAME'], 100)
+            except:
+                computer_name = 'no information'
+            try:
+                http_user_agent = su_cut(request.META['HTTP_USER_AGENT'], 500)
+            except:
+                http_user_agent = 'no information'
+            try:
+                guest_information = su_cut(request.POST['guest_information'], 2000)
+            except:
+                return HttpResponse(
+                    'аккаунт не обнаружен | account not found<br>or'
+                    '<br>guest_information not found | информация '
+                    'о пользователе не найдена')
+            new_user = Guest(guest_name=guest_name, guest_password=guest_password,
+                             guest_information=guest_information)
+            new_user.save()
+            session_key = generate_random_key(50)
+            new_session_for_user = Guest_session(guest=new_user, session_key=session_key, os=os,
+                                                 computername=computer_name, HTTP_USER_AGENT=http_user_agent)
+            new_session_for_user.save()
+            template = loader.get_template('math_book/successfullyLogin.html')
+            context = {
+                'user_id': new_user.id,
+                'session_key': session_key,
+                'user_name': guest_name,
+            }
+            return HttpResponse(template.render(context, request))
+        else:
+            return HttpResponse('имя занято | name reserved')
+    else:
+        if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
+            return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
+        else:
+            this_user = Guest.objects.get(guest_name=guest_name)
+            if this_user.guest_password == guest_password:
                 try:
                     os = su_cut(request.META['OS'], 100)
                 except:
-                    os = 'no informations'
+                    os = 'no information'
                 try:
-                    computername = su_cut(request.META['COMPUTERNAME'], 100)
+                    computer_name = su_cut(request.META['COMPUTERNAME'], 100)
                 except:
-                    computername = 'no informations'
+                    computer_name = 'no information'
                 try:
-                    HTTP_USER_AGENT = su_cut(request.META['HTTP_USER_AGENT'], 500)
+                    http_user_agent = su_cut(request.META['HTTP_USER_AGENT'], 500)
                 except:
-                    HTTP_USER_AGENT = 'no informations'
-                try:
-                    guest_information = su_cut(request.POST['guest_information'], 2000)
-                except:
-                    return HttpResponse(
-                        'аккаунт не обнаружен | account not found<br>or<br>guest_information not found | информация о пользователе не найдена')
-                new_user = Guest(guest_name=guest_name, guest_password=guest_password,
-                                 guest_information=guest_information)
-                new_user.save()
+                    http_user_agent = 'no information'
                 session_key = generate_random_key(50)
-                new_session_for_user = Guest_session(guest=new_user, session_key=session_key, os=os,
-                                                     computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
+                new_session_for_user = Guest_session(guest=this_user, session_key=session_key, os=os,
+                                                     computername=computer_name, HTTP_USER_AGENT=http_user_agent)
                 new_session_for_user.save()
                 template = loader.get_template('math_book/successfullyLogin.html')
                 context = {
-                    'user_id': new_user.id,
+                    'user_id': this_user.id,
                     'session_key': session_key,
                     'user_name': guest_name,
                 }
                 return HttpResponse(template.render(context, request))
             else:
-                return HttpResponse('имя занято | name reserved')
-        else:
-            if (len(Guest.objects.filter(guest_name=guest_name))) == 0:
-                return HttpResponse('аккаунт не обнаружен | account not found<br>or<br>guest_information not found')
-            else:
-                this_user = Guest.objects.get(guest_name=guest_name)
-                if this_user.guest_password == guest_password:
-                    try:
-                        os = su_cut(request.META['OS'], 100)
-                    except:
-                        os = 'no informations'
-                    try:
-                        computername = su_cut(request.META['COMPUTERNAME'], 100)
-                    except:
-                        computername = 'no informations'
-                    try:
-                        HTTP_USER_AGENT = su_cut(request.META['HTTP_USER_AGENT'], 500)
-                    except:
-                        HTTP_USER_AGENT = 'no informations'
-                    session_key = generate_random_key(50)
-                    new_session_for_user = Guest_session(guest=this_user, session_key=session_key, os=os,
-                                                         computername=computername, HTTP_USER_AGENT=HTTP_USER_AGENT)
-                    new_session_for_user.save()
-                    template = loader.get_template('math_book/successfullyLogin.html')
-                    context = {
-                        'user_id': this_user.id,
-                        'session_key': session_key,
-                        'user_name': guest_name,
-                    }
-                    return HttpResponse(template.render(context, request))
-                else:
-                    return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
-    else:
-        return HttpResponse("server error occurred")
+                return HttpResponse('name reserved|имя занято<br><a href="/physic-in-sesc/main">main page</a>')
 
 
-def myaccount(request):
+def my_account(request):
     if True:
         view_guest = open_account_guest(request)
         guest = view_guest
@@ -319,7 +330,8 @@ def get_guest(request, guest_id):
     except:
         return return_error(request)
 
-def settings(request):
+
+def account_settings(request):
     try:
         guest = open_account_guest(request)
         if guest.guest_name == 'undefined guest':
@@ -343,7 +355,7 @@ def settings(request):
         return return_information(request, information_return)
 
 
-def changecolortheme(request):
+def change_color_theme(request):
     try:
         user = open_account_guest(request)
         if user == "undefined guest":
@@ -352,12 +364,12 @@ def changecolortheme(request):
         if user.color_theme != color_theme:
             user.color_theme = color_theme
             user.save()
-        return settings(request)
+        return account_settings(request)
     except:
         return HttpResponse('сессия недействительна')
 
 
-def closesession(request, session_key):
+def close_session(request, session_key):
     try:
         user = open_account_guest(request)
         if len(user.guest_session_set.all().filter(session_key=session_key)) > 0:
@@ -374,7 +386,6 @@ def closesession(request, session_key):
             'user': user,
             'its_me': True,
             'color_theme': user.color_theme,
-
         }
         return HttpResponse(template.render(context, request))
     except:
@@ -382,7 +393,7 @@ def closesession(request, session_key):
         return return_information(request, information_return)
 
 
-def changeaccountinformation(request):
+def change_account_information(request):
     try:
         user = open_account_guest(request)
         if user == "undefined guest":
@@ -392,13 +403,13 @@ def changeaccountinformation(request):
         if user.guest_information != guest_information:
             user.guest_information = guest_information
             user.save()
-        return settings(request)
+        return account_settings(request)
     except:
         information_return = 'сессия недействительна'
         return return_information(request, information_return)
 
 
-def changepassword(request):
+def change_password(request):
     try:
         user = open_account_guest(request)
         if user == "undefined guest":
@@ -409,7 +420,7 @@ def changepassword(request):
         if user.guest_password == old_password:
             user.guest_password = new_password
             user.save()
-        return settings(request)
+        return account_settings(request)
     except:
         information_return = 'сессия недействительна'
         return return_information(request, information_return)
@@ -458,6 +469,7 @@ def first_search_guest():
     if guest_search_tree is None:
         guest_search_tree = NameTree(Guest, "ticket_count", "guest_name")
         guest_search_tree.create(Guest.objects.all())
+
 
 def search_guest(request):
     # print(set(dir(Guest)) - set(dir(Guest_session)))
@@ -1104,9 +1116,11 @@ def send_ticket(request):
                                              study_direction=study_direction, picture_href=picture_href,
                                              )
             ticket_id = ticket.id
-            return HttpResponse(
-                'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(
-                    ticket_id) + '">back to ticket | обратно к ticket</a>')
+            return HttpResponseRedirect(f'/math_book/ticket/{ticket_id}/')
+
+            #return HttpResponse(
+            #    'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/ticket/' + str(
+            #        ticket_id) + '">back to ticket | обратно к ticket</a>')
         else:
             return HttpResponse(
                 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
@@ -1411,7 +1425,8 @@ def send_theorem(request):
         subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
-        theorem_name = su_cut(request.POST['theorem_name'], 50)
+        theorem_name = set_default_if_empty(su_cut(request.POST['theorem_name'],
+                                                   50), "no name")
         theorem_text = su_cut(request.POST['theorem_text'], 10000)
         theorem_proof = su_cut(request.POST['theorem_proof'], 10000)
         picture_href = su_cut(request.POST['picture_href'], 100)
@@ -1492,6 +1507,44 @@ def show_theorem_page(request, sort_type, page_number):
         return return_error(request)
 
 
+theorem_search_tree = None
+
+
+def first_search_theorem():
+    global theorem_search_tree
+    if theorem_search_tree is None:
+        theorem_search_tree = NameTree(Theorem, "vote_for_count", "theorem_name")
+        theorem_search_tree.create(Theorem.objects.all())
+
+
+def search_theorem(request):
+    # print(set(dir(Guest)) - set(dir(Guest_session)))
+    global theorem_search_tree
+    first_search_theorem()
+    guest = open_account_guest(request)
+    sort_type = 'search'
+
+    if request.method == 'POST':
+        string_search = request.POST['string_search']
+        guests_list_id = theorem_search_tree.search_with_mistakes(
+            string_search, return_only_id=True)
+
+        theorems_list = Theorem.objects.filter(id__in=guests_list_id)
+        last_question = string_search
+    else:
+        theorems_list = ""
+        last_question = ""
+    template = loader.get_template('math_book/searchTheorem.html')
+    context = {
+        'last_question': last_question,
+        'theorems_list': theorems_list,
+        'page_name_text': 'поиск',
+        'main_link': '/math_book/theorems/' + sort_type,
+        'pagemenu': True,
+        'color_theme': guest.color_theme,
+    }
+    return HttpResponse(template.render(context, request))
+
 
 def create_theorem(request):
     try:
@@ -1504,7 +1557,6 @@ def create_theorem(request):
         return HttpResponse(template.render(context, request))
     except:
         return return_error(request)
-
 
 
 def send_vote_theorem(request, theorem_id, vote_type):
@@ -1570,16 +1622,18 @@ def send_definition(request):
         subject_id = su_cut(request.POST['subject_id'], 10)
         subject = Subject.objects.get(id=subject_id)
         guest = open_account_guest(request)
-        definition_name = su_cut(request.POST['definition_name'], 50)
+        definition_name = set_default_if_empty(su_cut(request.POST['definition_name'],
+                                                      50), "no name")
         definition_text = su_cut(request.POST['definition_text'], 10000)
         picture_href = su_cut(request.POST['picture_href'], 100)
         if len(guest.definition_set.filter(definition_text=definition_text)) == 0:
             guest.definition_set.create(subject=subject, pub_date=timezone.now(), definition_name=definition_name,
                                         definition_text=definition_text, picture_href=picture_href)
             definition_id = guest.definition_set.get(definition_name=definition_name).id
-            return HttpResponse(
-                'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/definition/' + str(
-                    definition_id) + '">back to definition | обратно к definition</a>')
+            return HttpResponseRedirect('/math_book/definition/' + str(definition_id))
+            #return HttpResponse(
+            #    'успешно<br><a href="/math_book/main">main page|главная страница</a><br><a href="/math_book/definition/' + str(
+            #        definition_id) + '">back to definition | обратно к definition</a>')
         else:
             return HttpResponse(
                 'ddos attack identified and reflected <a href="/math_book/main">main page|главная страница(go fuck)</a>')
@@ -1642,6 +1696,44 @@ def show_definition_page(request, sort_type, page_number):
         return HttpResponse(template.render(context, request))
     except:
         return return_error(request)
+
+
+definition_search_tree = None
+
+
+def first_search_definition():
+    global definition_search_tree
+    if definition_search_tree is None:
+        definition_search_tree = NameTree(Definition, "vote_for_count", "definition_name")
+        definition_search_tree.create(Definition.objects.all())
+
+
+def search_definition(request):
+    global definition_search_tree
+    first_search_definition()
+    guest = open_account_guest(request)
+    sort_type = 'search'
+
+    if request.method == 'POST':
+        string_search = request.POST['string_search']
+        definitions_list_id = definition_search_tree.search_with_mistakes(
+            string_search, return_only_id=True)
+
+        definitions_list = Definition.objects.filter(id__in=definitions_list_id)
+        last_question = string_search
+    else:
+        definitions_list = ""
+        last_question = ""
+    template = loader.get_template('math_book/searchDefinition.html')
+    context = {
+        'last_question': last_question,
+        'definitions_list': definitions_list,
+        'page_name_text': 'поиск',
+        'main_link': '/math_book/definitions/' + sort_type,
+        'pagemenu': True,
+        'color_theme': guest.color_theme,
+    }
+    return HttpResponse(template.render(context, request))
 
 
 def create_definition(request):
