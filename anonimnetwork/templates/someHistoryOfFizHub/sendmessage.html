@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/fizhub.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1nPgI5wBZlSygNgSwPTjaPLXApBiRslrr=w600-h570-p-k-nu-iv1">
+	<title>fizhub</title>
+	{% load static %}
+	
+
+	<link rel="stylesheet" type="text/css" href="{% static 'physicsesc/fizhub.css' %}">
+	<script type="text/javascript">
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
+		}
+		function savetask(){
+			text=document.getElementById("textarea").value;
+			theme1=document.getElementById("theme1").value;
+			theme2=document.getElementById("theme2").value;
+			creatorname=document.getElementById("creatorname").value;
+			creatorpassword=document.getElementById("creatorpassword").value;
+			picture=(document.getElementById("pictureurl").value);
+			for (let i=0;i<100;i++){
+				picture=picture.replace("/","^")
+			}
+			if (picture=="https:^^"){
+				document.getElementById("sendtaskbutton").innerHTML='<a id="a" href="/physic-in-sesc/sendtask/'+text+'/'+creatorname+'/'+creatorpassword+'/'+theme1+'/'+theme2+'">отправить задачу</a>'
+			} else {
+				document.getElementById("sendtaskbutton").innerHTML='<a id="a" href="/physic-in-sesc/sendtask/'+text+'/'+creatorname+'/'+creatorpassword+'/'+theme1+'/'+theme2+'/'+picture+'">отправить задачу</a>';
+			}
+		}
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		function writenameandpassword(){
+			let name=openaccountfromcookie("name");
+			let password=openaccountfromcookie("password");
+			if (name!=""){
+				document.getElementById("creatorname").value=name;
+
+			}
+			if (password!=""){
+				document.getElementById("creatorpassword").value=password;
+			}
+		}
+		function conditionregister(){
+			if (document.getElementById("creatorname").value=="undefined guest"){
+				document.getElementById("creatorname2").innerHTML="вы можете зарегистрироваться на сайте <a href='/physic-in-sesc/login'>здесь</a>"
+			}
+		}
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">|||</div></div>
+		<div class="taskname"><center>новая задача</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton" id="loginbutton" ><a href="/physic-in-sesc/login">login|войти</a></div>
+	</div>
+	<div class="menuclosed" id="menu">
+		<a href="/physic-in-sesc/main">главная</a><br>
+		<a href="/physic-in-sesc/new">новое</a><br>
+		<a href="/physic-in-sesc/best">лучшее</a><br>
+		<a href="/physic-in-sesc/user">создатели</a><br>
+		<a href="">популярное(no)</a><br>
+		<a href="">подписки(no)</a><br>
+		<a href="/physic-in-sesc/theme">темы</a><br>
+		<a href="">мое(no)</a><br>
+		<a href="/physic-in-sesc/createtask">новая задача</a><br><br>
+
+		<a href="/physic-in-sesc/useful">полезные файлы</a><br>
+		<a href="/physic-in-sesc/login">войти</a><br>
+	</div>
+	
+    <div class="bod">
+    
+        <div class="task">
+        	
+        	
+
+
+    <div class="taskheader"><center>новая задача</center></div>
+   
+    <form action="{% url 'physicsesc:sendtaskpost' %}" method="post" enctype="multipart/form-data">	
+    	{% csrf_token %}
+    <div class="tasksubpart"> имя создателя:
+    	<input type="text" id="creatorname" value="undefined guest" name="creatorname">
+    	<div id="creatorname2"></div>
+    </div><div class="tasksubpart">
+    	пароль
+    	<input type="password" id="creatorpassword" value="1234" name="creatorpassword">
+    </div><div class="tasksubpart">
+    	тема1:
+    	<select type="text" id="theme1" name="theme1">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
+
+    	</select>
+    </div><div class="tasksubpart">	
+    	тема2:
+    	<select type="text" id="theme2" name="theme2">
+    		<option value="No theme">No theme</option>
+    		<option value="электричество">электричество</option>
+    		<option value="динамика">динамика</option>
+    		<option value="механика">механика</option>
+    		<option value="конденсаторы">конденсаторы</option>
+    		<option value="рычаги">рычаги</option>
+    		<option value="флуд">флуд</option>
+    		<option value="обсуждение сайта">обсуждение сайта</option>
+    		<option value="коллоквиум матеша">для коллоквиума по матеше</option>
+
+    	</select>
+    </div>
+    	<div class="tasksubpart">название задачи<input type="text" name="taskheader" placeholder="название задачи"></div>
+        <textarea id="textarea" placeholder="условие задачи" cols='90' rows='10' name="textarea"></textarea>
+        <div class="tasksubpart">ссылка на картинку<input type="text" value="https://" id="pictureurl" name="pictureurl"></div>
+        <div class="tasksubpart">только для админа и друзей загрузить картинку<input type="file" accept="image/jpeg,image/png,image/img" value="" id="" name="file"></div>
+
+		<center><input type="submit" value="отправить задачу" class="solutionbutton"></center>
+        </form>
+    
+    
+
+    
+
+</div>
+
+</div>
+<script type="text/javascript">
+	openaccountfromcookie("i");
+	writenameandpassword();
+	conditionregister();
+</script>
+</body>
+</html>
