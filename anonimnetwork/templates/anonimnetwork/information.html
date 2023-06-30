@@ -20,9 +20,11 @@
 
 	<link rel="stylesheet" type="text/css" href="{% static 'anonimnetwork/anonnetwork.css' %}">
 
-	
+	<script type="text/javascript" src="https://superguestgg.github.io/me/anonimnetwork/anonnetwork.js"></script>
 
-<script type="text/javascript" src="https://superguestgg.github.io/me/anonimnetwork/anonnetwork.js"></script>
+
+
+<script type="text/javascript" src="{% static 'anonimnetwork/anonnetwork.js' %}"></script>
 
 
 	<script type="text/javascript">
@@ -116,11 +118,11 @@
 {% endif %}
 <script type="text/javascript">
 	//openaccountfromcookie("i");
-		if ("{{room.room_type_password}}"=="True"){
+	if ("{{room.room_type_password}}"=="True"){
 
-			document.getElementById("roompassword").value=room_password;
-			createcookie(room_password);
-		}
+		document.getElementById("roompassword").value=room_password;
+		createcookie(room_password);
+	}
 </script>
 </body>
 </html>

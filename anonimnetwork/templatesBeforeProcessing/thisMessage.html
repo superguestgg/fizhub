@@ -22,8 +22,10 @@
 				{% endif %}
 				<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
 				</form>`
-			document.getElementById(id).innerHTML=message
+			document.getElementById(id).innerHTML=message;
 		}
+
+
 </script>
 
 </head>
@@ -44,7 +46,9 @@
     {% for message in message_list %}
         <div class="task">
         	<div class="taskheader">
-        	<a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/">{{ message.message_text }}</a>{% if message.is_pinned %}&nbsp;&nbsp;&nbsp;&nbsp;
+        	<a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="message_{{message.id}}">{{ message.message_text }}</a>
+        	<script type="text/javascript">load_text("message_{{message.id}}")</script>
+        	{% if message.is_pinned %}&nbsp;&nbsp;&nbsp;&nbsp;
 	
 		(&#9885; <a href="/anonnetwork/{{room.room_name}}/pinned">pinned</a>)
 	
@@ -60,7 +64,8 @@
         	&nbsp;&nbsp;&nbsp;
         	 {{ message.answers_count }} ответов
         	 &nbsp;&nbsp;&nbsp;
-        	 	<click onclick="copylink()"> &#128279; скопировать ссылку</click>
+        	 	<click onclick="copylink('{{room.room_name}}', '{{message.id}}')"> &#128279; скопировать ссылку</click>
+        	 	<click onclick="copytext('message_{{message.id}}')"> &#128190; скопировать текст</click>
         	</div>
         	
         	<form action="/anonnetwork/{{room.room_name}}/{{message.id}}/answer/" method="post" enctype="multipart/form-data">
@@ -149,7 +154,7 @@
 {% endif %}
 
 <script type="text/javascript">
-	openaccountfromcookie("i");
+	//openaccountfromcookie("i");
 </script>
 </body>
 </html>

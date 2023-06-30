@@ -62,7 +62,8 @@ def anti_ddos_decorator(func):
         if anti_ddos(request):
             return func(request, *args, **kwargs)
         else:
-            return HttpResponse("sorry, it seems it a ddos attack")
+            return HttpResponseServerError()
+            #return HttpResponse("sorry, it seems it a ddos attack")
 
     new_func.__doc__ = func.__doc__
     new_func.__name__ = func.__name__
@@ -403,7 +404,7 @@ def pinned_messages(request, room_name):
     message_list = messages.order_by('-pub_date')[:100]
     return render(request, 'anonimnetwork/thisRoom.html',
                   {'message_list': message_list,
-                   'curr_room': curr_room,
+                   'room': curr_room,
                    'pages': 1,
                    'pagescount': page_count,
                    'pinned_message': pinned_message,
@@ -550,8 +551,7 @@ def unpin_message(request, room_name, message_id):
         this_message = this_room.message_set.get(id=message_id)
         this_message.is_pinned = False
         this_message.save()
-        return HttpResponse('succesful <br> <a href="/anonnetwork/' + room_name + '/' + str(
-            message_id) + '">back to message menu</a>')
+        return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')
 
     return HttpResponse("password incorrect<br><a href='/anonnetwork/main'>main page</a>")
 

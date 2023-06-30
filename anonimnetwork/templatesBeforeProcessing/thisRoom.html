@@ -10,7 +10,7 @@
 
 	<script type="text/javascript">
 		room_password="{{room.room_password}}";
-		
+
 		function createanswertextarea(id){
 			id=id.replace("answer","")
 			message=document.getElementById(id).innerHTML
@@ -24,7 +24,7 @@
 				{% endif %}
 				<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
 				</form>`
-		document.getElementById(id).innerHTML=message
+		document.getElementById(id).innerHTML=message;
 		}
 	</script>
 
@@ -116,6 +116,11 @@
         <div class="message" id="{{message.id}}">
         	
      <a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="textarea{{message.id}}">{{ message.message_text }}</a>
+     <script type="text/javascript">load_text("textarea{{message.id}}")</script>
+     <click onclick="copylink('{{room.room_name}}', '{{message.id}}')"> &#128279; </click>
+     <click onclick="copytext('textarea{{message.id}}')"> &#128190; </click>
+     {% if message.answers_count %}<b>{{ message.answers_count }} ответов</b> {% endif %}
+
      {% if message.answer_for %}<b>
 ответ на <a href="/anonnetwork/{{room.room_name}}/{{message.answer_for}}/" style="font-size: 20px"> сообщение {{message.answer_for}}</a></b>{% endif %}
 
