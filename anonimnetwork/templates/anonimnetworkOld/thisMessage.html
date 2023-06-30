@@ -1,48 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
-		<meta charset="UTF-8">
-
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-
+	<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/anonnetwork.css">
+	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1">
 	<title>AnonNetwork</title>
-
 	{% load static %}
 
-		<link rel="stylesheet" type="text/css" href="https://superguestgg.github.io/me/anonnetwork.css">
-
-	<link rel="shortcut icon" type="image/png" href="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1">
-
-
-
 	<link rel="stylesheet" type="text/css" href="{% static 'anonimnetwork/anonnetwork.css' %}">
-
-	
-
-<script type="text/javascript" src="https://superguestgg.github.io/me/anonimnetwork/anonnetwork.js"></script>
-
-
 	<script type="text/javascript">
-		function createanswertextarea(id){
-			id=id.replace("answer","")
-			message=document.getElementById(id).innerHTML
-			message+=`<form action="/anonnetwork/{{room.room_name}}/${id}/answer/" method="post" enctype="multipart/form-data">
-				{% csrf_token %}
-				<textarea name="textarea" placeholder="ваш ответ на сообщение ${id}" cols="50" rows="5"></textarea><br>
-				{% if room.room_type_password %}
-				<div class="tasksubpart">
-					пароль: <input type="text" name="roompassword" placeholder="сохраняется в cookies">
-				</div><br>
-				{% endif %}
-				<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
-				</form>`
-			document.getElementById(id).innerHTML=message
+		function openmenu() {
+			if (document.getElementById("menubutton").className=="menubutton") {
+				document.getElementById("menubutton").className="menubutton2";
+				document.getElementById("menu").className="menuopened";
+				
+			} else {
+				document.getElementById("menubutton").className="menubutton";
+				document.getElementById("menu").className="menuclosed";
+			}
 		}
-</script>
+		function openaccountfromcookie(string){
+			let cookies=(document.cookie).split(";");
+			//alert(cookies[2]);
+			let cakes=cookies.length;
+			//alert(cakes);
+			let username="undefined guest";
+			let userpassword="1234";
+			for (let i =1;i<cakes;i++){
+				thiscookie=cookies[i]+"";
+				console.log(thiscookie);
+				namethiscookie=thiscookie.split("=")[0];
+				valuethiscookie=thiscookie.split("=")[1];
+				if ((namethiscookie==" username") || (namethiscookie=="username")){
+					username=valuethiscookie;
+				} else if (namethiscookie==" userpassword" || namethiscookie=="userpassword") {
+					userpassword=valuethiscookie;
+				}
+			}
+			console.log(username);
+			if (cakes>1) {
+				document.getElementById("loginbutton").innerHTML=username;
+			}
+			if (string=="name"){
+				return username
+			} else if (string=="password"){
+				return userpassword
+			}
+		}
+		let massiveoftaskids=[]
+		let massiveoftasks=[]
+		function hiddentext(textid){
+			let text=document.getElementById(textid).innerHTML
+			let minitext=text.substring(0,90)
+			minitext=minitext+"..."
+			massiveoftaskids.push(textid)
+			massiveoftasks.push(text)
+			document.getElementById(textid).setAttribute("onclick", "showtext(id)")
+			if (text.length>90){
+				document.getElementById(textid).innerHTML="краткое условие: "+minitext
+				
 
+			} else {
+				document.getElementById(textid).innerHTML=text		
+					
+			}
+
+		}
+		function showtext(textid){
+			
+
+			document.getElementById(textid).innerHTML=massiveoftasks[massiveoftaskids.indexOf(textid)]
+			document.getElementById(textid).setAttribute("onclick", "hiddentext(id)")
+
+
+			
+		}
+		function createanswertextarea(id){
+			//console.log(id)
+			id=id.replace("answer","");
+			id2=id.replace("p","");
+			message=document.getElementById(id).innerHTML
+			message+=`<form action="/anonnetwork/{{room.room_name}}/${id2}/answer/" method="post" enctype="multipart/form-data">
+        		{% csrf_token %}
+        		<textarea name="textarea" placeholder="ваш ответ на сообщение {{message.id}}" cols="50" rows="5"></textarea><br>
+				{% if room.room_type_password %}<div class="tasksubpart">
+					пароль: <input type="text" name="roompassword" placeholder="сохраняется в cookies">
+				</div><br>{% endif %}
+        		<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
+        		</form>`
+        	document.getElementById(id).innerHTML=message
+		}
+
+
+		
+		function copylink(){
+			navigator.clipboard.writeText("phs3.na4u.ru/anonnetwork/{{room.room_name}}/{{this_message.id}}");
+		}
+	</script>
 </head>
 <body>
 	<div class="header"> 
@@ -52,37 +107,20 @@
 		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
 		
 	</div>
-
-		<div class="menuclosed" id="menu">
-
+	<div class="menuclosed" id="menu">
 		<div class="menusubpart"><a href="/anonnetwork/main"><symbol>&#8962;</symbol> главная</a></div>
-
 		<div class="menusubpart"><a href="/anonnetwork/newrooms"><symbol>&#8679;</symbol> новые комнаты</a></div>
-
 		<div class="menusubpart"><a href="/anonnetwork/toprooms"><symbol>&#9734;</symbol> популярные комнаты</a></div>
-
 		<div class="menusubpart"><a href="/anonnetwork/channels"><symbol>&#10064;</symbol> новые каналы </a></div>
-
 		<div class="menusubpart"><a href="/anonnetwork/theme"><symbol>&#8376;</symbol> комнаты по темам</a></div>		
-
 		<div class="menusubpart"><a href="/anonnetwork/createroom"><symbol>&#10010;</symbol> создать новую комнату</a></div>
-
 		<div class="menusubpart"><a href="/anonnetwork/findroom"><symbol>&#128270;</symbol> поиск комнат</a></div>
-
-		<br>
-
-		<div class="menusubpart"><a href="/fizhub/"><symbol>&#10144;</symbol>fizhub</a></div>
-
-    	<div class="menusubpart"><a href="/anonnetwork/"><symbol>&#10144;</symbol>math book</a></div>
-
-		<div class="menusubpart"><a href="https://superguestgg.github.io/me/"><symbol>&#10144;</symbol>about me</a></div><br>
-
+		<br><br>
+		<div class="menusubpart"><a href="/physic-in-sesc/">physic-in-sesc</a></div>
+		<div class="menusubpart"><a href="https://superguestgg.github.io/me/">about me</a></div><br>
 		<p>&#946; version</p>
 
-
-
 	</div>
-
 	{% if message_list %}
     <div class="bod">
     	
