@@ -138,9 +138,9 @@ def private_chats(request):
             chat.last_message = chat.privatemessage_set.all()[len(chat.privatemessage_set.all()) - 1]
         else:
             chat.last_message = "история общения пуста"
-        result_chats_list.append({'other_author_name': chat.other_author.name,
+        result_chats_list.append({'other_author': {'id':chat.other_author.id, 'name':chat.other_author.name},
                                   'not_checked_messages': chat.not_checked_messages,
-                                  'last_message': chat.last_message
+                                  'last_message': chat.last_message.text
                                   })
     context = {
         'chats_list': result_chats_list,
@@ -153,14 +153,77 @@ def private_chats(request):
     return JsonResponse(context)
 
 
-
 def account(request, guest_id):
-    return HttpResponse("ggg")
+    return JsonResponse({'result': 'error', 'information': 'later'})
 
 
 def private_chat(request, guest_id):
-    return HttpResponse("ggg")
+    user = openaccount(request)
+    other_user = Guest.objects.get(id=guest_id)
+    this_chat = PrivateChat.objects.filter(authors=user.id).get(authors=other_user.id)
+    messages_list = this_chat.privatemessage_set.all()
+    result_messages_list = list()
+    for message in messages_list:
+        if message.author.id == other_user.id:
+            if message.is_read == False:
+                message.is_read = True
+                message.save()
+                message.not_read = True
+            else:
+                message.not_read = False
+        else:
+            if message.is_read == False:
+                message.not_read = True
+            else:
+                message.not_read = False
+        message.is_my = message.author.id == user.id
+        result_messages_list.append({'author': {'id':message.author.id,'name':message.author.name},
+                                     'text': message.text,
+                                     'answers_count': message.answers_count,
+                                     'is_answer': message.is_answer
+                                     })
+    if len(result_messages_list) == 0:
+        a = PrivateMessage(private_chat=this_chat, author=user, text="first message in this chat",
+                           pub_date=timezone.now())
+        a.save()
+    if this_chat.authors.all()[0] == user:
+        this_chat.author_1_not_checked_messages_count = 0
+        this_chat.save()
+    else:
+        this_chat.author_2_not_checked_messages_count = 0
+        this_chat.save()
+
+    context = {
+        'messages_list': result_messages_list,
+        'other_user': other_user.name,
+    }
+
+    return JsonResponse({'result': 'success', 'information': context})
 
 
 def send_message(request, guest_id):
-    return HttpResponse("ggg")
+    if request.method == "POST":
+        user = openaccount(request)
+        user_request_id = su_cut(request.POST['user_request_id'], 100)
+        user_request = Guest.objects.get(id=user_request_id)
+        message_text = su_cut(request.POST['message_text'], 1000)
+        if len(PrivateChat.objects.filter(authors=user.id).filter(authors=user_request.id)) > 0:
+
+            chat = PrivateChat.objects.filter(authors=user.id).get(authors=user_request.id)
+        else:
+            chat = PrivateChat()
+            chat.save()
+            chat.authors.add(user_request.id)
+            chat.authors.add(user.id)
+
+            chat.save()
+
+        if len(message_text) > 0:
+            chat.privatemessage_set.create(message_text=message_text, author=user, pub_date=timezone.now())
+            if (chat.authors.all()[0] == user):
+                chat.author_2_not_checked_messages_count += 1
+            else:
+                chat.author_1_not_checked_messages_count += 1
+            chat.save()
+        return JsonResponse({'result': 'success', 'information': 'yes'})
+    return JsonResponse({'result': 'error', 'information': 'later'})
