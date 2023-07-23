@@ -13,9 +13,11 @@ from django.urls import reverse
 import random
 import time
 import json
+import hashlib
+
 
 from .views_helper import su_cut, generate_random_key, set_default_if_empty,\
-    get_bool_value_from_request, anti_ddos, anti_ddos_decorator
+    get_bool_value_from_request, anti_ddos, anti_ddos_decorator, my_hash
 
 
 def openaccount(request):
@@ -34,9 +36,9 @@ def openaccount(request):
 
 
 def login(request):
-    if request.type == 'POST':
+    if request.method == 'POST':
         guest_name = su_cut(request.POST['name'], 100)
-        guest_hashed_password = su_cut(request.POST['password'], 100)
+        guest_hashed_password = my_hash(su_cut(request.POST['password'], 100))
         if (len(Guest.objects.filter(name=guest_name))) == 0:
             return JsonResponse({'result': 'error', 'information': 'account not found'})
         else:
@@ -64,9 +66,9 @@ def login(request):
 
 
 def registration(request):
-    if request.type == 'POST':
+    if request.method == 'POST':
         guest_name = su_cut(request.POST['name'], 100)
-        guest_hashed_password = su_cut(request.POST['password'], 100)
+        guest_hashed_password = my_hash(su_cut(request.POST['password'], 100))
         about = su_cut(request.POST['about'], 5000)
         pub_date = timezone.now()
         if (len(Guest.objects.filter(name=guest_name))) == 1:
@@ -112,6 +114,7 @@ def my_account(request):
 
 
 def my_chats(request):
+    return HttpResponseRedirect("matmech/chats/private/")
     user = openaccount(request)
     print(dir(user))
     private_chats = json.dumps(user.privatechat_set.all())
@@ -120,7 +123,8 @@ def my_chats(request):
 
 def private_chats(request):
     user = openaccount(request)
-    chats_list = user.private_chat_set.all()
+    chats_list = user.privatechat_set.all()
+    result_chats_list = list()
     for chat in chats_list:
         chat.other_author = chat.authors.exclude(id=user.id)[0]
         if chat.authors.all()[0] == user:
@@ -130,20 +134,23 @@ def private_chats(request):
             chat.not_checked_messages = chat.author_2_not_checked_messages_count
             chat.author_1_not_checked_messages_count = 0
 
-        if len(chat.private_message_set.all()) > 0:
-            chat.last_message = chat.private_message_set.all()[len(chat.private_message_set.all()) - 1]
+        if len(chat.privatemessage_set.all()) > 0:
+            chat.last_message = chat.privatemessage_set.all()[len(chat.privatemessage_set.all()) - 1]
         else:
             chat.last_message = "история общения пуста"
-        # print((chat.last_message.message_text))
-    template = loader.get_template('physicsesc/chats.html')
+        result_chats_list.append({'other_author_name': chat.other_author.name,
+                                  'not_checked_messages': chat.not_checked_messages,
+                                  'last_message': chat.last_message
+                                  })
     context = {
-        'chats_list': chats_list,
-        'page_name': 'chats/private',
-        'page_name_text': 'личные чаты',
-        'pagemenu': True,
-        'color_theme': user.color_theme,
+        'chats_list': result_chats_list,
+        'user':
+        {
+            'name': user.name,
+            'hashed_password': user.hashed_password,
+        }
     }
-    return HttpResponse((template.render(context, request)))
+    return JsonResponse(context)
 
 
 

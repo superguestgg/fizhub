@@ -85,3 +85,19 @@ def anti_ddos_decorator(func):
     new_func.__doc__ = func.__doc__
     new_func.__name__ = func.__name__
     return new_func
+
+
+def my_hash(string):
+    s = "1234567890" \
+        "abcdefghijklmnopqrstuvwxyz" \
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ" \
+        "абвгдежзийклмнопрстуфхцчшщъыьэюя" \
+        "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+    result_hash = 0
+    for letter in string:
+        result_hash *= 7
+        if letter in s:
+            result_hash += s.index(letter)
+        else:
+            result_hash += 1
+    result_hash %= 2**20
