@@ -35,8 +35,8 @@ def openaccount(request):
 
 def login(request):
     if request.type == 'POST':
-        guest_name = su_cut(request.POST['username'], 100)
-        guest_hashed_password = su_cut(request.POST['userpassword'], 100)
+        guest_name = su_cut(request.POST['name'], 100)
+        guest_hashed_password = su_cut(request.POST['password'], 100)
         if (len(Guest.objects.filter(name=guest_name))) == 0:
             return JsonResponse({'result': 'error', 'information': 'account not found'})
         else:
@@ -59,6 +59,36 @@ def login(request):
                 return JsonResponse(context)
             else:
                 return JsonResponse({'result': 'error', 'information': 'password incorrect'})
+    else:
+        return JsonResponse({'result': 'error', 'information': 'request must be post'})
+
+
+def registration(request):
+    if request.type == 'POST':
+        guest_name = su_cut(request.POST['name'], 100)
+        guest_hashed_password = su_cut(request.POST['password'], 100)
+        about = su_cut(request.POST['about'], 5000)
+        pub_date = timezone.now()
+        if (len(Guest.objects.filter(name=guest_name))) == 1:
+            return JsonResponse({'result': 'error', 'information': 'name reserved'})
+        else:
+            new_user = Guest(name=guest_name, hashed_password=guest_hashed_password,
+                             about=about, pub_date=pub_date)
+            try:
+                http_user_agent = su_cut(request.META['HTTP_USER_AGENT'], 500)
+            except:
+                http_user_agent = 'no informations'
+            session_key = generate_random_key(50)
+            new_session_for_user = GuestSession(guest=new_user,
+                                                session_key=session_key, http_user_agent=http_user_agent)
+            new_session_for_user.save()
+            context = {
+                'result': 'success',
+                'user_id': new_user.id,
+                'session_key': session_key,
+                'user_name': guest_name,
+            }
+            return JsonResponse(context)
     else:
         return JsonResponse({'result': 'error', 'information': 'request must be post'})
 
