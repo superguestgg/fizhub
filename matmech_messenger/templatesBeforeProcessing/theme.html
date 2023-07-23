@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center><span class="spanpagename">поиск тем</span></center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		
+	</div>
+
+	+++leftmenu---
+
+    <div class="bod">
+    	<div class="task">
+        	<div class="taskheader">
+        	<center>введите тему чтобы найти интересные для вас комнаты</center>
+        	</div>
+        	<form action="/anonnetwork/theme/" method="post" enctype="multipart/form-data">	
+
+    	{% csrf_token %}
+        		
+        		<div class="tasksubpart">тема: <input type="text" name="theme" placeholder="да, тему вводить сюда"></div><br>
+    	 <center><input type="submit" name="submit" value="найти" class="solutionbutton"></center>
+        	</form>
+        	
+        	
+        	
+        	
+        	
+        
+        
+        </div>
+        
+    </div>
+
+		<div class="task">
+        	<div class="taskheader"><center>
+        	пока ничего не найдено, попробуйте ввести тему</center>
+        </div>
+        	<div class="solutionbutton" ><a href="/anonnetwork/newrooms">new rooms</a></div>
+        	<div class="solutionbutton" ><a href="/anonnetwork/main">main page</a></div>
+        </div>
+    
+
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+</script>
+</body>
+</html>

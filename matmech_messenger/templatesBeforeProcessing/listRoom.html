@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+</head>
+<body>
+
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;
+		</div></div>
+		<div class="taskname"><center>комнаты</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+	</div>
+
+	+++leftmenu---
+
+	{% if publicrooms_list %}
+    <div class="bodanon">
+    {% for room in publicrooms_list %}
+        <div class="room">
+        	<img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+
+        	<a href="/anonnetwork/{{ room.room_name }}/">{{ room.room_name }}</a>
+
+        	
+        	
+        	<b><a href="/anonnetwork/theme/{{room.room_theme}}">{{room.room_theme}}</a></b>
+        	{% if room.room_type_password %}<b>пароль &#128274;</b>{% endif %}
+        	{% if room.room_type_token %}<b>шифруется &#10004;</b>{% endif %}
+        	{% if room.room_type_channel %}<k>&#922;&#257;н&#257;л &#10064;</k>{% endif %}
+        	&nbsp; {{room.room_messages_count}} &#9993;
+        	&nbsp; <a href="/anonnetwork/{{ room.room_name }}/description" style="font-size: 20px"> о комнате </a>
+        	<script type="text/javascript"> hiddentext("{{task.id}}_text");showtext("{{task.id}}_text");hiddentext("{{task.id}}_text")</script>
+        
+        
+        </div>
+    {% endfor %}
+    <div class="message">
+        	{% if pages|add:'-1' %}
+     <a href="/anonnetwork/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a>
+     
+     {% endif %}
+     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<left>страница {{pages}} из {{pagescount}} &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;</left>
+
+     {% if next_page %}
+     <a href="/anonnetwork/{{page_name}}/page/{{pages|add:'1'}}/" id="textarea{{message.id}}"> следующая страница </a>
+     {% else %}
+
+     {% endif %}
+
+
+
+        	<br>
+        		
+     
+        </div>
+    </div>
+{% else %}
+		<div class="room">
+        	<div class="taskheader">
+        	No rooms are available.
+        </div>
+        {% if page_name %}
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/{{page_name}}/page/{{pages|add:'-1'}}/" id="textarea{{message.id}}"> предыдущая страница </a></center></div>{% endif %}
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/newrooms">new rooms</a></center></div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/main">main page</a></center></div>
+        </div>
+    
+{% endif %}
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+</script>
+</body>
+</html>

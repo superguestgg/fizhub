@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+	<script type="text/javascript">
+		function createanswertextarea(id){
+			id=id.replace("answer","")
+			message=document.getElementById(id).innerHTML
+			message+=`<form action="/anonnetwork/{{room.room_name}}/${id}/answer/" method="post" enctype="multipart/form-data">
+				{% csrf_token %}
+				<textarea name="textarea" placeholder="ваш ответ на сообщение ${id}" cols="50" rows="5"></textarea><br>
+				{% if room.room_type_password %}
+				<div class="tasksubpart">
+					пароль: <input type="text" name="roompassword" placeholder="сохраняется в cookies">
+				</div><br>
+				{% endif %}
+				<center><input type="submit" name="submit" value="отправить ответ" class="solutionbutton"></center>
+				</form>`
+			document.getElementById(id).innerHTML=message;
+		}
+
+
+</script>
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><a href="/anonnetwork/{{room.room_name}}/"><center>room: {{room.room_name}}</center></a></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		
+	</div>
+
+	+++leftmenu---
+
+	{% if message_list %}
+    <div class="bod">
+    	
+    {% for message in message_list %}
+        <div class="task">
+        	<div class="taskheader">
+        	<a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="message_{{message.id}}">{{ message.message_text }}</a>
+        	<script type="text/javascript">load_text("message_{{message.id}}")</script>
+        	{% if message.is_pinned %}&nbsp;&nbsp;&nbsp;&nbsp;
+	
+		(&#9885; <a href="/anonnetwork/{{room.room_name}}/pinned">pinned</a>)
+	
+	{% endif %}
+
+        	{% if message.answer_for %}<b><a href="/anonnetwork/{{room.room_name}}/{{message.answer_for}}" style="font-size: 20px"> ответ на сообщение {{message.answer_for}} </a>:  &nbsp; {{answer_for.message_text}} </b>
+
+        	{% endif %}
+        	{% if message.is_pinned %}
+        	 &nbsp;&nbsp;&nbsp;<a href="/anonnetwork/{{room.room_name}}/{{message.id}}/unpin"> &#128465; unpin</a>
+        	{% else %} &nbsp;&nbsp;&nbsp; <a href="/anonnetwork/{{room.room_name}}/{{message.id}}/pin"> &#9885; pin</a>
+        	{% endif %} 
+        	&nbsp;&nbsp;&nbsp;
+        	 {{ message.answers_count }} ответов
+        	 &nbsp;&nbsp;&nbsp;
+        	 	<click onclick="copylink('{{room.room_name}}', '{{message.id}}')"> &#128279; скопировать ссылку</click>
+        	 	<click onclick="copytext('message_{{message.id}}')"> &#128190; скопировать текст</click>
+        	</div>
+        	
+        	<form action="/anonnetwork/{{room.room_name}}/{{message.id}}/answer/" method="post" enctype="multipart/form-data">
+        		{% csrf_token %}
+        		{% if room.room_type_channel %}{% if isadmin %}
+        		<textarea name="textarea" placeholder="текст вашего ответа" cols="50" rows="4" id="textarea0"></textarea><br>
+        		{% if room.room_type_password %}
+        		<div class="tasksubpart">пароль: <input type="password" id="roompassword" name="roompassword" placeholder="для комнат с паролем"></div><br>
+        		{% endif %}
+        		{% if room.room_type_channel %}
+        		<div class="tasksubpart">пароль: <input type="password" id="passwordadmin" name="passwordadmin" placeholder="для администратора канала"></div><br>
+        		{% endif %}
+        		{% if room.room_type_token %} <div class="tasksubpart">зашифровать с помощью токена: <input type="button" id="0" onclick="encrypt(id)" value="зашифровать"> <input type="button" id="0" onclick="deencrypt(id)" value="расшифровать"></div><br> {% endif %}
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+    	 {% else %}
+    	 вы не владелец канала <a href="/anonnetwork/{{room.room_name}}/admin/{{message.id}}"> войти как владелец</a>
+
+    	 {% endif %}
+
+
+    	 {% else %}
+    	 	    <textarea name="textarea" placeholder="текст сообщения" cols="50" rows="4" id="textarea0"></textarea><br>
+        		{% if room.room_type_password %}
+        		<div class="tasksubpart">пароль: <input type="password" id="roompassword" name="roompassword" placeholder="для комнат с паролем"></div><br>
+        		{% endif %}
+        		{% if room.room_type_channel %}
+        		<div class="tasksubpart">пароль: <input type="password" id="passwordadmin" name="passwordadmin" placeholder="для администратора канала"></div><br>
+        		{% endif %}
+        		{% if room.room_type_token %} <div class="tasksubpart">зашифровать с помощью токена: <input type="button" id="0" onclick="encrypt(id)" value="зашифровать"> <input type="button" id="0" onclick="deencrypt(id)" value="расшифровать"></div><br> {% endif %}
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+
+
+    	 {% endif %}
+        		</form>
+        		
+        	
+        		
+        	
+        	
+        
+        
+        </div>
+    {% endfor %}
+    </div>
+    {% if answers_list %}
+    <div class="message"><center>вот они, сверху вниз, ответы на это собщение:{{message_list.answer_count}}</center></div>
+    
+    {% for message in answers_list %}
+
+
+        <div class="message" id="{{message.id}}">
+        	
+     <a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="textarea{{message.id}}">{{ message.message_text }}</a>
+     
+
+ <button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
+{% if message.is_pinned %}
+	
+		&#9885; pinned
+	
+	{% endif %}
+        	<br>
+        		
+{% if room.room_type_token %} 
+<div class="messagemenu">
+
+        		действия с помощью токена: 
+        	<input type="button" id="{{message.id}}" onclick="encrypt2(id)" value="зашифровать"> 
+        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать"></div>{% endif %}
+     
+        </div>
+
+    {% endfor %}
+    {% else %}
+    <div class="message"><center>нет ответов</center></div>
+    {% endif %}
+{% else %}
+		<div class="task">
+        	<div class="taskheader">
+        	No messages are available.
+        </div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/newrooms">new rooms</a></center></div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/main">main page</a></center></div>
+        </div>
+    
+{% endif %}
+
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+</script>
+</body>
+</html>

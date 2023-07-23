@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+	<script type="text/javascript">
+		function sheetcodeforopenpassword(password){
+
+		}
+
+	</script>
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>главная</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+	</div>
+
+	+++leftmenu---
+	
+    <div class="bod">
+    	<div class="task">
+        	<div class="taskheader">
+        	<center>введите пароль от комнаты чтобы зайти в нее</center>
+        	</div>
+        	<form action="/anonnetwork/{{room.room_name}}/" method="post" enctype="multipart/form-data">	
+
+    	{% csrf_token %}
+        		
+        		<div class="tasksubpart">пароль: <input type="password" name="roompassword" placeholder="да, пароль вводить сюда"></div><br>
+    	 <center><input type="submit" name="submit" value="войти" class="solutionbutton"></center>
+        	</form>
+        	
+        	
+        	
+        	
+        	
+        
+        
+        </div>
+        
+    </div>
+
+		<div class="task">
+        	<div class="taskheader">
+        	на двери замок с паролем, вы не войдете в комнату и не узнаете о чем там говорят, пока не введете его
+        </div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/newrooms">new rooms</a></center></div>
+        	<div class="solutionbutton" ><center><a href="/anonnetwork/main">main page</a></center></div>
+        </div>
+    
+
+<script type="text/javascript">
+	openaccountfromcookie("i");
+</script>
+</body>
+</html>

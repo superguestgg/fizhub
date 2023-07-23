@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+	<script type="text/javascript">
+		room_password="{{room.room_password}}";
+	</script>
+	
+</head>
+<body>
+	<base href="/anonnetwork/{{room.room_name}}/">
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center><a href="/anonnetwork/{{room.room_name}}/">{{room.room_name}} информация</a></center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+
+		{% if room.room_type_token %} <div class="loginbutton"><center>токен:</center> <input type="text" id="roomtoken" name="roomtoken" placeholder="мой токен"></div><br> {% else %}
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		{% endif %}
+	</div>
+	
+	+++leftmenu---
+	
+    <div class="bod">
+    	
+
+
+
+        {% if True %}
+
+
+        <div class="task">
+        	<div class="taskheader">
+    <center> <a href="/anonnetwork/{{room.room_name}}/" id="textarea{{room.id}}">{{ room.room_name }}</a></center>
+     описание комнаты: {{information}}
+
+ </div>
+
+
+
+        	<div class="solutionbutton" ><a href="/anonnetwork/new">new rooms</a></div>
+        	<div class="solutionbutton" ><a href="/anonnetwork/main">main</a></div>
+        		
+
+     
+        </div>
+
+    
+
+    </div>
+
+
+{% else %}
+		<div class="task">
+        	<div class="taskheader">
+        	No messages are available.<br>здесь пока пусто, заговорите первым и пустота возможно ответит
+        </div>
+        {% if pages|add:'-1' %}
+        	<div class="solutionbutton" ><a href="/anonnetwork/{{room.room_name}}/page/{{pages|add:'-1'}}">предыдущая страница </a></div>{% else %}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        	{% endif %}
+        	<div class="solutionbutton" ><a href="/anonnetwork/new">new rooms</a></div>
+        	<div class="solutionbutton" ><a href="/anonnetwork/main">main</a></div>
+        </div>
+    
+{% endif %}
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+	if ("{{room.room_type_password}}"=="True"){
+
+		document.getElementById("roompassword").value=room_password;
+		createcookie(room_password);
+	}
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+	+++headmeta---
+
+	+++headlinks---
+
+	+++headscripts---
+
+</head>
+<body>
+	<div class="header"> 
+		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
+		<div class="taskname"><center>создание комнаты</center></div>
+		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
+		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
+		
+	</div>
+	
+	+++leftmenu---
+	
+    <div class="bod">
+    	<div class="task">
+        	<div class="taskheader">
+        	<center>создать новую комнату</center>
+        	</div>
+        	<form action="/anonnetwork/sendroom/" method="post" enctype="multipart/form-data">	
+
+    	{% csrf_token %}
+        		<div class="tasksubpart">название комнаты: <input name="room_name" placeholder="например, AnonNetwork"></input></div>
+        		<div class="tasksubpart">тема комнаты: <input name="room_theme" placeholder="например, бред"></input></div>
+        		<div class="tasksubpart">описание комнаты: <textarea cols="50" rows="4" name="room_description" placeholder="например, 'комната для общения', так людям будет легче понять, о чем здесь говорят"></textarea></div>
+        		<div class="tasksubpart">иконка комнаты: <br>
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon"> 
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        			<input type="radio" checked name="room_image" value="AnonNetwork">  <img src="https://lh3.google.com/u/0/d/1x0vmYeJ_J__ghIRW9M1Cn0mblmFOCqoM=w1920-h865-iv1" class="room_icon">
+        		</div>
+        		<div class="tasksubpart">комната - канал (смотреть могут все, а писать только те, у кого есть пароль администратора) <input name="room_type_channel" type="checkbox"></input></div>
+        		<div class="tasksubpart">пароль администратора: <input name="room_channel_admin_password" type="password" placeholder="например, 12345"></input></div>
+        		<div class="tasksubpart">комната приватная (ее не видно из списка всех комнат) <input name="room_type_private" type="checkbox"></input></div>
+        		<div class="tasksubpart">у комнаты есть пароль(входить в комнату только по паролю) <input name="room_type_password" type="checkbox"></input></div>
+        		<div class="tasksubpart">пароль: <input name="room_password" type="password" placeholder="например, 12345"></input></div>
+        		<div class="tasksubpart">в комнате будет возможность использовать шифрование вашим личным токеном <input name="room_type_token" type="checkbox" placeholder="token?"></input></div>
+        		
+    	 <center><input type="submit" name="submit" value="отправить" class="solutionbutton"></center>
+        	</form>
+        	
+        	
+        	
+        	
+        	
+        
+        
+        </div>
+
+    </div>
+
+
+
+        </div>
+    
+
+<script type="text/javascript">
+	//openaccountfromcookie("i");
+</script>
+</body>
+</html>
