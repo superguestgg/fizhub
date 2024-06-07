@@ -501,10 +501,11 @@ def message(request, room_name, message_id):
     template = loader.get_template('anonimnetwork/thisMessage.html')
     context = {
         'answer_for': answer_for,
-        'this_message': message,
+        'this_message': this_message,
         'message_list': message_list,
         'room': this_room,
-        'answers_list': answers_list
+        'answers_list': answers_list,
+        'is_thread': False
     }
 
     return HttpResponse(template.render(context, request))
