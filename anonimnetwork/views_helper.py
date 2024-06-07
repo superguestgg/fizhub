@@ -35,3 +35,16 @@ def get_bool_value_from_request(request, value_name):
     except:
         value_type_private = False
     return value_type_private
+
+
+class Links:
+    main_page = "<a href='/anonnetwork/main'>main page</a><br>"
+    bug_report = "<a href='/anonnetwork/admin'>bug report</a><br>"
+
+    @staticmethod
+    def room(room_name):
+        return f"<a href='/anonnetwork/{room_name}'>перейти к комнате</a><br>"
+
+    @staticmethod
+    def message(room_name, message_id):
+        return f"<a href='/anonnetwork/{room_name}/{message_id}'>current message</a><br>"

@@ -5,6 +5,7 @@ from . import views
 app_name = "anonimnetwork"
 urlpatterns = [
     path('', views.main, name='main'),
+    path('recount/', views.recount_answers, name='recount_answers'),
     # path('spamroom/<int:room_count>', views.spam_room, name='spam_room'),
 
     re_path(r"^(?P<sort_type>main|new|top|channels|newrooms|toprooms)/"
@@ -20,7 +21,8 @@ urlpatterns = [
     path('getroom/', views.get_room, name='get_room'),
     path('openroom/', views.get_room, name='get_room'),
     path('<str:room_name>/', views.room, name='room'),
-    path('<str:room_name>/pinned', views.pinned_messages, name='pinned_messages'),
+    path('<str:room_name>/threads/', views.room_threads, name='room_threads'),
+    path('<str:room_name>/pinned/', views.pinned_messages, name='pinned_messages'),
     path('<str:room_name>/admin/', views.room_admin, name='room_admin'),
     path('<str:room_name>/admin/<int:message_id>/', views.message_admin, name='message_admin'),
     path('<str:room_name>/description', views.room_description, name='description'),

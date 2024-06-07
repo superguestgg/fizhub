@@ -9,12 +9,22 @@ from django.http import HttpResponse, HttpResponseRedirect,\
 from .models import Room, Message
 from django.template import loader
 from django.urls import reverse
-from .room_tree import create, get, create_room
+from .room_tree import create, get, tree_create_room
 from .rooms_popularity import restart_top_of_rooms, get_top_of_rooms, update_top_of_rooms
 import random
 import time
 
-from .views_helper import su_cut, generate_random_key, set_default_if_empty, get_bool_value_from_request
+from .views_helper import su_cut, generate_random_key, set_default_if_empty, get_bool_value_from_request, Links
+
+
+def recount_answers(request):
+    for message in Message.objects.all():
+        answers_count = len(Message.objects.filter(answer_for=message.id))
+        if message.answers_count == answers_count:
+            continue
+        message.answers_count = answers_count
+        message.save()
+    return HttpResponse("successful")
 
 
 # не используется
@@ -120,13 +130,13 @@ def open_room_from_request(request, room_name):
     if not this_room.room_type_password:
         return True, this_room
     if 'roompassword' in request.POST:
-        room_password = su_cut(request.POST['roompassword'], 50)
+        room_password = request.POST['roompassword'][:50]
         if this_room.room_password == room_password:
             return True, this_room
         elif len(room_password) != 0:
             return False, HttpResponse('password incorrect, whatsapp suck')
     if 'password' in request.COOKIES:
-        room_password = su_cut(request.COOKIES['password'], 50)
+        room_password = request.COOKIES['password'][:50]
         if this_room.room_password == room_password:
             return True, this_room
         else:
@@ -143,15 +153,15 @@ def can_change_room(request, room_name):
     if not this_room.room_type_channel:
         return True, this_room
     if 'passwordadmin' in request.POST:
-        admin_password = su_cut(request.POST['passwordadmin'], 50)
+        admin_password = request.POST['passwordadmin'][:50]
         if this_room.room_channel_admin_password == admin_password:
             return True, this_room
     if 'passwordadmin' in request.COOKIES:
-        admin_password = su_cut(request.COOKIES['passwordadmin'], 50)
+        admin_password = request.COOKIES['passwordadmin'][:50]
         if this_room.room_channel_admin_password == admin_password:
             return True, this_room
     else:
-        return False, HttpResponse("admin password incorrect<br><a href='/anonnetwork/main'>main page</a>")
+        return False, HttpResponse(f"admin password incorrect<br>{Links.main_page}")
 
 
 
@@ -237,7 +247,7 @@ def create_room(request):
         }
         return HttpResponse(template.render(context, request))
     except:
-        return HttpResponse("server error <br><a href='/anonnetwork/main'>main page</a>")
+        return HttpResponse(f"server error <br>{Links.main_page}")
 
 
 @anti_ddos_decorator
@@ -251,21 +261,20 @@ def spam_room(request, room_count):
 
 @anti_ddos_decorator
 def send_room(request):
-    room_name = su_cut(request.POST['room_name'].replace("/", "").replace('\\', ""), 100)
-    room_theme = su_cut(request.POST['room_theme'].replace("/", "").replace('\\', ""), 50)
-    room_description = su_cut(request.POST['room_description'], 1000)
-    room_password = su_cut(request.POST['room_password'], 50)
-    room_channel_admin_password = su_cut(request.POST['room_channel_admin_password'], 50)
+    room_name = request.POST['room_name'].replace("/", "").replace('\\', "")[:100]
+    room_theme = request.POST['room_theme'].replace("/", "").replace('\\', "")[:50]
+    room_description = request.POST['room_description'][:1000]
+    room_password = request.POST['room_password'][:50]
+    room_channel_admin_password = request.POST['room_channel_admin_password'][:50]
     room_type_private = get_bool_value_from_request(request, 'room_type_private')
     room_type_channel = get_bool_value_from_request(request, 'room_type_channel')
     room_type_password = get_bool_value_from_request(request, 'room_type_password')
     room_type_token = get_bool_value_from_request(request, 'room_type_token')
 
     if len(Room.objects.filter(room_name=room_name)) > 0:
-        return HttpResponse("name reserved <br><a href='/anonnetwork/main'>main page</a>")
+        return HttpResponse(f"name reserved <br>{Links.main_page}")
     if len(room_name) == 0:
-        return HttpResponse(
-            "you can't create a room without name <br><a href='/anonnetwork/main'>main page</a>")
+        return HttpResponse(f"you can't create a room without name <br>{Links.main_page}")
     room_theme = set_default_if_empty(room_theme, "no theme")
     new_room = Room(room_name=room_name, room_theme=room_theme, room_type_private=room_type_private,
                     room_type_password=room_type_password, room_password=room_password,
@@ -274,7 +283,7 @@ def send_room(request):
                     room_channel_admin_password=room_channel_admin_password)
     new_room.save()
     try:
-        ret = create_room(Room.objects.get(room_name=room_name).id)
+        ret = tree_create_room(Room.objects.get(room_name=room_name).id)
         if ret == "e":
             return HttpResponse(
                 "succesful created, but error: room hadn't been append to room's tree<br><a href='/anonnetwork/" + str(
@@ -314,9 +323,7 @@ def find_room(request):
             return render(request, 'anonimnetwork/findroom.html')
         except:
             return HttpResponse(
-                "server error <br><a href='/anonnetwork/main'>"
-                "main page</a> <br><a href='/anonnetwork/admin'>"
-                "bug report</a>")
+                f"server error <br>{Links.main_page}{Links.bug_report}")
 
 
 @anti_ddos_decorator
@@ -325,9 +332,9 @@ def get_room(request):
         room_name = request.POST['room_name']
         rooms = Room.objects.filter(room_name=room_name)
         if len(rooms) > 0:
-            return HttpResponse(" <br><a href='/anonnetwork/" + room_name + "'>room</a>")
+            return HttpResponse(Links.room(room_name))
     except:
-        return HttpResponse(" <br><a href='/anonnetwork/" + "'>room</a>")
+        return HttpResponse(Links.main_page)
 
 
 @anti_ddos_decorator
@@ -355,6 +362,29 @@ def room(request, room_name):
                    })
 
 
+def room_threads(request, room_name):
+    can_see, this_room = open_room_from_request(request, room_name)
+    if not can_see:
+        return this_room
+    messages = Message.objects.filter(room_id=this_room.id)
+    threads_messages = messages.filter(answer_for=0)
+    pinned_messages = messages.filter(is_pinned=True)
+    page_count = (len(threads_messages) + 99) // 100
+    if len(pinned_messages) >= 1:
+        pinned_message = pinned_messages[len(pinned_messages) - 1]
+    else:
+        pinned_message = False
+
+    message_list = threads_messages.order_by('-pub_date')[:100]
+
+    return render(request, 'anonimnetwork/thisRoom.html',
+                  {'message_list': message_list,
+                   'room': this_room,
+                   'pages': 1,
+                   'pagescount': page_count,
+                   'pinned_message': pinned_message
+                   })
+
 
 @anti_ddos_decorator
 def room_admin(request, room_name):
@@ -373,8 +403,7 @@ def room_admin(request, room_name):
 
 @anti_ddos_decorator
 def room_pass(request, room_name):
-    return HttpResponse("это устаревшая ссылка, она уже не поддерживается"
-                        "<a href='/anonnetwork/" + room_name + "'>перейти к комнате</a>")
+    return HttpResponse(f"это устаревшая ссылка, она уже не поддерживается<br>{Links.room(room_name)}")
 
 
 @anti_ddos_decorator
@@ -489,71 +518,65 @@ def send_message(request, room_name):
     if not can_send:
         return this_room
 
-    message_text = su_cut(request.POST['textarea'], 2000)
-    if len(message_text) > 0:
-        if this_room.room_rights >= 0:
-            this_room.message_set.create(message_text=message_text, pub_date=timezone.now())
-            this_room.room_messages_count = this_room.room_messages_count + 1
-            this_room.save()
-            if not this_room.room_type_private:
-                update_top_of_rooms(this_room.id)
-            return HttpResponseRedirect(f'/anonnetwork/{room_name}/')
-        """elif user.guest_rights>=1:
-            try:
-                userfile = request.FILES['file']
-                filesize= userfile.size
-                if filesize>100 and filesize<3000000:
-                    fs = FileSystemStorage()
-                    filename = fs.save(creator_name+"_"+userfile.name, userfile)
-                    uploaded_file_url = fs.url(filename)
-                    user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(),picture_href=uploaded_file_url, theme1_name=theme1_name, theme2_name=theme2_name)
-                    user.guest_rights=user.guest_rights-1
-                    user.save()
-                    return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
-                elif  filesize>=3000000:
-                    return HttpResponse('picture size too big<a href="/physic-in-sesc/main">main page</a>')
-                elif filesize>0:
-                    return HttpResponse('picture size not enough big<a href="/physic-in-sesc/main">main page</a>')
-                else:
-                    user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
-                    return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
-            except:
+    message_text = request.POST['textarea'][:2000]
+    if len(message_text) <= 0:
+        return HttpResponse(f"недостаточная длина сообщения<br>{Links.main_page}{Links.room(room_name)}")
+
+    if this_room.room_rights >= 0:
+        this_room.message_set.create(message_text=message_text, pub_date=timezone.now())
+        this_room.room_messages_count = this_room.room_messages_count + 1
+        this_room.save()
+        if not this_room.room_type_private:
+            update_top_of_rooms(this_room.id)
+        return HttpResponseRedirect(f'/anonnetwork/{room_name}/')
+    """elif user.guest_rights>=1:
+        try:
+            userfile = request.FILES['file']
+            filesize= userfile.size
+            if filesize>100 and filesize<3000000:
+                fs = FileSystemStorage()
+                filename = fs.save(creator_name+"_"+userfile.name, userfile)
+                uploaded_file_url = fs.url(filename)
+                user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(),picture_href=uploaded_file_url, theme1_name=theme1_name, theme2_name=theme2_name)
+                user.guest_rights=user.guest_rights-1
+                user.save()
+                return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+            elif  filesize>=3000000:
+                return HttpResponse('picture size too big<a href="/physic-in-sesc/main">main page</a>')
+            elif filesize>0:
+                return HttpResponse('picture size not enough big<a href="/physic-in-sesc/main">main page</a>')
+            else:
                 user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
                 return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
-        """
-    elif len(message_text) == 0:
-        return HttpResponse("недостаточная длина сообщения<br><a href='/anonnetwork/main'>main page</a>")
+        except:
+            user.task_set.create(task_name=task_name, task_text=task_text, pub_date=timezone.now(), picture_href=picture_url, theme1_name=theme1_name, theme2_name=theme2_name)
+            return HttpResponse('succesful <br> <a href="/physic-in-sesc/main">main page</a>')
+    """
 
 
 @anti_ddos_decorator
 def pin_message(request, room_name, message_id):
-    can_change, this_room = can_change_room(request, room_name)
-    if not can_change:
-        return this_room
-
-    if this_room.room_rights >= 0:
-        message = this_room.message_set.get(id=message_id)
-        message.is_pinned = True
-        message.save()
-        return HttpResponse('succesful <br> <a href="/anonnetwork/' + room_name + '/' + str(
-            message_id) + '">back to message menu</a>')
-
-    return HttpResponse("password incorrect<br><a href='/anonnetwork/main'>main page</a>")
+    return change_message_pinned(request, room_name, message_id, True)
 
 
 @anti_ddos_decorator
 def unpin_message(request, room_name, message_id):
+    return change_message_pinned(request, room_name, message_id, False)
+
+
+def change_message_pinned(request, room_name, message_id, set_status):
     can_change, this_room = can_change_room(request, room_name)
     if not can_change:
         return this_room
 
-    if this_room.room_rights >= 0:
-        this_message = this_room.message_set.get(id=message_id)
-        this_message.is_pinned = False
-        this_message.save()
-        return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')
+    if this_room.room_rights < 0:
+        return HttpResponse(f"room banned<br>{Links.main_page}")
 
-    return HttpResponse("password incorrect<br><a href='/anonnetwork/main'>main page</a>")
+    this_message = this_room.message_set.get(id=message_id)
+    this_message.is_pinned = set_status
+    this_message.save()
+
+    return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')
 
 
 @anti_ddos_decorator
@@ -562,23 +585,23 @@ def answer(request, room_name, message_id):
     if not can_send:
         return this_room
 
-    message_text = su_cut(request.POST['textarea'], 2000)
-    if this_room.room_rights >= 0:
-        this_room.message_set.create(message_text=message_text, pub_date=timezone.now(),
-                                answer_for=message_id)
+    message_text = request.POST['textarea'][:2000]
+    if len(message_text) <= 0:
+        return HttpResponse(f"недостаточная длина сообщения<br>{Links.main_page}{Links.room(room_name)}")
 
-        this_room.room_messages_count = this_room.room_messages_count + 1
-        this_room.save()
-        message = Message.objects.get(id=message_id)
-        message.answers_count = message.answers_count + 1
-        message.save()
-        if not this_room.room_type_private:
-            update_top_of_rooms(this_room.id)
-        return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')
+    if this_room.room_rights < 0:
+        return HttpResponse(f"room banned<br>{Links.main_page}")
 
-    return HttpResponse("password incorrect<br><a href='/anonnetwork/main'>main page</a>")
+    this_room.message_set.create(message_text=message_text, pub_date=timezone.now(), answer_for=message_id)
 
-
+    this_room.room_messages_count = this_room.room_messages_count + 1
+    this_room.save()
+    message = Message.objects.get(id=message_id)
+    message.answers_count = message.answers_count + 1
+    message.save()
+    if not this_room.room_type_private:
+        update_top_of_rooms(this_room.id)
+    return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')
 
 
 """def useful(request):
