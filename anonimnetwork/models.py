@@ -1,4 +1,6 @@
 from django.db import models
+
+
 class Room(models.Model):
     room_name = models.CharField(max_length=100, default="no name")
     room_theme = models.CharField(max_length=50, default="No theme")
@@ -11,17 +13,24 @@ class Room(models.Model):
     room_type_token = models.BooleanField(default=False)
     room_password = models.CharField(max_length=50, default="no password")
     room_messages_count = models.IntegerField(default=0)
+
     def __str__(self):
         return str(self.room_name)+" ______ description: "+str(self.room_description)
+
+
 class Message(models.Model):
     room_id = models.ForeignKey(Room, on_delete=models.CASCADE)
     answer_for = models.IntegerField(default=0)
+    thread_id = models.IntegerField(default=0)
     pub_date = models.DateTimeField('date published')
     message_text = models.CharField(max_length=2000, default="empty message")
     is_pinned = models.BooleanField(default=False)
     answers_count = models.IntegerField(default=0)
+
     def __str__(self):
-        return str(self.message_text)+" ______ room: "+str(self.room_id.room_name)
+        return f"{self.id} {self.message_text} ______ room: {self.room_id.room_name}, __{self.answer_for} {self.thread_id}"
+
+
 """class Group(models.Model):
     group_id=models.IntegerField()
     group_rooms=models."""

@@ -32,7 +32,21 @@
 <body>
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname"><a href="/anonnetwork/{{room.room_name}}/"><center>room: {{room.room_name}}</center></a></div>
+		<div class="taskname"><center>
+			<a href="/anonnetwork/{{room.room_name}}/">
+				room: {{room.room_name}}
+			</a>
+
+			{% if is_thread %}
+				<a href="/anonnetwork/{{room.room_name}}/{{this_message.id}}/">thread</a>
+			{% else %}
+				{% if this_message.thread_id %} 
+					<a href="/anonnetwork/{{room.room_name}}/{{this_message.thread_id}}/thread/">to thread</a>
+				{% else %}
+					<a href="/anonnetwork/{{room.room_name}}/{{this_message.id}}/thread/">to thread</a>
+				{% endif %}
+			{% endif %}
+		</center></div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 		<div class="loginbutton"><center><a href="/anonnetwork/help/">help</a> | <a href="/anonnetwork/about/">about</a></center></div>
 		
@@ -111,30 +125,38 @@
     {% endfor %}
     </div>
     {% if answers_list %}
-    <div class="message"><center>вот они, сверху вниз, ответы на это собщение:{{message_list.answer_count}}</center></div>
+    <div class="message"><center>
+		{% if is_thread %}
+			ответы на это сообщение, ответы на них, ответы на них...
+		{% else %}
+			вот они, сверху вниз, ответы на это собщение:{{message_list.answer_count}}
+		{% endif %}
+	</center></div>
     
     {% for message in answers_list %}
 
 
         <div class="message" id="{{message.id}}">
         	
-     <a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="textarea{{message.id}}">{{ message.message_text }}</a>
-     
+	     	<a href="/anonnetwork/{{room.room_name}}/{{ message.id }}/" id="textarea{{message.id}}">{{ message.message_text }}</a>
+	     
 
- <button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
-{% if message.is_pinned %}
-	
-		&#9885; pinned
-	
-	{% endif %}
-        	<br>
-        		
-{% if room.room_type_token %} 
-<div class="messagemenu">
+			 <button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
 
-        		действия с помощью токена: 
-        	<input type="button" id="{{message.id}}" onclick="encrypt2(id)" value="зашифровать"> 
-        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать"></div>{% endif %}
+			{% if message.is_pinned %}
+				&#9885; pinned
+			{% endif %}
+
+			<br>
+			        		
+			{% if room.room_type_token %} 
+			<div class="messagemenu">
+
+	        		действия с помощью токена: 
+	        	<input type="button" id="{{message.id}}" onclick="encrypt2(id)" value="зашифровать"> 
+	        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать">
+	        </div>
+	        {% endif %}
      
         </div>
 

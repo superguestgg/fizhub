@@ -33,8 +33,25 @@
 	<base href="/anonnetwork/{{room.room_name}}/">
 	<div class="header"> 
 		<div class="menubuttonplace"><div class="menubutton" id="menubutton" onclick="openmenu()">&#9776;</div></div>
-		<div class="taskname" ><center>{% if is_pined_page %}pinned{% endif %}<a href="/anonnetwork/{{room.room_name}}/description" title="описание">
-		{{room.room_name}}</a> {{pages}}/{{pagescount}}</center></div>
+		<div class="taskname" >
+			<center>
+				{% if is_pined_page %}pinned{% endif %}
+				<a href="/anonnetwork/{{room.room_name}}/description" title="описание">
+					{{room.room_name}}
+				</a>
+		 		{{pages}}/{{pagescount}}
+
+		 		{% if is_threads %}
+		 			<a href="/anonnetwork/{{room.room_name}}/" title="messages">
+		 				threads
+		 			</a>
+		 		{% else %}		 			
+		 			<a href="/anonnetwork/{{room.room_name}}/threads/" title="threads">
+		 				messages
+		 			</a>
+		 		{% endif %}
+		 	</center>
+		</div>
 		<div class="changetheme" id="changetheme" onclick="changetheme()"></div>
 
 		{% if room.room_type_token %} <div class="loginbutton"><center>токен:</center> <input type="text" id="roomtoken" name="roomtoken" placeholder="мой токен"></div><br> {% else %}
@@ -121,23 +138,31 @@
      <click onclick="copytext('textarea{{message.id}}')"> &#128190; </click>
      {% if message.answers_count %}<b>{{ message.answers_count }} ответов</b> {% endif %}
 
-     {% if message.answer_for %}<b>
-ответ на <a href="/anonnetwork/{{room.room_name}}/{{message.answer_for}}/" style="font-size: 20px"> сообщение {{message.answer_for}}</a></b>{% endif %}
-
-<button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
-	{% if message.is_pinned %}
-	
-		&#9885; pinned
-	
+     {% if message.answer_for %}
+	     <b> ответ на 
+	     	<a href="/anonnetwork/{{room.room_name}}/{{message.answer_for}}/" style="font-size: 20px"> сообщение {{message.answer_for}}</a>
+	     </b>
+	{% else %}
+		{% if message.answers_count %}
+		<b> перейти к <a href="/anonnetwork/{{room.room_name}}/{{message.id}}/thread/" style="font-size: 20px">треду</a> </b>
+		{% endif %}
 	{% endif %}
-        	<br>
-        		
-{% if room.room_type_token %} 
-<div class="messagemenu">
 
-        		действия с помощью токена: 
+	<button  id="answer{{message.id}}" onclick="createanswertextarea(id)">ответить</button>
+
+	{% if message.is_pinned %}
+		&#9885; pinned
+	{% endif %}
+    <br>
+        		
+	{% if room.room_type_token %} 
+		<div class="messagemenu">
+
+        	действия с помощью токена: 
         	<input type="button" id="{{message.id}}" onclick="encrypt2(id)" value="зашифровать"> 
-        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать"></div>{% endif %}
+        	<input type="button" id="{{message.id}}" onclick="deencrypt2(id)" value="расшифровать">
+    	</div>
+    {% endif %}
      
         </div>
 

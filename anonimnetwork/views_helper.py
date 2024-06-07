@@ -38,13 +38,13 @@ def get_bool_value_from_request(request, value_name):
 
 
 class Links:
-    main_page = "<a href='/anonnetwork/main'>main page</a><br>"
-    bug_report = "<a href='/anonnetwork/admin'>bug report</a><br>"
+    main_page = "<a href='/anonnetwork/main'>Главная страница</a><br>"
+    bug_report = "<a href='/anonnetwork/admin'>Сообщить об ошибке</a><br>"
 
     @staticmethod
     def room(room_name):
-        return f"<a href='/anonnetwork/{room_name}'>перейти к комнате</a><br>"
+        return f"<a href='/anonnetwork/{room_name}'>Перейти к комнате</a><br>"
 
     @staticmethod
     def message(room_name, message_id):
-        return f"<a href='/anonnetwork/{room_name}/{message_id}'>current message</a><br>"
+        return f"<a href='/anonnetwork/{room_name}/{message_id}'>Перейти к сообщению</a><br>"

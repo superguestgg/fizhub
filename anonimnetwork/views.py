@@ -14,7 +14,7 @@ from .rooms_popularity import restart_top_of_rooms, get_top_of_rooms, update_top
 import random
 import time
 
-from .views_helper import su_cut, generate_random_key, set_default_if_empty, get_bool_value_from_request, Links
+from .views_helper import generate_random_key, set_default_if_empty, get_bool_value_from_request, Links
 
 
 def recount_answers(request):
@@ -27,11 +27,19 @@ def recount_answers(request):
     return HttpResponse("successful")
 
 
-# не используется
-def start2():
-    for message in Message.objects.all():
-        message.answers_count = len(Message.objects.filter(answer_for=message.id))
-        message.save()
+def set_threads(request):
+    for room in Room.objects.all():
+        for message in room.message_set.all():
+            if message.answer_for != 0:
+                continue
+            children_ids = get_children(room.message_set.all(), message.id)
+            children = room.message_set.filter(id__in=children_ids)
+            for child in children:
+                if child.id == message.id:
+                    continue
+                child.thread_id = message.id
+                child.save()
+    return HttpResponse("successful")
 
 
 massive_of_users = dict()
@@ -134,7 +142,7 @@ def open_room_from_request(request, room_name):
         if this_room.room_password == room_password:
             return True, this_room
         elif len(room_password) != 0:
-            return False, HttpResponse('password incorrect, whatsapp suck')
+            return False, HttpResponse(f'password incorrect, whatsapp suck<br>{Links.main_page}')
     if 'password' in request.COOKIES:
         room_password = request.COOKIES['password'][:50]
         if this_room.room_password == room_password:
@@ -286,13 +294,12 @@ def send_room(request):
         ret = tree_create_room(Room.objects.get(room_name=room_name).id)
         if ret == "e":
             return HttpResponse(
-                "succesful created, but error: room hadn't been append to room's tree<br><a href='/anonnetwork/" + str(
-                    new_room.room_name) + "'>your room</a>")
+                "successful created, but error: room hadn't been append to room's tree<br>"
+                f"{Links.room(new_room.room_name)}")
 
     except:
         return HttpResponse(
-            "succesful created, but error: room hadn't been append to room's tree<br><a href='/anonnetwork/" + str(
-                new_room.room_name) + "'>your room</a>")
+            f"successful created, but error: room hadn't been append to room's tree<br>{Links.room(new_room.room_name)}")
     return HttpResponseRedirect(f"/anonnetwork/{new_room.room_name}")
 
 
@@ -338,52 +345,34 @@ def get_room(request):
 
 
 @anti_ddos_decorator
-def room(request, room_name):
+def room(request, room_name, is_threads=False):
     can_see, this_room = open_room_from_request(request, room_name)
     if not can_see:
         return this_room
     messages = Message.objects.filter(room_id=this_room.id)
+
     pinned_messages = messages.filter(is_pinned=True)
+    pinned_message = pinned_messages[len(pinned_messages) - 1] if len(pinned_messages) >= 1 else False
+
+    if is_threads:
+        messages = messages.filter(answer_for=0)
+
     page_count = (len(messages) + 99) // 100
-    if len(pinned_messages) > 1:
-        pinned_message = pinned_messages[len(pinned_messages) - 1]
-    elif len(pinned_messages) == 1:
-        pinned_message = pinned_messages[0]
-    else:
-        pinned_message = False
+    message_list = messages.order_by('-pub_date')[:100]
 
-    message_list = this_room.message_set.order_by('-pub_date')[:100]
     return render(request, 'anonimnetwork/thisRoom.html',
                   {'message_list': message_list,
                    'room': this_room,
                    'pages': 1,
                    'pagescount': page_count,
-                   'pinned_message': pinned_message
+                   'pinned_message': pinned_message,
+                   'is_threads': is_threads
                    })
 
 
+@anti_ddos_decorator
 def room_threads(request, room_name):
-    can_see, this_room = open_room_from_request(request, room_name)
-    if not can_see:
-        return this_room
-    messages = Message.objects.filter(room_id=this_room.id)
-    threads_messages = messages.filter(answer_for=0)
-    pinned_messages = messages.filter(is_pinned=True)
-    page_count = (len(threads_messages) + 99) // 100
-    if len(pinned_messages) >= 1:
-        pinned_message = pinned_messages[len(pinned_messages) - 1]
-    else:
-        pinned_message = False
-
-    message_list = threads_messages.order_by('-pub_date')[:100]
-
-    return render(request, 'anonimnetwork/thisRoom.html',
-                  {'message_list': message_list,
-                   'room': this_room,
-                   'pages': 1,
-                   'pagescount': page_count,
-                   'pinned_message': pinned_message
-                   })
+    return room(request, room_name, True)
 
 
 @anti_ddos_decorator
@@ -455,26 +444,60 @@ def room_description(request, room_name):
     return render(request, 'anonimnetwork/information.html', context)
 
 
+def get_children(all_messages, message_id):
+    all_ids = {message_id}
+    aa = [message_id]
+    while len(aa):
+        aa = [message.id for message in all_messages.filter(answer_for__in=aa)]
+        for a in aa:
+            all_ids.add(a)
+    return all_ids
+
+
+@anti_ddos_decorator
+def message_thread(request, room_name, message_id):
+    can_see, this_room = open_room_from_request(request, room_name)
+    if not can_see:
+        return this_room
+
+    message_list = this_room.message_set.filter(id=message_id)
+    this_message = message_list[0] if len(message_list) == 1 else "not found"
+
+    try:
+        answer_for = Message.objects.get(id=this_message.answer_for)
+    except:
+        answer_for = "server error"
+
+    answers_list = this_room.message_set.filter(thread_id=message_id)
+
+    template = loader.get_template('anonimnetwork/thisMessage.html')
+    context = {
+        'answer_for': answer_for,
+        'this_message': this_message,
+        'message_list': message_list,
+        'room': this_room,
+        'answers_list': answers_list,
+        'is_thread': True
+    }
+
+    return HttpResponse(template.render(context, request))
+
+
 @anti_ddos_decorator
 def message(request, room_name, message_id):
     can_see, this_room = open_room_from_request(request, room_name)
     if not can_see:
         return this_room
 
-    room_id = this_room.id
+    message_list = this_room.message_set.filter(id=message_id)
+    this_message = message_list[0] if len(message_list) == 1 else "not found"
 
     try:
-        answer_for = Message.objects.get(id=Message.objects.get(id=message_id, room_id=room_id).answer_for)
+        answer_for = this_room.message_set.get(id=this_message.answer_for)
     except:
         answer_for = "server error"
 
-    # кажется это не используется
-    message_list = Message.objects.filter(id=message_id, room_id=room_id)
-    try:
-        message = Message.objects.get(id=message_id, room_id=room_id)
-    except:
-        message = "not found"
-    answers_list = Message.objects.filter(answer_for=message_id, room_id=room_id)
+    answers_list = this_room.message_set.filter(answer_for=message_id)
     template = loader.get_template('anonimnetwork/thisMessage.html')
     context = {
         'answer_for': answer_for,
@@ -492,14 +515,16 @@ def message_admin(request, room_name, message_id):
     can_see, this_room = open_room_from_request(request, room_name)
     if not can_see:
         return this_room
-    room_id = this_room.id
+
+    message_list = this_room.message_set.filter(id=message_id)
+    this_message = message_list[0] if len(message_list) == 1 else "not found"
 
     try:
-        answer_for = Message.objects.get(id=Message.objects.get(id=message_id, room_id=room_id).answer_for)
+        answer_for = this_room.message_set.get(id=this_message.answer_for)
     except:
         answer_for = "server error"
-    message_list = Message.objects.filter(id=message_id, room_id=room_id)
-    answers_list = Message.objects.filter(answer_for=message_id, room_id=room_id)
+
+    answers_list = this_room.message_set.filter(answer_for=message_id)
     template = loader.get_template('anonimnetwork/thisMessage.html')
     context = {
         'answer_for': answer_for,
@@ -519,15 +544,17 @@ def send_message(request, room_name):
         return this_room
 
     message_text = request.POST['textarea'][:2000]
-    if len(message_text) <= 0:
+    if len(message_text) == 0:
         return HttpResponse(f"недостаточная длина сообщения<br>{Links.main_page}{Links.room(room_name)}")
 
     if this_room.room_rights >= 0:
         this_room.message_set.create(message_text=message_text, pub_date=timezone.now())
         this_room.room_messages_count = this_room.room_messages_count + 1
         this_room.save()
+
         if not this_room.room_type_private:
             update_top_of_rooms(this_room.id)
+
         return HttpResponseRedirect(f'/anonnetwork/{room_name}/')
     """elif user.guest_rights>=1:
         try:
@@ -586,19 +613,27 @@ def answer(request, room_name, message_id):
         return this_room
 
     message_text = request.POST['textarea'][:2000]
-    if len(message_text) <= 0:
+    if len(message_text) == 0:
         return HttpResponse(f"недостаточная длина сообщения<br>{Links.main_page}{Links.room(room_name)}")
+
+    parent_messages = this_room.message_set.filter(id=message_id)
+    if len(parent_messages) != 1:
+        return HttpResponse(f"нельзя ответить на несуществующее сообщение"
+                            f"<br>{Links.main_page}{Links.room(room_name)}")
+    parent_message = parent_messages[0]
+    thread_id = parent_message.thread_id if parent_message.thread_id != 0 else parent_message.id
 
     if this_room.room_rights < 0:
         return HttpResponse(f"room banned<br>{Links.main_page}")
 
-    this_room.message_set.create(message_text=message_text, pub_date=timezone.now(), answer_for=message_id)
+    this_room.message_set.create(message_text=message_text, pub_date=timezone.now(),
+                                 answer_for=message_id, thread_id=thread_id)
 
     this_room.room_messages_count = this_room.room_messages_count + 1
     this_room.save()
-    message = Message.objects.get(id=message_id)
-    message.answers_count = message.answers_count + 1
-    message.save()
+
+    parent_message.answers_count = parent_message.answers_count + 1
+    parent_message.save()
     if not this_room.room_type_private:
         update_top_of_rooms(this_room.id)
     return HttpResponseRedirect(f'/anonnetwork/{room_name}/{message_id}/')

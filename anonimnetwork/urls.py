@@ -6,6 +6,8 @@ app_name = "anonimnetwork"
 urlpatterns = [
     path('', views.main, name='main'),
     path('recount/', views.recount_answers, name='recount_answers'),
+    path('set/', views.set_threads, name='set_threads'),
+
     # path('spamroom/<int:room_count>', views.spam_room, name='spam_room'),
 
     re_path(r"^(?P<sort_type>main|new|top|channels|newrooms|toprooms)/"
@@ -25,9 +27,10 @@ urlpatterns = [
     path('<str:room_name>/pinned/', views.pinned_messages, name='pinned_messages'),
     path('<str:room_name>/admin/', views.room_admin, name='room_admin'),
     path('<str:room_name>/admin/<int:message_id>/', views.message_admin, name='message_admin'),
-    path('<str:room_name>/description', views.room_description, name='description'),
+    path('<str:room_name>/description/', views.room_description, name='description'),
     path('<str:room_name>/page/<int:page_number>', views.room_page, name='room_page'),
     path('<str:room_name>/pass', views.room_pass, name='room_pass'),
+    path('<str:room_name>/<int:message_id>/thread/', views.message_thread, name='message_thread'),
     path('<str:room_name>/<int:message_id>/', views.message, name='message'),
     path('<str:room_name>/<int:message_id>/pin', views.pin_message, name='pin_message'),
     path('<str:room_name>/<int:message_id>/unpin', views.unpin_message, name='unpin_message'),
